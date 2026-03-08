@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 import styled from 'styled-components';
 
+import { Button } from '../../common/components/atoms/Button';
+
 const PAGE_PADDING = '2rem';
 const PRIMARY_BLUE = '#2563eb';
 const LIGHT_BG = '#f8f9fa';
@@ -128,22 +130,9 @@ const ViewAllLink = styled.a`
   }
 `;
 
-const ComposeButton = styled.button`
+const ComposeButton = styled(Button.Primary)`
   margin-top: auto;
-  padding: 0.6rem 1.25rem;
-  background: ${PRIMARY_BLUE};
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
   align-self: flex-start;
-  transition: background 0.15s;
-
-  &:hover {
-    background: #1d4ed8;
-  }
 `;
 
 const Table = styled.table`

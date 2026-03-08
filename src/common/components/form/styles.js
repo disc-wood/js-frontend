@@ -20,11 +20,14 @@ export const RedSpan = styled.span`
 
 export const StyledInput = styled.input`
   font-size: 1rem;
-  padding: 8px;
-  border: solid 2px var(--text);
-  border-radius: 8px;
+  padding: 10px;
+  border: transparent;
+  border-radius: 6px;
   width: 100%;
   box-sizing: border-box;
+  background: #C8C8C8;
+  color: #636363;
+  line-height: 2;
 `;
 
 export const PasswordContainer = styled.div`
@@ -40,10 +43,11 @@ export const IconContainer = styled.div`
 `;
 
 export const StyledButton = styled(Button.Primary)`
-  font-size: 1.1rem;
-  width: 200px;
+  font-size: 1rem;        /* bigger text inside buttons */
+  width: 100%;
   font-align: center;
   margin-top: 20px;
   margin-left: auto;
   margin-right: auto;
+  line-height: 2;
 `;

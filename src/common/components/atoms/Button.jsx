@@ -2,16 +2,16 @@ import styled from 'styled-components';
 
 const ButtonBase = styled.button`
   font-size: 0.8em;
-  padding: 8px 20px;
-  border-radius: 5px;
-  border: solid 1px var(--text);
+  padding: 10px;
+  border-radius: 6px;
+  border: transparent;
   color: var(--text);
   cursor: pointer;
 `;
 
 const ButtonPrimary = styled(ButtonBase)`
-  background-color: var(--primary-green);
-  border-color: var(--primary-green);
+  background: linear-gradient(to right, #204775, #3491FF);
+  border-color: transparent;
   color: var(--white);
 `;
 

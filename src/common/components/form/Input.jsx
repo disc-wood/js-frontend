@@ -18,7 +18,7 @@ function TitledInput({ title, required, children }) {
     <InputContainer>
       <InputName>
         <InputTitle>{title}</InputTitle>
-        {required && <RedSpan>*</RedSpan>}
+        {required}
       </InputName>
       {children}
     </InputContainer>

@@ -10,7 +10,7 @@ import SubmitButton from '@/common/components/form/SubmitButton';
 import { RedSpan } from '@/common/components/form/styles';
 import { useUser } from '@/common/contexts/UserContext';
 
-import { StyledPage } from './styles';
+import { StyledPage, SignupText, StyledForm } from './styles';
 
 const StyledLink = styled(Link)`
   color: #007bff;
@@ -77,34 +77,37 @@ export default function Login() {
 
   return (
     <StyledPage>
-      <Form onSubmit={handleSubmit}>
-        <FormTitle>Log In</FormTitle>
+      <StyledForm onSubmit={handleSubmit}>
+        <FormTitle>Login</FormTitle>
+        <GoogleButton
+          onClick={handleGoogleLogin}
+          isLoading={isLoading}
+          text='Login with Google'
+        />
         {error && <RedSpan>{error}</RedSpan>}
         <Input.Text
-          title='Email'
           name='email'
-          placeholder='jsmith or j@example.com'
+          placeholder='Email'
           value={formState.email}
           onChange={handleChange}
           required
         />
         <Input.Password
-          title='Password'
           name='password'
+          placeholder='Password'
           value={formState.password}
           onChange={handleChange}
           required
         />
-        <StyledLink to='/forgot-password'>Forgot Password?</StyledLink>
         <SubmitButton disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Log In'}
+          {isLoading ? 'Logging in...' : 'Login'}
         </SubmitButton>
-        <GoogleButton
-          onClick={handleGoogleLogin}
-          isLoading={isLoading}
-          text='Sign in with Google'
-        />
-      </Form>
+        <StyledLink to='/forgot-password'>Forgot Password?</StyledLink>
+        <SignupText>
+          Don't have an account? <StyledLink to='/signup'>Create</StyledLink>
+        </SignupText>
+      
+      </StyledForm>
     </StyledPage>
   );
 }

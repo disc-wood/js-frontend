@@ -9,14 +9,15 @@ const StyledButton = styled.button`
   justify-content: center;
   align-items: center;
   gap: 8px;
-  background-color: white;
-  border: 1px solid #e2e2e2;
-  border-radius: 4px;
-  padding: 8px 16px;
-  color: #5f6368;
+  background-color: #F1F1F1;
+  border: 1px solid #969696;
+  border-radius: 30px;
+  padding: 10px;
+  color: black;
   font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s;
+  line-height: 2;
 
   &:hover {
     background-color: #f8f9fa;
@@ -64,9 +65,9 @@ export default function GoogleButton({
 }) {
   return (
     <>
-      <Divider>
+      {/* <Divider>
         <span>Or continue with</span>
-      </Divider>
+      </Divider> */}
       <StyledButton type='button' onClick={onClick} disabled={isLoading}>
         <svg width='18' height='18' viewBox='0 0 24 24'>
           <path

@@ -11,7 +11,7 @@ const StyledNav = styled.nav`
   justify-content: space-between;
   align-items: center;
   padding: 24px 40px;
-  background-color: #e0f2fe; 
+  background-color: #E2F3FF; 
   color: white;
   /* Matching the clean, modern font-family from the first image */
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -101,6 +101,9 @@ export default function NavBar() {
           Learner Tracking System
         </LogoText>
         <NavLink onClick={() => navigate('/about')}>About</NavLink>
+        <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
+        <NavLink onClick={() => navigate('/database')}>Database</NavLink>
+        <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
       </LeftGroup>
 
       <RightGroup>

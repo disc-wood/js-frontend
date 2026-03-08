@@ -13,7 +13,6 @@ const TEXT_MUTED = '#6b7280';
 
 const PageContainer = styled.div`
   flex: 1;
-  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
   padding: ${PAGE_PADDING};
   overflow: auto;
 `;

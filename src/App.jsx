@@ -25,8 +25,10 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<NavLayout />}>
+            <Route index element={<Home />} />
+            {/* 2. Keep the empty PrivateRoute wrapper for future protected pages */}
             <Route element={<PrivateRoute />}>
-              <Route index element={<Home />} />
+               {/* Dashboard will go here later */}
             </Route>
             <Route path='communications' element={<Communications />} />
             <Route path='dashboard' element={<Dashboard />} />

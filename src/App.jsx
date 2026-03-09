@@ -12,6 +12,7 @@ import RequestPasswordReset from '@/pages/account/RequestPasswordReset';
 import ResetPassword from '@/pages/account/ResetPassword';
 import SignUp from '@/pages/account/SignUp';
 import Communications from '@/pages/communications/Communications';
+import Database from '@/pages/database/Database';
 import Home from '@/pages/home/Home';
 import NotFound from '@/pages/not-found/NotFound';
 
@@ -27,6 +28,7 @@ export default function App() {
               <Route index element={<Home />} />
             </Route>
             <Route path='communications' element={<Communications />} />
+            <Route path='database' element={<Database />} />
             <Route element={<PublicOnlyRoute />}>
               <Route path='login' element={<Login />} />
               <Route path='signup' element={<SignUp />} />

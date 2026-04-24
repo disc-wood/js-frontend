@@ -16,6 +16,7 @@ import Dashboard from '@/pages/dashboard/Dashboard';
 import Database from '@/pages/database/Database';
 import Home from '@/pages/home/Home';
 import NotFound from '@/pages/not-found/NotFound';
+import OaktonIntake from '@/pages/oakton-intake/oakton-intake';
 
 import './App.css';
 
@@ -24,6 +25,10 @@ export default function App() {
     <UserProvider>
       <BrowserRouter>
         <Routes>
+          {/* Forms */}
+          <Route path='/apply/oakton' element={<OaktonIntake />} />
+
+          {/* Internal Page */}
           <Route path='/' element={<NavLayout />}>
             <Route index element={<Home />} />
             {/* 2. Keep the empty PrivateRoute wrapper for future protected pages */}

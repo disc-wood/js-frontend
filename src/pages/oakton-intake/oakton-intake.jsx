@@ -1,4 +1,10 @@
 import React, { useMemo, useState } from 'react';
+
+import medicalStudent from '@/assets/oakton-intake/medical-student.png';
+import oaktonLogo from '@/assets/oakton-intake/logo.png';
+import studentSmiling from '@/assets/oakton-intake/student-smiling.png';
+import studentWorking from '@/assets/oakton-intake/student-working.png';
+
 import './oakton-intake.css';
 
 function calculateAge(dateOfBirthISO) {
@@ -92,8 +98,8 @@ export default function OaktonIntake() {
       {/* Navigation */}
       <nav className="oakton-nav">
         <div className="oakton-nav-left">
-          <img src="/placeholder-logo.png" alt="Oakton College" className="oakton-nav-logo" />
-          <a href="#" className="oakton-nav-link">About</a>
+          <img src={oaktonLogo} alt="Oakton College" className="oakton-nav-logo" />
+          <a href="https://www.oakton.edu/paying-for-college/wei-grant.php" className="oakton-nav-link">About</a>
         </div>
         <div className="oakton-nav-right">
           <h2>WEI Application</h2>
@@ -217,10 +223,9 @@ export default function OaktonIntake() {
           {/* Image and Contact */}
           <div className="oakton-right-col">
             <div className="oakton-image-collage">
-              {/* Replace these with the actual image exports from Figma */}
-              <img src="https://via.placeholder.com/400x200" alt="Student smiling" />
-              <img src="https://via.placeholder.com/200x200" alt="Student working" />
-              <img src="https://via.placeholder.com/200x200" alt="Medical student" />
+              <img src={studentSmiling} alt="Student smiling" />
+              <img src={studentWorking} alt="Student working" />
+              <img src={medicalStudent} alt="Medical student" />
             </div>
 
             <div className="oakton-contact-box">

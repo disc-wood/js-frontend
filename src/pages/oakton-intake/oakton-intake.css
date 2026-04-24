@@ -192,7 +192,7 @@
 /* Make the first image span full width on top if matching the exact grid */
 .oakton-image-collage img:first-child {
   grid-column: 1 / -1;
-  max-height: 200px;
+  max-height: 400px;
 }
 
 .oakton-contact-box {

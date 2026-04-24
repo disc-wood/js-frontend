@@ -1,0 +1,171 @@
+.oakton-page-wrapper {
+  background-color: #f0f2f5;
+  min-height: 100vh;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  color: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Navigation --- */
+.oakton-nav {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.oakton-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.oakton-nav-logo {
+  height: 40px; /* Adjust based on your exported asset */
+}
+
+.oakton-nav-link {
+  color: #006853; /* Oakton Green */
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.1rem;
+}
+
+.oakton-nav-right h2 {
+  color: #006853;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* --- Main Layout --- */
+.oakton-main {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+  flex: 1;
+}
+
+.oakton-welcome-title {
+  color: #006853;
+  font-weight: 400;
+  font-size: 1.6rem;
+  margin-bottom: 30px;
+}
+
+.oakton-welcome-title strong {
+  font-weight: 700;
+}
+
+.oakton-content-grid {
+  display: flex;
+  gap: 40px;
+}
+
+/* --- Left Column (Text & Form) --- */
+.oakton-left-col {
+  flex: 1.5;
+}
+
+.oakton-description {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.oakton-form-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 25px;
+  margin-top: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.oakton-form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.oakton-form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.oakton-form-group label {
+  color: #006853;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.oakton-form-group input {
+  background-color: #f0f2f5;
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 1rem;
+  outline: none;
+}
+
+.oakton-form-group input:focus {
+  background-color: #e4e6e9;
+}
+
+/* --- Right Column (Images & Contact) --- */
+.oakton-right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.oakton-image-collage {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 5px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.oakton-image-collage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Make the first image span full width on top if matching the exact grid */
+.oakton-image-collage img:first-child {
+  grid-column: 1 / -1;
+  max-height: 200px;
+}
+
+.oakton-contact-box {
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.oakton-contact-box a {
+  color: #1a1a1a;
+  font-weight: bold;
+}
+
+.oakton-disclaimer {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 15px;
+}
+
+/* --- Footer --- */
+.oakton-footer {
+  padding: 20px 40px;
+  font-size: 0.85rem;
+  color: #666;
+  background-color: #f0f2f5;
+  border-top: 1px solid #e0e0e0;
+}

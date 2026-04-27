@@ -1,23 +1,89 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import './oakton-intake.css';
+
+function calculateAge(dateOfBirthISO) {
+  if (!dateOfBirthISO) return null;
+  const dob = new Date(dateOfBirthISO);
+  if (Number.isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const m = today.getMonth() - dob.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age -= 1;
+  return age;
+}
 
 export default function OaktonIntake() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
+    gender: '',
+    dateOfBirth: '',
+    ethnicityRace: '',
+    currentCity: '',
+    zipCode: '',
   });
+
+  const [submitStatus, setSubmitStatus] = useState({
+    state: 'idle', // idle | submitting | success | error
+    message: '',
+  });
+
+  const ageAtEnrollment = useMemo(
+    () => calculateAge(formData.dateOfBirth),
+    [formData.dateOfBirth]
+  );
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form payload:', formData);
+    setSubmitStatus({ state: 'submitting', message: '' });
+
+    const payload = {
+      ...formData,
+      ageAtEnrollment,
+    };
+
+    try {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/oaktonInfo/intakes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        const msg =
+          data?.error ||
+          `Failed to submit intake (HTTP ${response.status})`;
+        setSubmitStatus({ state: 'error', message: msg });
+        return;
+      }
+
+      setSubmitStatus({ state: 'success', message: 'Submitted successfully.' });
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phoneNumber: '',
+        gender: '',
+        dateOfBirth: '',
+        ethnicityRace: '',
+        currentCity: '',
+        zipCode: '',
+      });
+    } catch (err) {
+      setSubmitStatus({
+        state: 'error',
+        message: err?.message || 'Failed to submit intake',
+      });
+    }
   };
 
   return (
@@ -73,9 +139,76 @@ export default function OaktonIntake() {
                     <input type="email" id="email" name="email" placeholder="Your Answer" value={formData.email} onChange={handleChange} required />
                   </div>
                   <div className="oakton-form-group">
-                    <label htmlFor="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone" placeholder="Your Answer" value={formData.phone} onChange={handleChange} />
+                    <label htmlFor="phoneNumber">Phone Number</label>
+                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Your Answer" value={formData.phoneNumber} onChange={handleChange} required />
                   </div>
+                </div>
+
+                <div className="oakton-form-row">
+                  <div className="oakton-form-group">
+                    <label htmlFor="gender">Gender</label>
+                    <select id="gender" name="gender" value={formData.gender} onChange={handleChange} required>
+                      <option value="" disabled>Select…</option>
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Non-binary">Non-binary</option>
+                      <option value="Prefer not to say">Prefer not to say</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="oakton-form-group">
+                    <label htmlFor="dateOfBirth">Date of Birth</label>
+                    <input type="date" id="dateOfBirth" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                  </div>
+                </div>
+
+                <div className="oakton-form-row">
+                  <div className="oakton-form-group">
+                    <label htmlFor="ageAtEnrollment">Age at Time of Enrollment</label>
+                    <input type="number" id="ageAtEnrollment" name="ageAtEnrollment" value={ageAtEnrollment ?? ''} readOnly aria-readonly="true" placeholder="Calculated from DOB" />
+                  </div>
+
+                  <div className="oakton-form-group">
+                    <label htmlFor="ethnicityRace">Ethnicity/Race</label>
+                    <input type="text" id="ethnicityRace" name="ethnicityRace" placeholder="Your Answer" value={formData.ethnicityRace} onChange={handleChange} required />
+                  </div>
+                </div>
+
+                <div className="oakton-form-row">
+                  <div className="oakton-form-group">
+                    <label htmlFor="currentCity">Current City</label>
+                    <input type="text" id="currentCity" name="currentCity" placeholder="Your Answer" value={formData.currentCity} onChange={handleChange} required />
+                  </div>
+
+                  <div className="oakton-form-group">
+                    <label htmlFor="zipCode">ZIP Code</label>
+                    <input type="text" id="zipCode" name="zipCode" placeholder="Your Answer" value={formData.zipCode} onChange={handleChange} required />
+                  </div>
+                </div>
+
+                <div className="oakton-form-actions">
+                  <button
+                    className="oakton-submit-button"
+                    type="submit"
+                    disabled={submitStatus.state === 'submitting'}
+                  >
+                    {submitStatus.state === 'submitting' ? 'Submitting…' : 'Submit'}
+                  </button>
+                  {submitStatus.state !== 'idle' && (
+                    <p
+                      className={`oakton-submit-message ${
+                        submitStatus.state === 'success'
+                          ? 'oakton-submit-message--success'
+                          : submitStatus.state === 'error'
+                            ? 'oakton-submit-message--error'
+                            : ''
+                      }`}
+                      role="status"
+                    >
+                      {submitStatus.message}
+                    </p>
+                  )}
                 </div>
               </form>
             </div>

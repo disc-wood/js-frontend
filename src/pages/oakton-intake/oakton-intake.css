@@ -112,10 +112,60 @@
   outline: none;
 }
 
+.oakton-form-group select {
+  background-color: #f0f2f5;
+  border: none;
+  border-radius: 4px;
+  padding: 12px;
+  font-size: 1rem;
+  outline: none;
+}
+
 .oakton-form-group input:focus {
   background-color: #e4e6e9;
 }
 
+.oakton-form-group select:focus {
+  background-color: #e4e6e9;
+}
+
+.oakton-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.oakton-submit-button {
+  background: #006853;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 18px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.oakton-submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.oakton-submit-message {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.oakton-submit-message--success {
+  color: #006853;
+  font-weight: 600;
+}
+
+.oakton-submit-message--error {
+  color: #b42318;
+  font-weight: 600;
+}
 /* --- Right Column (Images & Contact) --- */
 .oakton-right-col {
   flex: 1;

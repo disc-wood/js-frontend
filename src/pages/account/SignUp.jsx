@@ -51,10 +51,15 @@ export default function SignUp() {
   };
 
   const handleGoogleSignup = async () => {
+    setIsLoading(true);
+    setError('');
     try {
       await googleAuth();
+      navigate('/', { replace: true });
     } catch (error) {
       setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -111,22 +116,33 @@ export default function SignUp() {
           text='Sign up with Google'
         />
         <Input.Text
+          name='username'
+          placeholder='Username'
+          value={formState.username}
+          onChange={handleChangeUsername}
+          required
+        />
+        <Input.Text
+          name='firstname'
           placeholder='First name'
           value={formState.firstname}
           onChange={handleChangeFirstname}
         />
         <Input.Text
+          name='lastname'
           placeholder='Last name'
           value={formState.lastname}
           onChange={handleChangeLastname}
         />
         <Input.Text
+          name='email'
           placeholder='Email'
           value={formState.email}
           onChange={handleChangeEmail}
           required
         />
         <Input.Password
+          name='password'
           placeholder='Password'
           value={formState.password}
           onChange={handleChangePassword}

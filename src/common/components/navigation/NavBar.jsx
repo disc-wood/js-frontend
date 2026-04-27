@@ -108,7 +108,7 @@ export default function NavBar() {
 
       <RightGroup>
         {user ? (
-          <SignInButton onClick={handleLogoutClick}>Log Out</SignInButton>
+          <GetStartedButton onClick={handleLogoutClick}>Log Out</GetStartedButton>
         ) : (
           <>
             <NavLink onClick={() => navigate('/login')}>

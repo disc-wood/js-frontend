@@ -83,15 +83,22 @@ export function UserProvider({ children }) {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
 
-      await fetch(buildUrl('/auth/token'), {
+      const response = await fetch(buildUrl('/auth/token'), {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken }),
       });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => ({}));
+        throw new Error(errorPayload.error || 'Backend token sync failed');
+      }
+
+      return result.user;
     } catch (error) {
       console.error('Google auth error:', error);
-      throw new Error('Failed to complete Google authentication');
+      throw new Error(error.message || 'Failed to complete Google authentication');
     }
   };
 

@@ -68,10 +68,15 @@ export default function Login() {
   };
 
   const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    setError('');
     try {
       await googleAuth();
+      navigate('/', { replace: true });
     } catch (error) {
       setError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 

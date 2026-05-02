@@ -16,6 +16,7 @@ import Dashboard from '@/pages/dashboard/Dashboard';
 import Database from '@/pages/database/Database';
 import Home from '@/pages/home/Home';
 import NotFound from '@/pages/not-found/NotFound';
+import IhtuIntake from '@/pages/ihtu-intake/ihtu-intake';
 import OaktonIntake from '@/pages/oakton-intake/oakton-intake';
 
 import './App.css';
@@ -27,6 +28,7 @@ export default function App() {
         <Routes>
           {/* Forms */}
           <Route path='/apply/oakton' element={<OaktonIntake />} />
+          <Route path='/apply/ihtu' element={<IhtuIntake />} />
 
           {/* Internal Page */}
           <Route path='/' element={<NavLayout />}>

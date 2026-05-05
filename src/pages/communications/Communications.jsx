@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
+import { Button } from '@/common/components/atoms/Button';
 import styled from 'styled-components';
-
-import { Button } from '../../common/components/atoms/Button';
 
 const PAGE_PADDING = '2rem';
 const PRIMARY_BLUE = '#2563eb';
@@ -10,6 +9,8 @@ const LIGHT_BG = '#f8f9fa';
 const CARD_BG = '#f3f3f3';
 const BORDER_GRAY = '#e5e7eb';
 const TEXT_MUTED = '#6b7280';
+const TAB_TRIANGLE_BLUE = '#c0e6ff';
+const TAB_INACTIVE_GRAY = '#d1d5db';
 
 const PageContainer = styled.div`
   flex: 1;
@@ -27,9 +28,6 @@ const PageTitle = styled.h1`
   margin: 0 0 0.5rem 0;
   color: var(--text);
 `;
-
-const TAB_TRIANGLE_BLUE = '#e0f2fe';
-const TAB_INACTIVE_GRAY = '#d1d5db';
 
 const TabCardWrapper = styled.div`
   background: ${CARD_BG};
@@ -66,72 +64,96 @@ const Tab = styled.button`
 const MainCard = styled.div`
   background: ${CARD_BG};
   padding: 1.5rem;
-  display: flex;
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: 1.5rem;
-  min-height: 400px;
+  min-height: 430px;
 
-  @media (max-width: 900px) {
+  @media (max-width: 800px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const Sidebar = styled.aside`
+  background: ${LIGHT_BG};
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const ComposeButton = styled(Button.Primary)`
+  width: 100%;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+`;
+
+const SidebarNav = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  @media (max-width: 800px) {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+`;
+
+const SidebarItem = styled.button`
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  background: ${({ $active }) => ($active ? '#e8f0ff' : 'transparent')};
+  border: 1px solid ${({ $active }) => ($active ? PRIMARY_BLUE : 'transparent')};
+  border-radius: 6px;
+  color: ${({ $active }) => ($active ? '#1d4ed8' : 'var(--text)')};
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: ${({ $active }) => ($active ? '700' : '500')};
+  text-align: left;
+
+  &:hover {
+    background: ${({ $active }) => ($active ? '#e8f0ff' : '#eceff3')};
+  }
+`;
+
+const ContentPanel = styled.section`
+  background: ${LIGHT_BG};
+  border-radius: 8px;
+  padding: 1.25rem;
+  min-width: 0;
+`;
+
+const ContentHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: 640px) {
     flex-direction: column;
   }
 `;
 
-const Panel = styled.section`
-  flex: 1;
-  background: ${LIGHT_BG};
-  border-radius: 8px;
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-`;
-
-const PanelHeader = styled.h2`
-  font-size: 1.1rem;
+const PanelTitle = styled.h2`
+  font-size: 1.2rem;
   font-weight: 700;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.3rem 0;
   color: var(--text);
 `;
 
-const SubHeader = styled.p`
-  font-size: 0.9rem;
-  margin: 0 0 0.75rem 0;
-  color: var(--text);
+const PanelDescription = styled.p`
+  font-size: 0.85rem;
+  margin: 0;
+  color: ${TEXT_MUTED};
 `;
 
-const TemplateOption = styled.button`
-  display: block;
-  width: 100%;
-  padding: 0.6rem 0.9rem;
-  margin-bottom: 0.5rem;
-  background: ${CARD_BG};
-  border: 1px solid ${BORDER_GRAY};
-  border-radius: 6px;
-  font-size: 0.9rem;
-  text-align: left;
-  cursor: pointer;
-  color: var(--text);
-  transition: background 0.15s;
-
-  &:hover {
-    background: #e5e7eb;
-  }
-`;
-
-const ViewAllLink = styled.a`
-  font-size: 0.9rem;
-  color: ${PRIMARY_BLUE};
-  text-decoration: none;
-  margin-top: 0.5rem;
-  display: inline-block;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const ComposeButton = styled(Button.Primary)`
-  margin-top: auto;
-  align-self: flex-start;
+const TableScroll = styled.div`
+  overflow-x: auto;
 `;
 
 const Table = styled.table`
@@ -146,48 +168,224 @@ const TableHead = styled.thead`
 
 const Th = styled.th`
   text-align: left;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.75rem 0.5rem 0;
   font-weight: 600;
   color: var(--text);
+  white-space: nowrap;
 `;
 
 const Td = styled.td`
-  padding: 0.6rem 0;
+  padding: 0.7rem 0.75rem 0.7rem 0;
   border-bottom: 1px solid #f0f0f0;
   color: var(--text);
+  vertical-align: middle;
 `;
 
-const SubjectLink = styled.a`
+const SubjectButton = styled.button`
+  background: none;
+  border: none;
   color: ${PRIMARY_BLUE};
-  text-decoration: underline;
   cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
 
   &:hover {
     color: #1d4ed8;
   }
 `;
 
-const RowActions = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
+const ActionButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${PRIMARY_BLUE};
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover {
+    color: #1d4ed8;
+  }
 `;
 
-const CloseButton = styled.button`
-  background: none;
+const TemplateGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const TemplateOption = styled.button`
+  min-height: 4.5rem;
+  padding: 0.85rem 1rem;
+  background: ${CARD_BG};
+  border: 1px solid ${BORDER_GRAY};
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+  transition: background 0.15s;
+
+  &:hover {
+    background: #e5e7eb;
+  }
+`;
+
+const EmptyState = styled.div`
+  border: 1px dashed ${BORDER_GRAY};
+  border-radius: 8px;
+  padding: 2rem;
+  color: ${TEXT_MUTED};
+  text-align: center;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(25, 26, 35, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.form`
+  width: min(640px, 100%);
+  background: var(--white);
+  border-radius: 8px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: ${CARD_BG};
+  border-bottom: 1px solid ${BORDER_GRAY};
+  padding: 0.9rem 1rem;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+`;
+
+const IconButton = styled.button`
+  background: transparent;
   border: none;
   color: ${TEXT_MUTED};
   cursor: pointer;
-  padding: 0 0.25rem;
-  font-size: 0.9rem;
+  font-size: 1.25rem;
   line-height: 1;
+  padding: 0.25rem;
 
   &:hover {
     color: var(--text);
   }
 `;
 
+const ModalBody = styled.div`
+  display: grid;
+  gap: 0.9rem;
+  padding: 1rem;
+`;
+
+const Field = styled.label`
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: ${TEXT_MUTED};
+`;
+
+const Input = styled.input`
+  width: 100%;
+  border: 1px solid ${BORDER_GRAY};
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  color: var(--text);
+`;
+
+const Select = styled.select`
+  width: 100%;
+  border: 1px solid ${BORDER_GRAY};
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  color: var(--text);
+`;
+
+const Textarea = styled.textarea`
+  width: 100%;
+  min-height: 180px;
+  border: 1px solid ${BORDER_GRAY};
+  border-radius: 6px;
+  padding: 0.75rem;
+  font: inherit;
+  color: var(--text);
+  resize: vertical;
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  border-top: 1px solid ${BORDER_GRAY};
+  padding: 1rem;
+`;
+
+const CancelButton = styled(Button.Secondary)`
+  min-width: 92px;
+`;
+
+const SaveButton = styled(Button.Primary)`
+  min-width: 112px;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+`;
+
 const TABS = ['Oakton College', 'I Hope They Understand'];
+
+const SECTIONS = [
+  { id: 'scheduled', label: 'Scheduled' },
+  { id: 'sent', label: 'Sent' },
+  { id: 'templates', label: 'Templates' },
+  { id: 'drafts', label: 'Drafts' },
+];
+
+const SECTION_DETAILS = {
+  scheduled: {
+    title: 'Scheduled',
+    description: 'Emails queued to go out later.',
+  },
+  sent: {
+    title: 'Sent',
+    description: 'Previously delivered emails.',
+  },
+  templates: {
+    title: 'Templates',
+    description: 'Start a draft from a common message type.',
+  },
+  drafts: {
+    title: 'Drafts',
+    description: 'Locally saved drafts for this session.',
+  },
+};
 
 const TEMPLATES = [
   'Follow-Up Email',
@@ -197,19 +395,241 @@ const TEMPLATES = [
 ];
 
 const SCHEDULED = [
-  { subject: 'March Newsletter', recipients: 'Enrolled Students', date: '3/1/26 10:00am' },
-  { subject: 'April Newsletter', recipients: 'Enrolled Students', date: '4/1/26 10:00am' },
-  { subject: 'Mid-Year Congrats', recipients: 'Enrolled Students', date: '4/1/26 10:00am' },
-  { subject: 'May Newsletter', recipients: 'Enrolled Students', date: '5/1/26 10:00am' },
+  {
+    subject: 'March Newsletter',
+    recipients: 'Enrolled Students',
+    date: '3/1/26 10:00am',
+  },
+  {
+    subject: 'April Newsletter',
+    recipients: 'Enrolled Students',
+    date: '4/1/26 10:00am',
+  },
+  {
+    subject: 'Mid-Year Congrats',
+    recipients: 'Enrolled Students',
+    date: '4/1/26 10:00am',
+  },
+  {
+    subject: 'May Newsletter',
+    recipients: 'Enrolled Students',
+    date: '5/1/26 10:00am',
+  },
 ];
 
 const SENT = [
-  { subject: 'February Newsletter', recipients: 'Enrolled Students', date: '2/1/26 10:00am', showClose: false },
-  { subject: 'Follow-Up', recipients: 'John Smith', date: '2/1/26 10:00am', showClose: false },
+  {
+    subject: 'February Newsletter',
+    recipients: 'Enrolled Students',
+    date: '2/1/26 10:00am',
+  },
+  {
+    subject: 'Follow-Up',
+    recipients: 'John Smith',
+    date: '2/1/26 10:00am',
+  },
 ];
+
+const EMPTY_DRAFT = {
+  id: null,
+  recipients: '',
+  template: TEMPLATES[0],
+  subject: '',
+  body: '',
+};
+
+const formatDraftDate = (date) =>
+  new Intl.DateTimeFormat('en-US', {
+    month: 'numeric',
+    day: 'numeric',
+    year: '2-digit',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
 
 export default function Communications() {
   const [activeTab, setActiveTab] = useState(0);
+  const [activeSection, setActiveSection] = useState('scheduled');
+  const [drafts, setDrafts] = useState([]);
+  const [draftForm, setDraftForm] = useState(EMPTY_DRAFT);
+  const [isDraftModalOpen, setIsDraftModalOpen] = useState(false);
+
+  const currentSection = SECTION_DETAILS[activeSection];
+  const canSaveDraft = Boolean(
+    draftForm.recipients.trim() ||
+    draftForm.subject.trim() ||
+    draftForm.body.trim()
+  );
+
+  const openComposeModal = (template = TEMPLATES[0]) => {
+    setDraftForm({ ...EMPTY_DRAFT, template });
+    setIsDraftModalOpen(true);
+  };
+
+  const openDraftModal = (draft) => {
+    setDraftForm(draft);
+    setIsDraftModalOpen(true);
+  };
+
+  const closeDraftModal = () => {
+    setIsDraftModalOpen(false);
+    setDraftForm(EMPTY_DRAFT);
+  };
+
+  const handleDraftChange = (event) => {
+    const { name, value } = event.target;
+
+    setDraftForm((currentDraft) => ({
+      ...currentDraft,
+      [name]: value,
+    }));
+  };
+
+  const handleSaveDraft = (event) => {
+    event.preventDefault();
+
+    if (!canSaveDraft) {
+      return;
+    }
+
+    const savedDraft = {
+      ...draftForm,
+      id: draftForm.id ?? Date.now(),
+      updatedAt: formatDraftDate(new Date()),
+    };
+
+    setDrafts((currentDrafts) => {
+      if (draftForm.id) {
+        return currentDrafts.map((draft) =>
+          draft.id === draftForm.id ? savedDraft : draft
+        );
+      }
+
+      return [savedDraft, ...currentDrafts];
+    });
+    setActiveSection('drafts');
+    closeDraftModal();
+  };
+
+  const renderScheduled = () => (
+    <TableScroll>
+      <Table>
+        <TableHead>
+          <tr>
+            <Th>Subject</Th>
+            <Th>Recipient List</Th>
+            <Th>Send Date</Th>
+          </tr>
+        </TableHead>
+        <tbody>
+          {SCHEDULED.map((row) => (
+            <tr key={row.subject}>
+              <Td>
+                <SubjectButton type='button'>{row.subject}</SubjectButton>
+              </Td>
+              <Td>{row.recipients}</Td>
+              <Td>{row.date}</Td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </TableScroll>
+  );
+
+  const renderSent = () => (
+    <TableScroll>
+      <Table>
+        <TableHead>
+          <tr>
+            <Th>Subject</Th>
+            <Th>Recipient List</Th>
+            <Th>Send Date</Th>
+          </tr>
+        </TableHead>
+        <tbody>
+          {SENT.map((row) => (
+            <tr key={`${row.subject}-${row.recipients}`}>
+              <Td>
+                <SubjectButton type='button'>{row.subject}</SubjectButton>
+              </Td>
+              <Td>{row.recipients}</Td>
+              <Td>{row.date}</Td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </TableScroll>
+  );
+
+  const renderTemplates = () => (
+    <TemplateGrid>
+      {TEMPLATES.map((name) => (
+        <TemplateOption
+          key={name}
+          type='button'
+          onClick={() => openComposeModal(name)}
+        >
+          {name}
+        </TemplateOption>
+      ))}
+    </TemplateGrid>
+  );
+
+  const renderDrafts = () => {
+    if (drafts.length === 0) {
+      return (
+        <EmptyState>No drafts yet. Compose an email to save one.</EmptyState>
+      );
+    }
+
+    return (
+      <TableScroll>
+        <Table>
+          <TableHead>
+            <tr>
+              <Th>Subject</Th>
+              <Th>Recipient List</Th>
+              <Th>Last Updated</Th>
+              <Th>Action</Th>
+            </tr>
+          </TableHead>
+          <tbody>
+            {drafts.map((draft) => (
+              <tr key={draft.id}>
+                <Td>{draft.subject.trim() || 'Untitled draft'}</Td>
+                <Td>{draft.recipients.trim() || 'No recipient'}</Td>
+                <Td>{draft.updatedAt}</Td>
+                <Td>
+                  <ActionButton
+                    type='button'
+                    onClick={() => openDraftModal(draft)}
+                  >
+                    Resume
+                  </ActionButton>
+                </Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </TableScroll>
+    );
+  };
+
+  const renderContent = () => {
+    if (activeSection === 'scheduled') {
+      return renderScheduled();
+    }
+
+    if (activeSection === 'sent') {
+      return renderSent();
+    }
+
+    if (activeSection === 'templates') {
+      return renderTemplates();
+    }
+
+    return renderDrafts();
+  };
 
   return (
     <PageContainer>
@@ -222,7 +642,7 @@ export default function Communications() {
           {TABS.map((tab, index) => (
             <Tab
               key={tab}
-              type="button"
+              type='button'
               $active={activeTab === index}
               $first={index === 0}
               onClick={() => setActiveTab(index)}
@@ -231,77 +651,119 @@ export default function Communications() {
             </Tab>
           ))}
         </Tabs>
+
         <MainCard>
-          <Panel>
-            <PanelHeader>Create an Email</PanelHeader>
-            <SubHeader>Choose a Template:</SubHeader>
-            {TEMPLATES.map((name) => (
-              <TemplateOption key={name} type="button">
-                {name}
-              </TemplateOption>
-            ))}
-            <ViewAllLink href="#">View all templates &gt;</ViewAllLink>
-            <ComposeButton type="button">Compose Email</ComposeButton>
-          </Panel>
+          <Sidebar>
+            <ComposeButton type='button' onClick={() => openComposeModal()}>
+              Compose Email
+            </ComposeButton>
 
-          <Panel>
-            <PanelHeader>Scheduled</PanelHeader>
-            <Table>
-              <TableHead>
-                <tr>
-                  <Th>Subject</Th>
-                  <Th>Recipient List</Th>
-                  <Th>Send Date</Th>
-                </tr>
-              </TableHead>
-              <tbody>
-                {SCHEDULED.map((row) => (
-                  <tr key={row.subject}>
-                    <Td>
-                      <SubjectLink href="#">{row.subject}</SubjectLink>
-                    </Td>
-                    <Td>{row.recipients}</Td>
-                    <Td>{row.date}</Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Panel>
+            <SidebarNav aria-label='Communication sections'>
+              {SECTIONS.map((section) => (
+                <SidebarItem
+                  key={section.id}
+                  type='button'
+                  $active={activeSection === section.id}
+                  onClick={() => setActiveSection(section.id)}
+                >
+                  {section.label}
+                </SidebarItem>
+              ))}
+            </SidebarNav>
+          </Sidebar>
 
-          <Panel>
-            <PanelHeader>Sent</PanelHeader>
-            <Table>
-              <TableHead>
-                <tr>
-                  <Th>Subject</Th>
-                  <Th>Recipient List</Th>
-                  <Th>Send Date</Th>
-                </tr>
-              </TableHead>
-              <tbody>
-                {SENT.map((row) => (
-                  <tr key={`${row.subject}-${row.recipients}`}>
-                    <Td>
-                      <SubjectLink href="#">{row.subject}</SubjectLink>
-                    </Td>
-                    <Td>{row.recipients}</Td>
-                    <Td>
-                      <RowActions>
-                        {row.date}
-                        {row.showClose && (
-                          <CloseButton type="button" aria-label="Dismiss">
-                            ×
-                          </CloseButton>
-                        )}
-                      </RowActions>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          </Panel>
+          <ContentPanel>
+            <ContentHeader>
+              <div>
+                <PanelTitle>{currentSection.title}</PanelTitle>
+                <PanelDescription>
+                  {currentSection.description}
+                </PanelDescription>
+              </div>
+            </ContentHeader>
+
+            {renderContent()}
+          </ContentPanel>
         </MainCard>
       </TabCardWrapper>
+
+      {isDraftModalOpen && (
+        <ModalOverlay onClick={closeDraftModal}>
+          <ModalContent
+            onSubmit={handleSaveDraft}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ModalHeader>
+              <ModalTitle>
+                {draftForm.id ? 'Edit Draft' : 'Compose Email'}
+              </ModalTitle>
+              <IconButton
+                type='button'
+                aria-label='Close compose modal'
+                onClick={closeDraftModal}
+              >
+                ×
+              </IconButton>
+            </ModalHeader>
+
+            <ModalBody>
+              <Field>
+                Recipient/List
+                <Input
+                  name='recipients'
+                  value={draftForm.recipients}
+                  onChange={handleDraftChange}
+                  placeholder='Enrolled Students'
+                />
+              </Field>
+
+              <Field>
+                Template
+                <Select
+                  name='template'
+                  value={draftForm.template}
+                  onChange={handleDraftChange}
+                >
+                  {TEMPLATES.map((template) => (
+                    <option key={template} value={template}>
+                      {template}
+                    </option>
+                  ))}
+                </Select>
+              </Field>
+
+              <Field>
+                Subject
+                <Input
+                  name='subject'
+                  value={draftForm.subject}
+                  onChange={handleDraftChange}
+                  placeholder='Email subject'
+                />
+              </Field>
+
+              <Field>
+                Message
+                <Textarea
+                  name='body'
+                  value={draftForm.body}
+                  onChange={handleDraftChange}
+                  placeholder='Write your message here...'
+                />
+              </Field>
+            </ModalBody>
+
+            <ModalActions>
+              <CancelButton type='button' onClick={closeDraftModal}>
+                Cancel
+              </CancelButton>
+              <SaveButton type='submit' disabled={!canSaveDraft}>
+                Save Draft
+              </SaveButton>
+            </ModalActions>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </PageContainer>
   );
 }

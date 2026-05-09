@@ -1,9 +1,5 @@
-// Login page for authenticating users with Firebase Auth (email/password or Google)
-    // - On success, redirects to dashboard
-    // - Displays user-friendly Firebase error messages
-
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import GoogleButton from '@/common/components/atoms/GoogleButton';
 import { FormTitle } from '@/common/components/form/Form';
@@ -35,8 +31,22 @@ const StyledLink = styled(Link)`
 
 const provider = new GoogleAuthProvider();
 
+async function acceptInvite(token, uid) {
+  try {
+    await fetch('http://localhost:5050/invite/accept', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, uid }),
+    });
+  } catch (err) {
+    console.error('Failed to accept invite:', err);
+  }
+}
+
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite');
 
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,30 +56,29 @@ export default function Login() {
     password: '',
   });
 
-  // Updates controlled inputs safely
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormState((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
+    setFormState((prev) => ({ ...prev, [name]: value }));
     setError('');
   };
 
-  // Email/password login via Firebase
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      await signInWithEmailAndPassword(
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         formState.email,
         formState.password
       );
+
+      if (inviteToken) {
+        await acceptInvite(inviteToken, userCredential.user.uid);
+        // force token refresh so useUser picks up new role immediately
+        await userCredential.user.getIdToken(true);
+      }
 
       navigate('/', { replace: true });
     } catch (error) {
@@ -92,13 +101,18 @@ export default function Login() {
     }
   };
 
-  // Google OAuth login
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     setError('');
 
     try {
-      await signInWithPopup(auth, provider);
+      const userCredential = await signInWithPopup(auth, provider);
+
+      if (inviteToken) {
+        await acceptInvite(inviteToken, userCredential.user.uid);
+        await userCredential.user.getIdToken(true);
+      }
+
       navigate('/', { replace: true });
     } catch (error) {
       console.error('Google login error:', error);
@@ -111,7 +125,7 @@ export default function Login() {
   return (
     <StyledPage>
       <StyledForm onSubmit={handleSubmit}>
-        <FormTitle>Login</FormTitle>
+        <FormTitle>{inviteToken ? 'Accept Invitation' : 'Login'}</FormTitle>
 
         <GoogleButton
           onClick={handleGoogleLogin}
@@ -141,9 +155,7 @@ export default function Login() {
           {isLoading ? 'Logging in...' : 'Login'}
         </SubmitButton>
 
-        <StyledLink to="/forgot-password">
-          Forgot Password?
-        </StyledLink>
+        <StyledLink to="/forgot-password">Forgot Password?</StyledLink>
 
         <SignupText>
           Don't have an account?{' '}

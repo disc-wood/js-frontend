@@ -21,6 +21,8 @@ export function useUser() {
 
       const token = await firebaseUser.getIdTokenResult();
       const userRole = token.claims.role;
+      console.log('Token claims:', token.claims);
+      console.log('User UID:', firebaseUser.uid);
 
       setUser(firebaseUser);
       setRole(userRole);
@@ -31,6 +33,7 @@ export function useUser() {
           .select('program_id')
           .eq('user_id', firebaseUser.uid);
 
+        console.log('Supabase assignments data:', data);
         setAssignedPrograms(data.map(row => row.program_id));
       }
 

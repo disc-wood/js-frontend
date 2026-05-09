@@ -1,7 +1,6 @@
-// handles the email verification status page after a user clicks a verification link. 
-// it reads query parameters from the URL to determine whether verification succeeded or failed,
-// displays the appropriate status message, and redirects the user to the login page after
-// successful verification.
+// handles the email verification status page after user clicks a verification link. 
+    // - reads query parameters from the URL to determine whether verification succeeded or failed,
+    // - displays appropriate status message, and redirects the user to the login page after verification. 
 
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';

@@ -1,6 +1,7 @@
-// handles the authentication callback after a user signs in with a redirect-based login flow (e.g. Google OAuth on mobile).
-// it processes the authentication result from Firebase, retrieves the user ID token, and sends it to the backend for session creation.
-// if authentication succeeds, the user is redirected to the homepage; if it fails, the user is redirected back to the login page with an error message.
+// handles the authentication callback after a user signs in with a redirect-based login flow (e.g. Google OAuth on mobile). 
+    // - processes the authentication result from Firebase, retrieves the user ID token, and sends it to the backend for session creation.
+    // - if authentication succeeds, the user is redirected to the homepage. 
+    // - if authentication fails, the user is redirected back to the login page with an error message.
 
 import React, { useEffect } from 'react';
 import { getRedirectResult } from 'firebase/auth';

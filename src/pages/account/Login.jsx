@@ -1,6 +1,6 @@
 // Login page for authenticating users with Firebase Auth (email/password or Google)
-// On success, redirects to dashboard
-// Displays user-friendly Firebase error messages
+    // - On success, redirects to dashboard
+    // - Displays user-friendly Firebase error messages
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';

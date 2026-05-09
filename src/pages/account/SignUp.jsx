@@ -1,5 +1,5 @@
 // Sign Up page that allows users to create an account using email/password or Google OAuth
-// Sends registration data to backend for Firebase Auth + DB user creation
+    // - Sends registration data to backend for Firebase Auth + DB user creation
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

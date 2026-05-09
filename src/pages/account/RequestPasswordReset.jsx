@@ -1,7 +1,7 @@
 // handles the "forgot password" request flow. 
-// allows a user to enter their email address and sends a password reset request via the authentication service.
-// if successful, it triggers a password reset email and shows a confirmation message. 
-// the user can then use the emailed link to reset their password securely. 
+    // -  allows a user to enter their email address and sends a password reset request via the authentication service.
+    // - if successful, it triggers a password reset email and shows a confirmation message. 
+    // - the user can then use the emailed link to reset their password securely. 
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';

@@ -1,9 +1,9 @@
 // handles the password reset flow using a secure reset link sent via email. 
-    // verifies the reset token from the URL
-    // enforces password strength requirements
-    // confirms that both password fields match
-    // updates the user's password using Firebase Auth
-// after a successful reset, the user is redirected to the login page. 
+    // - verifies the reset token from the URL
+    // - enforces password strength requirements
+    // - confirms that both password fields match
+    // -  updates the user's password using Firebase Auth
+    // - after a successful reset, the user is redirected to the login page. 
 import React, { useEffect, useState } from 'react';
 
 import { confirmPasswordReset } from 'firebase/auth';

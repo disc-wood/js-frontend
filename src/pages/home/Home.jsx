@@ -57,13 +57,21 @@ export default function Home() {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
+  const handleGetStarted = () => {
+    if (user) {
+      navigate('/dashboard'); // or wherever logged-in users go
+    } else {
+      navigate('/signup');
+    }
+  };
+
   return (
     <HomePage>
       <TextContainer>
         <MainText>
           Empowering educators and administrators with a comprehensive system to track learner progress and automate communication.
         </MainText>
-        <GetStartedButton onClick={() => navigate('/signup')}>
+        <GetStartedButton onClick={handleGetStarted}>
           Get Started
         </GetStartedButton>
       </TextContainer>

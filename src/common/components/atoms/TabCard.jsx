@@ -28,7 +28,6 @@ const Tab = styled.button`
   color: ${({ $active }) => ($active ? 'var(--text)' : TEXT_MUTED)};
   background: ${({ $active }) => ($active ? CARD_BG : TAB_INACTIVE_GRAY)};
   border: none;
-  border-radius: ${({ $first }) => ($first ? '0 16px 0 0' : '16px 0 0 0')};
   cursor: pointer;
   position: relative;
   z-index: ${({ $active }) => ($active ? 1 : 0)};
@@ -42,14 +41,20 @@ const Tab = styled.button`
 export default function TabCard({ tabs }) {
   const [activeTab, setActiveTab] = useState(0);
 
+  if (!tabs || tabs.length === 0) {
+    return null; // or loading state
+  }
+
+  const safeIndex = Math.min(activeTab, tabs.length - 1);
+
   return (
     <TabCardWrapper>
       <Tabs>
         {tabs.map((tab, index) => (
           <Tab
             key={tab.label}
-            type='button'
-            $active={activeTab === index}
+            type="button"
+            $active={safeIndex === index}
             $first={index === 0}
             onClick={() => setActiveTab(index)}
           >
@@ -57,7 +62,8 @@ export default function TabCard({ tabs }) {
           </Tab>
         ))}
       </Tabs>
-      {tabs[activeTab].content}
+
+      {tabs[safeIndex]?.content}
     </TabCardWrapper>
   );
 }

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import TabCard from "@/common/components/atoms/TabCard";
+import { programs } from "@/config/programs";
 
+// --- Styled Components ---
 const PageContainer = styled.div`
   flex: 1;
   padding: 2rem;
@@ -16,7 +18,7 @@ const PageTitle = styled.h1`
 `;
 
 const TableWrapper = styled.div`
-  background:rgb(255, 255, 255);
+  background: #fff;
   border-radius: 10px;
   overflow: auto;
   padding: 1rem;
@@ -25,19 +27,18 @@ const TableWrapper = styled.div`
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  color: white;
 `;
 
 const Th = styled.th`
   text-align: left;
   padding: 10px;
-  border-bottom: 1px solid #555;
+  border-bottom: 1px solid #ddd;
   font-size: 0.9rem;
 `;
 
 const Td = styled.td`
   padding: 8px;
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #eee;
 `;
 
 const Input = styled.input`
@@ -52,8 +53,7 @@ const Input = styled.input`
   }
 `;
 
-function EditableTable() {
-
+function EditableTable({ programId }) {
   const [rows, setRows] = useState([
     {
       startDate: "10/11/2025 17:32:23",
@@ -87,10 +87,14 @@ function EditableTable() {
     }
   ]);
 
+  React.useEffect(() => {
+    console.log("Load data for program:", programId);
+  }, [programId]);
+
   const handleChange = (rowIndex, field, value) => {
-    const updatedRows = [...rows];
-    updatedRows[rowIndex][field] = value;
-    setRows(updatedRows);
+    const updated = [...rows];
+    updated[rowIndex][field] = value;
+    setRows(updated);
   };
 
   const columns = [
@@ -112,7 +116,6 @@ function EditableTable() {
   return (
     <TableWrapper>
       <Table>
-
         <thead>
           <tr>
             {columns.map((col) => (
@@ -124,7 +127,6 @@ function EditableTable() {
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
-
               {columns.map((col) => (
                 <Td key={col.key}>
                   <Input
@@ -135,35 +137,26 @@ function EditableTable() {
                   />
                 </Td>
               ))}
-
             </tr>
           ))}
         </tbody>
-
       </Table>
     </TableWrapper>
   );
 }
 
+// --- Main Page ---
 export default function Database() {
-
-  const tabs = [
-    {
-      label: "Oakton Community College",
-      content: <EditableTable />
-    },
-    {
-      label: "I Hope They Understand",
-      content: <div>Content coming soon</div>
-    }
-  ];
+  const tabs = programs.map((p) => ({
+    id: p.id,
+    label: p.label,
+    content: <EditableTable programId={p.id} />,
+  }));
 
   return (
     <PageContainer>
       <PageTitle>Database</PageTitle>
-
       <TabCard tabs={tabs} />
-
     </PageContainer>
   );
 }

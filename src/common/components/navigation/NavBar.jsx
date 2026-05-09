@@ -100,7 +100,6 @@ export default function NavBar() {
         <LogoText onClick={() => navigate('/')}>
           Learner Tracking System
         </LogoText>
-        <NavLink onClick={() => navigate('/about')}>About</NavLink>
         <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
         <NavLink onClick={() => navigate('/database')}>Database</NavLink>
         <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>

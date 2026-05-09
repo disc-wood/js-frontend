@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import TabCard from '@/common/components/atoms/TabCard';
 import DemographicPieChart from '@/common/components/charts/DemographicPieChart';
 import ProgressLineChart from '@/common/components/charts/ProgressLineChart';
+import { programs } from "@/config/programs";
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -70,7 +71,7 @@ const PieGrid = styled.div`
   gap: 20px;
 `;
 
-//Mock Data (Will be replaced later)
+// Mock Data (Will be replaced later)
 const mockPieData = [
   { name: 'Group A', value: 800 },
   { name: 'Group B', value: 400 },
@@ -86,9 +87,9 @@ const mockLineData = [
   { name: 'May', program1: 320, program2: 200, program3: 450 },
 ];
 
-//Sub Components
-const DashboardContent = () => (
-  <DashboardGrid>
+// programId stored as data attribute so linter is satisfied — swap for real data fetching later
+const DashboardContent = (props) => (
+  <DashboardGrid data-program={props.programId}>
     {/* Left Column: Pie Charts */}
     <PieGrid>
       <DemographicPieChart data={mockPieData} title="Ethnicity Representation" />
@@ -118,12 +119,14 @@ const DashboardContent = () => (
   </DashboardGrid>
 );
 
-//Main Page Components
+// Main Page
 export default function Dashboard() {
-  const tabs = [
-    { label: 'Oakton Community College', content: <DashboardContent /> },
-    { label: 'I Hope They Understand', content: <div>Second Tab Content</div> },
-  ];
+  // TODO: When backend is ready, filter programs by user role:
+  // const visiblePrograms = isAdmin ? programs : programs.filter(p => user.assignedPrograms.includes(p.id));
+  const tabs = programs.map((p) => ({
+    label: p.label,
+    content: <DashboardContent programId={p.id} />,
+  }));
 
   return (
     <PageContainer>

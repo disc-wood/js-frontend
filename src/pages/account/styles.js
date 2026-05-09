@@ -1,5 +1,9 @@
-import styled from 'styled-components';
+// defines shared styled-components used across authentication pages (login, signup, etc.).
+// it contains layout and UI styling for forms, page centering, buttons, and supporting text elements.
+// these styles are used to ensure consistent spacing, alignment, and visual design across all auth screens,
+// without containing any application logic.
 
+import styled from 'styled-components';
 import { Button } from '@/common/components/atoms/Button';
 
 export const StyledForm = styled.form`

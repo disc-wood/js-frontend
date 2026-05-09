@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+// handles the "forgot password" request flow. 
+// allows a user to enter their email address and sends a password reset request via the authentication service.
+// if successful, it triggers a password reset email and shows a confirmation message. 
+// the user can then use the emailed link to reset their password securely. 
 
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-
 import { useUser } from '@/common/contexts/UserContext';
 import { Form, FormTitle } from '@/common/components/form/Form';
 import { Input } from '@/common/components/form/Input';

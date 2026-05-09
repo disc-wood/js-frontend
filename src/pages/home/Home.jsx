@@ -1,5 +1,4 @@
 import React, { useContext } from 'react';
-
 import styled from 'styled-components';
 
 import { Subtitle, Title } from '@/common/components/atoms/Text';

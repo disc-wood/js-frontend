@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+// handles the email verification status page after a user clicks a verification link. 
+// it reads query parameters from the URL to determine whether verification succeeded or failed,
+// displays the appropriate status message, and redirects the user to the login page after
+// successful verification.
 
+import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-
 import { Subtitle, Title } from '@/common/components/atoms/Text';
 
 const VerificationPage = styled.div`

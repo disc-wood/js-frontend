@@ -4,6 +4,7 @@ import TabCard from '@/common/components/atoms/TabCard';
 import DemographicPieChart from '@/common/components/charts/DemographicPieChart';
 import ProgressLineChart from '@/common/components/charts/ProgressLineChart';
 import { programs } from "@/config/programs";
+import { useUser } from '@/common/hooks/useUser';
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -87,18 +88,14 @@ const mockLineData = [
   { name: 'May', program1: 320, program2: 200, program3: 450 },
 ];
 
-// programId stored as data attribute so linter is satisfied — swap for real data fetching later
 const DashboardContent = (props) => (
   <DashboardGrid data-program={props.programId}>
-    {/* Left Column: Pie Charts */}
     <PieGrid>
       <DemographicPieChart data={mockPieData} title="Ethnicity Representation" />
       <DemographicPieChart data={mockPieData} title="Enrollment by Program" />
       <DemographicPieChart data={mockPieData} title="Gender Representation" />
       <DemographicPieChart data={mockPieData} title="Job Placements" />
     </PieGrid>
-
-    {/* Right Column: Top Metrics & Line Chart */}
     <div>
       <MetricsRow>
         <Metric>
@@ -119,11 +116,17 @@ const DashboardContent = (props) => (
   </DashboardGrid>
 );
 
-// Main Page
 export default function Dashboard() {
-  // TODO: When backend is ready, filter programs by user role:
-  // const visiblePrograms = isAdmin ? programs : programs.filter(p => user.assignedPrograms.includes(p.id));
-  const tabs = programs.map((p) => ({
+  const { role, assignedPrograms, loading } = useUser();
+
+  if (loading) return <div>Loading...</div>;
+
+  const visiblePrograms = role === 'admin'
+    ? programs
+    : programs.filter(p => assignedPrograms.includes(p.id));
+
+  const tabs = visiblePrograms.map((p) => ({
+    id: p.id,
     label: p.label,
     content: <DashboardContent programId={p.id} />,
   }));
@@ -132,7 +135,7 @@ export default function Dashboard() {
     <PageContainer>
       <HeaderRow>
         <PageTitle>Dashboard</PageTitle>
-        <EditButton>Edit Programs</EditButton>
+        {role === 'admin' && <EditButton>Edit Programs</EditButton>}
       </HeaderRow>
       <TabCard tabs={tabs} />
     </PageContainer>

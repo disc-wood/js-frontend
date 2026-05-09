@@ -13,6 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",
     "firebase": "^12.7.0",
+    "firebase-admin": "^13.9.0",
     "path": "^0.12.7",
     "prop-types": "^15.8.1",
     "react": "^19.2.0",

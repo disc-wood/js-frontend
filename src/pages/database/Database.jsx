@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import TabCard from "@/common/components/atoms/TabCard";
 import { programs } from "@/config/programs";
+import { useUser } from '@/common/hooks/useUser';
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -123,7 +124,6 @@ function EditableTable({ programId }) {
             ))}
           </tr>
         </thead>
-
         <tbody>
           {rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
@@ -147,7 +147,15 @@ function EditableTable({ programId }) {
 
 // --- Main Page ---
 export default function Database() {
-  const tabs = programs.map((p) => ({
+  const { role, assignedPrograms, loading } = useUser();
+
+  if (loading) return <div>Loading...</div>;
+
+  const visiblePrograms = role === 'admin'
+    ? programs
+    : programs.filter(p => assignedPrograms.includes(p.id));
+
+  const tabs = visiblePrograms.map((p) => ({
     id: p.id,
     label: p.label,
     content: <EditableTable programId={p.id} />,

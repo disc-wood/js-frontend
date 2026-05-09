@@ -2,6 +2,7 @@ import React from 'react';
 import { programs } from "@/config/programs";
 import styled from 'styled-components';
 import TabCard from '@/common/components/atoms/TabCard';
+import { useUser } from '@/common/hooks/useUser';
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -31,7 +32,15 @@ function CommunicationsContent({ programId }) {
 }
 
 export default function Communications() {
-  const tabs = programs.map((p) => ({
+  const { role, assignedPrograms, loading } = useUser();
+
+  if (loading) return <div>Loading...</div>;
+
+  const visiblePrograms = role === 'admin'
+    ? programs
+    : programs.filter(p => assignedPrograms.includes(p.id));
+
+  const tabs = visiblePrograms.map((p) => ({
     id: p.id,
     label: p.label,
     content: <CommunicationsContent programId={p.id} />,

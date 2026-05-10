@@ -2,7 +2,6 @@ import { useState } from 'react';
 import styled from 'styled-components';
 import { programs } from '@/config/programs';
 
-// --- Styled Components ---
 const PageContainer = styled.div`
   flex: 1;
   padding: 2rem;
@@ -28,7 +27,6 @@ const SectionTitle = styled.h2`
   font-size: 1.1rem;
   font-weight: 600;
   margin: 0 0 1rem 0;
-  color: var(--text);
 `;
 
 const Form = styled.div`
@@ -59,9 +57,7 @@ const Input = styled.input`
   font-size: 0.95rem;
   outline: none;
 
-  &:focus {
-    border-color: #2563eb;
-  }
+  &:focus { border-color: #2563eb; }
 `;
 
 const Select = styled.select`
@@ -72,14 +68,12 @@ const Select = styled.select`
   background: white;
   outline: none;
 
-  &:focus {
-    border-color: #2563eb;
-  }
+  &:focus { border-color: #2563eb; }
 `;
 
-const SendButton = styled.button`
+const Button = styled.button`
   padding: 0.6rem 1.5rem;
-  background: #000000;
+  background: #000;
   color: white;
   border: none;
   border-radius: 8px;
@@ -88,36 +82,61 @@ const SendButton = styled.button`
   cursor: pointer;
   white-space: nowrap;
 
-  &:hover {
-    background: #222;
-  }
+  &:hover { background: #222; }
+  &:disabled { background: #9ca3af; cursor: not-allowed; }
+`;
 
-  &:disabled {
-    background: #9ca3af;
-    cursor: not-allowed;
-  }
+const ResultBox = styled.div`
+  margin-top: 1.5rem;
+  background: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem;
+`;
+
+const ResultLink = styled.div`
+  font-family: monospace;
+  font-size: 0.85rem;
+  word-break: break-all;
+  margin-bottom: 0.75rem;
+  color: #2563eb;
+`;
+
+const CopyButton = styled.button`
+  padding: 0.4rem 1rem;
+  background: white;
+  color: #000;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover { background: #f9fafb; }
 `;
 
 const StatusMessage = styled.div`
-  margin-top: 1rem;
-  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
   color: ${({ $error }) => ($error ? '#dc2626' : '#16a34a')};
 `;
 
-// --- Component ---
 export default function ManageAccess() {
   const [email, setEmail] = useState('');
   const [programId, setProgramId] = useState(programs[0]?.id || '');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState(null);
+  const [inviteLink, setInviteLink] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSendInvite = async () => {
+  const handleGenerate = async () => {
     if (!email || !programId) return;
     setLoading(true);
-    setStatus(null);
+    setError('');
+    setInviteLink('');
+    setCopied(false);
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite`, {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, programId }),
@@ -125,15 +144,21 @@ export default function ManageAccess() {
 
       const data = await res.json();
 
-      if (!res.ok) throw new Error(data.error || 'Failed to send invite');
+      if (!res.ok) throw new Error(data.error || 'Failed to generate invite');
 
-      setStatus({ message: `Invite sent to ${email}`, error: false });
+      setInviteLink(data.inviteLink);
       setEmail('');
     } catch (err) {
-      setStatus({ message: err.message, error: true });
+      setError(err.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -141,7 +166,7 @@ export default function ManageAccess() {
       <PageTitle>Manage Access</PageTitle>
 
       <Section>
-        <SectionTitle>Invite a Supervisor</SectionTitle>
+        <SectionTitle>Generate Invite Link</SectionTitle>
         <Form>
           <Field>
             <Label>Email Address</Label>
@@ -156,18 +181,25 @@ export default function ManageAccess() {
             <Label>Program</Label>
             <Select value={programId} onChange={(e) => setProgramId(e.target.value)}>
               {programs.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.label}
-                </option>
+                <option key={p.id} value={p.id}>{p.label}</option>
               ))}
             </Select>
           </Field>
-          <SendButton onClick={handleSendInvite} disabled={loading}>
-            {loading ? 'Sending...' : 'Send Invite'}
-          </SendButton>
+          <Button onClick={handleGenerate} disabled={loading}>
+            {loading ? 'Generating...' : 'Generate Link'}
+          </Button>
         </Form>
-        {status && (
-          <StatusMessage $error={status.error}>{status.message}</StatusMessage>
+
+        {error && <StatusMessage $error>{error}</StatusMessage>}
+
+        {inviteLink && (
+          <ResultBox>
+            <Label>Invite Link (valid for 7 days)</Label>
+            <ResultLink>{inviteLink}</ResultLink>
+            <CopyButton onClick={handleCopy}>
+              {copied ? 'Copied!' : 'Copy Link'}
+            </CopyButton>
+          </ResultBox>
         )}
       </Section>
     </PageContainer>

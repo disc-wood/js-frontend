@@ -106,6 +106,11 @@ const MessageBox = styled.pre`
   margin: 0.5rem 0 0.75rem 0;
 `;
 
+const ButtonRow = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
 const CopyButton = styled.button`
   padding: 0.4rem 1rem;
   background: white;
@@ -114,6 +119,22 @@ const CopyButton = styled.button`
   border-radius: 6px;
   font-size: 0.85rem;
   cursor: pointer;
+
+  &:hover { background: #f9fafb; }
+`;
+
+const EmailIconButton = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1rem;
+  background: white;
+  color: #000;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
 
   &:hover { background: #f9fafb; }
 `;
@@ -129,6 +150,7 @@ export default function ManageAccess() {
   const [programId, setProgramId] = useState(programs[0]?.id || '');
   const [loading, setLoading] = useState(false);
   const [inviteMessage, setInviteMessage] = useState('');
+  const [recipientEmail, setRecipientEmail] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
 
@@ -137,6 +159,7 @@ export default function ManageAccess() {
     setLoading(true);
     setError('');
     setInviteMessage('');
+    setRecipientEmail('');
     setCopied(false);
 
     try {
@@ -160,6 +183,7 @@ ${data.inviteLink}
 This link will expire in 7 days.`;
 
       setInviteMessage(message);
+      setRecipientEmail(email);
       setEmail('');
     } catch (err) {
       setError(err.message);
@@ -173,6 +197,10 @@ This link will expire in 7 days.`;
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(
+    "You've been invited to the Learner Tracking System"
+  )}&body=${encodeURIComponent(inviteMessage)}`;
 
   return (
     <PageContainer>
@@ -194,7 +222,9 @@ This link will expire in 7 days.`;
             <Label>Program</Label>
             <Select value={programId} onChange={(e) => setProgramId(e.target.value)}>
               {programs.map((p) => (
-                <option key={p.id} value={p.id}>{p.label}</option>
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                </option>
               ))}
             </Select>
           </Field>
@@ -207,11 +237,16 @@ This link will expire in 7 days.`;
 
         {inviteMessage && (
           <ResultBox>
-            <Label>Invite Message (copy and paste into your email)</Label>
+            <Label>Invite Message</Label>
             <MessageBox>{inviteMessage}</MessageBox>
-            <CopyButton onClick={handleCopy}>
-              {copied ? 'Copied!' : 'Copy Message'}
-            </CopyButton>
+            <ButtonRow>
+              <CopyButton onClick={handleCopy}>
+                {copied ? 'Copied!' : 'Copy Message'}
+              </CopyButton>
+              <EmailIconButton href={mailtoLink}>
+                ✉️ Open in Email
+              </EmailIconButton>
+            </ButtonRow>
           </ResultBox>
         )}
       </Section>

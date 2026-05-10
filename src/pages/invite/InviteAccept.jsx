@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { getAuth, signOut } from 'firebase/auth';
 import styled from 'styled-components';
 
 const PageContainer = styled.div`
@@ -78,6 +79,16 @@ export default function InviteAccept() {
     validate();
   }, [token]);
 
+  const handleAccept = async () => {
+    // sign out any currently logged-in user so the new supervisor can log in cleanly
+    try {
+      await signOut(getAuth());
+    } catch (err) {
+      console.error('Sign out error:', err);
+    }
+    navigate(`/login?invite=${token}`);
+  };
+
   if (status === 'loading') {
     return <PageContainer><p>Validating invite...</p></PageContainer>;
   }
@@ -89,7 +100,7 @@ export default function InviteAccept() {
           <>
             <Title>You've been invited!</Title>
             <Message>Log in or create an account to accept your invitation and access your program.</Message>
-            <Button onClick={() => navigate(`/login?invite=${token}`)}>
+            <Button onClick={handleAccept}>
               Accept Invitation
             </Button>
           </>

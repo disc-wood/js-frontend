@@ -94,12 +94,16 @@ const ResultBox = styled.div`
   padding: 1rem;
 `;
 
-const ResultLink = styled.div`
-  font-family: monospace;
-  font-size: 0.85rem;
-  word-break: break-all;
-  margin-bottom: 0.75rem;
-  color: #2563eb;
+const MessageBox = styled.pre`
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0.5rem 0 0.75rem 0;
 `;
 
 const CopyButton = styled.button`
@@ -124,7 +128,7 @@ export default function ManageAccess() {
   const [email, setEmail] = useState('');
   const [programId, setProgramId] = useState(programs[0]?.id || '');
   const [loading, setLoading] = useState(false);
-  const [inviteLink, setInviteLink] = useState('');
+  const [inviteMessage, setInviteMessage] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
 
@@ -132,7 +136,7 @@ export default function ManageAccess() {
     if (!email || !programId) return;
     setLoading(true);
     setError('');
-    setInviteLink('');
+    setInviteMessage('');
     setCopied(false);
 
     try {
@@ -146,7 +150,16 @@ export default function ManageAccess() {
 
       if (!res.ok) throw new Error(data.error || 'Failed to generate invite');
 
-      setInviteLink(data.inviteLink);
+      const message = `Hi,
+
+You've been invited to supervise a program on the Learner Tracking System.
+
+Click the link below to accept your invitation:
+${data.inviteLink}
+
+This link will expire in 7 days.`;
+
+      setInviteMessage(message);
       setEmail('');
     } catch (err) {
       setError(err.message);
@@ -156,7 +169,7 @@ export default function ManageAccess() {
   };
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(inviteLink);
+    await navigator.clipboard.writeText(inviteMessage);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -192,12 +205,12 @@ export default function ManageAccess() {
 
         {error && <StatusMessage $error>{error}</StatusMessage>}
 
-        {inviteLink && (
+        {inviteMessage && (
           <ResultBox>
-            <Label>Invite Link (valid for 7 days)</Label>
-            <ResultLink>{inviteLink}</ResultLink>
+            <Label>Invite Message (copy and paste into your email)</Label>
+            <MessageBox>{inviteMessage}</MessageBox>
             <CopyButton onClick={handleCopy}>
-              {copied ? 'Copied!' : 'Copy Link'}
+              {copied ? 'Copied!' : 'Copy Message'}
             </CopyButton>
           </ResultBox>
         )}

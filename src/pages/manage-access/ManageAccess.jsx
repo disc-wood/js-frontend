@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { programs } from '@/config/programs';
 
@@ -128,6 +128,66 @@ const StatusMessage = styled.div`
   color: ${({ $error }) => ($error ? '#dc2626' : '#16a34a')};
 `;
 
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
+const Th = styled.th`
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #d1d5db;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  background: #f9fafb;
+`;
+
+const Td = styled.td`
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+`;
+
+const StatusBadge = styled.span`
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: ${({ $status }) =>
+    $status === 'accepted' ? '#dcfce7' :
+    $status === 'pending' ? '#fef3c7' :
+    '#fee2e2'};
+  color: ${({ $status }) =>
+    $status === 'accepted' ? '#166534' :
+    $status === 'pending' ? '#92400e' :
+    '#991b1b'};
+`;
+
+const SmallButton = styled.button`
+  padding: 0.3rem 0.7rem;
+  background: white;
+  color: #dc2626;
+  border: 1px solid #dc2626;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover { background: #fee2e2; }
+`;
+
+const EmptyState = styled.div`
+  font-size: 0.9rem;
+  color: #6b7280;
+  padding: 1rem 0;
+  text-align: center;
+`;
+
 export default function ManageAccess() {
   const [email, setEmail] = useState('');
   const [programId, setProgramId] = useState(programs[0]?.id || '');
@@ -135,6 +195,31 @@ export default function ManageAccess() {
   const [inviteMessage, setInviteMessage] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
   const [error, setError] = useState('');
+
+  const [invitations, setInvitations] = useState([]);
+  const [supervisors, setSupervisors] = useState([]);
+
+  const programLabel = (id) =>
+    programs.find((p) => p.id === id)?.label || id;
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [invRes, supRes] = await Promise.all([
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/list`),
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/active`),
+      ]);
+      const invData = await invRes.json();
+      const supData = await supRes.json();
+      setInvitations(invData.invitations || []);
+      setSupervisors(supData.supervisors || []);
+    } catch (err) {
+      console.error('Failed to fetch:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleGenerate = async () => {
     if (!email || !programId) return;
@@ -151,7 +236,6 @@ export default function ManageAccess() {
       });
 
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || 'Failed to generate invite');
 
       const message = `Hi,
@@ -165,6 +249,7 @@ This link will expire in 7 days.`;
 
       setInviteMessage(message);
       setRecipientEmail(email);
+      fetchData();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -172,9 +257,29 @@ This link will expire in 7 days.`;
     }
   };
 
+  const handleCancel = async (token) => {
+    if (!window.confirm('Cancel this pending invite?')) return;
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/cancel/${token}`, {
+      method: 'DELETE',
+    });
+    fetchData();
+  };
+
+  const handleRevoke = async (userId, progId) => {
+    if (!window.confirm("Revoke this supervisor's access?")) return;
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/revoke`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, programId: progId }),
+    });
+    fetchData();
+  };
+
   const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(
     "You've been invited to the Learner Tracking System"
   )}&body=${encodeURIComponent(inviteMessage)}`;
+
+  const pendingInvites = invitations.filter((i) => i.status === 'pending');
 
   return (
     <PageContainer>
@@ -217,6 +322,68 @@ This link will expire in 7 days.`;
               ✉️ Open in Email
             </EmailIconButton>
           </ResultBox>
+        )}
+      </Section>
+
+      <Section>
+        <SectionTitle>Pending Invites</SectionTitle>
+        {pendingInvites.length === 0 ? (
+          <EmptyState>No pending invites.</EmptyState>
+        ) : (
+          <Table>
+            <thead>
+              <tr>
+                <Th>Email</Th>
+                <Th>Program</Th>
+                <Th>Sent</Th>
+                <Th>Status</Th>
+                <Th></Th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendingInvites.map((inv) => (
+                <tr key={inv.id}>
+                  <Td>{inv.email}</Td>
+                  <Td>{programLabel(inv.program_id)}</Td>
+                  <Td>{new Date(inv.created_at).toLocaleDateString()}</Td>
+                  <Td><StatusBadge $status={inv.status}>{inv.status}</StatusBadge></Td>
+                  <Td>
+                    <SmallButton onClick={() => handleCancel(inv.token)}>Cancel</SmallButton>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Section>
+
+      <Section>
+        <SectionTitle>Active Supervisors</SectionTitle>
+        {supervisors.length === 0 ? (
+          <EmptyState>No active supervisors.</EmptyState>
+        ) : (
+          <Table>
+            <thead>
+              <tr>
+                <Th>Email</Th>
+                <Th>Program</Th>
+                <Th></Th>
+              </tr>
+            </thead>
+            <tbody>
+              {supervisors.map((sup) => (
+                <tr key={sup.id}>
+                  <Td>{sup.email}</Td>
+                  <Td>{programLabel(sup.program_id)}</Td>
+                  <Td>
+                    <SmallButton onClick={() => handleRevoke(sup.user_id, sup.program_id)}>
+                      Revoke
+                    </SmallButton>
+                  </Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         )}
       </Section>
     </PageContainer>

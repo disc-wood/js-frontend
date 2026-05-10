@@ -33,7 +33,7 @@ const provider = new GoogleAuthProvider();
 
 async function acceptInvite(token, uid) {
   try {
-      await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/accept`, {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/accept`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, uid }),
@@ -76,11 +76,10 @@ export default function Login() {
 
       if (inviteToken) {
         await acceptInvite(inviteToken, userCredential.user.uid);
-        // force token refresh so useUser picks up new role immediately
         await userCredential.user.getIdToken(true);
       }
 
-      navigate('/', { replace: true });
+      navigate(inviteToken ? '/dashboard' : '/', { replace: true });
     } catch (error) {
       console.error('Login error:', error);
 
@@ -113,7 +112,7 @@ export default function Login() {
         await userCredential.user.getIdToken(true);
       }
 
-      navigate('/', { replace: true });
+      navigate(inviteToken ? '/dashboard' : '/', { replace: true });
     } catch (error) {
       console.error('Google login error:', error);
       setError(error.message || 'Google login failed.');

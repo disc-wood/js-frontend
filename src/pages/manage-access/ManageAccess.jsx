@@ -165,7 +165,6 @@ This link will expire in 7 days.`;
 
       setInviteMessage(message);
       setRecipientEmail(email);
-      setEmail('');
     } catch (err) {
       setError(err.message);
     } finally {

@@ -106,23 +106,6 @@ const MessageBox = styled.pre`
   margin: 0.5rem 0 0.75rem 0;
 `;
 
-const ButtonRow = styled.div`
-  display: flex;
-  gap: 0.5rem;
-`;
-
-const CopyButton = styled.button`
-  padding: 0.4rem 1rem;
-  background: white;
-  color: #000;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-
-  &:hover { background: #f9fafb; }
-`;
-
 const EmailIconButton = styled.a`
   display: inline-flex;
   align-items: center;
@@ -151,7 +134,6 @@ export default function ManageAccess() {
   const [loading, setLoading] = useState(false);
   const [inviteMessage, setInviteMessage] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
 
   const handleGenerate = async () => {
@@ -160,7 +142,6 @@ export default function ManageAccess() {
     setError('');
     setInviteMessage('');
     setRecipientEmail('');
-    setCopied(false);
 
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/generate`, {
@@ -190,12 +171,6 @@ This link will expire in 7 days.`;
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(inviteMessage);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(
@@ -239,14 +214,9 @@ This link will expire in 7 days.`;
           <ResultBox>
             <Label>Invite Message</Label>
             <MessageBox>{inviteMessage}</MessageBox>
-            <ButtonRow>
-              <CopyButton onClick={handleCopy}>
-                {copied ? 'Copied!' : 'Copy Message'}
-              </CopyButton>
-              <EmailIconButton href={mailtoLink}>
-                ✉️ Open in Email
-              </EmailIconButton>
-            </ButtonRow>
+            <EmailIconButton href={mailtoLink}>
+              ✉️ Open in Email
+            </EmailIconButton>
           </ResultBox>
         )}
       </Section>

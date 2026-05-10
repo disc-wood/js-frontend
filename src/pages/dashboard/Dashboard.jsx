@@ -135,7 +135,6 @@ export default function Dashboard() {
     <PageContainer>
       <HeaderRow>
         <PageTitle>Dashboard</PageTitle>
-        {role === 'admin' && <EditButton>Edit Programs</EditButton>}
       </HeaderRow>
       <TabCard tabs={tabs} />
     </PageContainer>

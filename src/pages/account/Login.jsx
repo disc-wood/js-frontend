@@ -33,7 +33,7 @@ const provider = new GoogleAuthProvider();
 
 async function acceptInvite(token, uid) {
   try {
-    await fetch('http://localhost:5050/invite/accept', {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/accept`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, uid }),

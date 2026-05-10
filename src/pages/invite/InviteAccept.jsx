@@ -61,7 +61,7 @@ export default function InviteAccept() {
       }
 
       try {
-        const res = await fetch(`http://localhost:5050/invite/validate?token=${token}`);
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/validate?token=${token}`);
         const data = await res.json();
 
         if (!res.ok || data.error) {

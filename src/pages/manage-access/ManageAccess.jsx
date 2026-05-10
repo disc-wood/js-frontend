@@ -117,7 +117,7 @@ export default function ManageAccess() {
     setStatus(null);
 
     try {
-      const res = await fetch('http://localhost:5050/invite', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, programId }),

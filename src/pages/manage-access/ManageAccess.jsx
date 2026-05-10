@@ -210,7 +210,7 @@ This link will expire in 7 days.`;
         <SectionTitle>Generate Invite Link</SectionTitle>
         <Form>
           <Field>
-            <Label>Email Address</Label>
+            <Label>Supervisor Email Address</Label>
             <Input
               type="email"
               placeholder="supervisor@example.com"

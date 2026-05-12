@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { supabase } from '@/lib/supabase';
 
 export function useUser() {
   const [user, setUser] = useState(null);
@@ -21,20 +20,17 @@ export function useUser() {
 
       const token = await firebaseUser.getIdTokenResult();
       const userRole = token.claims.role;
-      console.log('Token claims:', token.claims);
-      console.log('User UID:', firebaseUser.uid);
 
       setUser(firebaseUser);
       setRole(userRole);
 
       if (userRole === 'supervisor') {
-        const { data } = await supabase
-          .from('user_assignments')
-          .select('program_id')
-          .eq('user_id', firebaseUser.uid);
-
-        console.log('Supabase assignments data:', data);
-        setAssignedPrograms(data.map(row => row.program_id));
+        const idToken = await firebaseUser.getIdToken();
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/me/assignments`, {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        const data = await res.json();
+        setAssignedPrograms(data.programIds || []);
       }
 
       setLoading(false);

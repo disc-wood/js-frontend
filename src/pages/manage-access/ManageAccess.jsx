@@ -56,7 +56,6 @@ const Input = styled.input`
   border-radius: 8px;
   font-size: 0.95rem;
   outline: none;
-
   &:focus { border-color: #2563eb; }
 `;
 
@@ -67,7 +66,6 @@ const Select = styled.select`
   font-size: 0.95rem;
   background: white;
   outline: none;
-
   &:focus { border-color: #2563eb; }
 `;
 
@@ -81,45 +79,8 @@ const Button = styled.button`
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-
   &:hover { background: #222; }
   &:disabled { background: #9ca3af; cursor: not-allowed; }
-`;
-
-const ResultBox = styled.div`
-  margin-top: 1.5rem;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 1rem;
-`;
-
-const MessageBox = styled.pre`
-  font-family: inherit;
-  font-size: 0.9rem;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.75rem;
-  white-space: pre-wrap;
-  word-break: break-word;
-  margin: 0.5rem 0 0.75rem 0;
-`;
-
-const EmailIconButton = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 1rem;
-  background: white;
-  color: #000;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  text-decoration: none;
-
-  &:hover { background: #f9fafb; }
 `;
 
 const StatusMessage = styled.div`
@@ -177,7 +138,6 @@ const SmallButton = styled.button`
   border-radius: 6px;
   font-size: 0.8rem;
   cursor: pointer;
-
   &:hover { background: #fee2e2; }
 `;
 
@@ -192,8 +152,7 @@ export default function ManageAccess() {
   const [email, setEmail] = useState('');
   const [programId, setProgramId] = useState(programs[0]?.id || '');
   const [loading, setLoading] = useState(false);
-  const [inviteMessage, setInviteMessage] = useState('');
-  const [recipientEmail, setRecipientEmail] = useState('');
+  const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
 
   const [invitations, setInvitations] = useState([]);
@@ -221,12 +180,11 @@ export default function ManageAccess() {
     fetchData();
   }, [fetchData]);
 
-  const handleGenerate = async () => {
+  const handleSendInvite = async () => {
     if (!email || !programId) return;
     setLoading(true);
     setError('');
-    setInviteMessage('');
-    setRecipientEmail('');
+    setSuccess('');
 
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/generate`, {
@@ -236,19 +194,10 @@ export default function ManageAccess() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to generate invite');
+      if (!res.ok) throw new Error(data.error || 'Failed to send invite');
 
-      const message = `Hi,
-
-You've been invited to supervise a program on the Learner Tracking System.
-
-Click the link below to accept your invitation:
-${data.inviteLink}
-
-This link will expire in 7 days.`;
-
-      setInviteMessage(message);
-      setRecipientEmail(email);
+      setSuccess(`Invite sent to ${email}`);
+      setEmail('');
       fetchData();
     } catch (err) {
       setError(err.message);
@@ -275,10 +224,6 @@ This link will expire in 7 days.`;
     fetchData();
   };
 
-  const mailtoLink = `mailto:${recipientEmail}?subject=${encodeURIComponent(
-    "You've been invited to the Learner Tracking System"
-  )}&body=${encodeURIComponent(inviteMessage)}`;
-
   const pendingInvites = invitations.filter((i) => i.status === 'pending');
 
   return (
@@ -286,7 +231,7 @@ This link will expire in 7 days.`;
       <PageTitle>Manage Access</PageTitle>
 
       <Section>
-        <SectionTitle>Generate Invite Link</SectionTitle>
+        <SectionTitle>Send Invite</SectionTitle>
         <Form>
           <Field>
             <Label>Supervisor Email Address</Label>
@@ -307,22 +252,13 @@ This link will expire in 7 days.`;
               ))}
             </Select>
           </Field>
-          <Button onClick={handleGenerate} disabled={loading}>
-            {loading ? 'Generating...' : 'Generate Link'}
+          <Button onClick={handleSendInvite} disabled={loading}>
+            {loading ? 'Sending...' : 'Send Invite'}
           </Button>
         </Form>
 
         {error && <StatusMessage $error>{error}</StatusMessage>}
-
-        {inviteMessage && (
-          <ResultBox>
-            <Label>Invite Message</Label>
-            <MessageBox>{inviteMessage}</MessageBox>
-            <EmailIconButton href={mailtoLink}>
-              ✉️ Open in Email
-            </EmailIconButton>
-          </ResultBox>
-        )}
+        {success && <StatusMessage>{success}</StatusMessage>}
       </Section>
 
       <Section>

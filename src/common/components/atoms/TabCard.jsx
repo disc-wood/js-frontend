@@ -6,9 +6,11 @@ const TAB_TRIANGLE_BLUE = '#e0f2fe';
 const TAB_INACTIVE_GRAY = '#d1d5db';
 const CARD_BG = '#f3f3f3';
 const TEXT_MUTED = '#6b7280';
+const BORDER_COLOR = '#d4d4d4';
 
 const TabCardWrapper = styled.div`
   background: ${CARD_BG};
+  border: 1.5px solid ${BORDER_COLOR};
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;

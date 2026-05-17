@@ -11,6 +11,10 @@ const TextContainer = styled.div`
   flex-direction: column;
   max-width: 720px;
   gap: 24px;
+
+  @media (max-width: 768px) {
+    gap: 18px;
+  }
 `;
 
 const MainText = styled(Title)`
@@ -21,6 +25,22 @@ const MainText = styled(Title)`
   color: #0a0a0a;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   margin: 0;
+
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    letter-spacing: -0.75px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 24px;
+    letter-spacing: -0.3px;
+  }
 `;
 
 const HomePage = styled.div`
@@ -33,6 +53,18 @@ const HomePage = styled.div`
   padding: 96px 80px;
   background-color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  @media (max-width: 1024px) {
+    padding: 64px 48px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 40px 24px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 32px 20px;
+  }
 `;
 
 const BaseButton = styled.button`

@@ -33,10 +33,23 @@ const Tab = styled.button`
   cursor: pointer;
   position: relative;
   z-index: ${({ $active }) => ($active ? 1 : 0)};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     color: var(--text);
     background: ${({ $active }) => ($active ? CARD_BG : '#c9cdd3')};
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.7rem;
   }
 `;
 

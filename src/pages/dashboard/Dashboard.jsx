@@ -13,10 +13,18 @@ const PageContainer = styled.div`
   overflow: auto;
   background-color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1.25rem 1rem;
+  }
 `;
 
 const PageHeader = styled.div`
   margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -25,12 +33,21 @@ const PageTitle = styled.h1`
   letter-spacing: -0.5px;
   margin: 0 0 6px 0;
   color: #0a0a0a;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+    letter-spacing: -0.3px;
+  }
 `;
 
 const PageSubtitle = styled.p`
   font-size: 13px;
   color: #888888;
   margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
 `;
 
 const EditButton = styled.button`
@@ -55,6 +72,16 @@ const DashboardGrid = styled.div`
   background-color: #ffffff;
   border: 1px solid #eaeaea;
   border-radius: 0 0 12px 12px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+    gap: 16px;
+  }
 `;
 
 const MetricsRow = styled.div`
@@ -62,6 +89,12 @@ const MetricsRow = styled.div`
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-bottom: 24px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
 `;
 
 const Metric = styled.div`
@@ -69,6 +102,10 @@ const Metric = styled.div`
   border-radius: 8px;
   padding: 16px;
   text-align: left;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `;
 
 const MetricLabel = styled.div`
@@ -77,6 +114,10 @@ const MetricLabel = styled.div`
   font-weight: 400;
   margin-bottom: 6px;
   letter-spacing: 0.2px;
+
+  @media (max-width: 768px) {
+    font-size: 11px;
+  }
 `;
 
 const MetricValue = styled.div`
@@ -85,12 +126,21 @@ const MetricValue = styled.div`
   color: #0a0a0a;
   letter-spacing: -0.5px;
   line-height: 1;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+  }
 `;
 
 const PieGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 `;
 
 const LoadingState = styled.div`
@@ -144,7 +194,9 @@ const DashboardContent = (props) => (
           <MetricValue>430</MetricValue>
         </Metric>
       </MetricsRow>
-      <ProgressLineChart data={mockLineData} />
+      <div style={{ minHeight: '350px', width: '100%' }}>
+        <ProgressLineChart data={mockLineData} />
+      </div>
     </div>
   </DashboardGrid>
 );

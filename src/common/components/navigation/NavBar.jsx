@@ -15,12 +15,31 @@ const StyledNav = styled.nav`
   background-color: #ffffff;
   border-bottom: 1px solid #eaeaea;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 14px 20px;
+  }
 `;
 
 const LeftGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 32px;
+
+  @media (max-width: 768px) {
+    gap: 0;
+  }
+`;
+
+const NavLinksGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 28px;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const RightGroup = styled.div`
@@ -28,6 +47,10 @@ const RightGroup = styled.div`
   align-items: center;
   gap: 20px;
   position: relative;
+
+  @media (max-width: 768px) {
+    gap: 12px;
+  }
 `;
 
 const LogoGroup = styled.div`
@@ -48,6 +71,7 @@ const LogoMark = styled.div`
   color: #ffffff;
   font-size: 13px;
   font-weight: 500;
+  flex-shrink: 0;
 `;
 
 const LogoText = styled.h1`
@@ -105,6 +129,10 @@ const SecondaryButton = styled(BaseButton)`
   &:hover {
     border-color: #0a0a0a;
   }
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+  }
 `;
 
 const SettingsButton = styled.button`
@@ -123,8 +151,66 @@ const SettingsButton = styled.button`
   }
 `;
 
+const HamburgerButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  align-items: center;
+  justify-content: center;
+  color: #0a0a0a;
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+`;
+
+const MobileMenu = styled.div`
+  display: none;
+
+  @media (max-width: 768px) {
+    display: ${({ $open }) => ($open ? 'flex' : 'none')};
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: #ffffff;
+    border-bottom: 1px solid #eaeaea;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    z-index: 50;
+  }
+`;
+
+const MobileMenuLink = styled.button`
+  width: 100%;
+  text-align: left;
+  padding: 14px 20px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 14px;
+  font-family: inherit;
+  color: #0a0a0a;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: #fafafa;
+  }
+`;
+
 const DropdownWrapper = styled.div`
   position: relative;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const Dropdown = styled.div`
@@ -161,16 +247,21 @@ const DropdownItem = styled.button`
 export default function NavBar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useUser();
   const { role } = useUserRole();
   const dropdownRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   // close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(e) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsDropdownOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(e.target)) {
+        setIsMobileMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -190,16 +281,23 @@ export default function NavBar() {
     }
   };
 
+  const navigateAndClose = (path) => {
+    navigate(path);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
-    <StyledNav>
+    <StyledNav ref={mobileMenuRef}>
       <LeftGroup>
         <LogoGroup onClick={() => navigate('/')}>
           <LogoMark>L</LogoMark>
           <LogoText>LearnerTrack</LogoText>
         </LogoGroup>
-        <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
-        <NavLink onClick={() => navigate('/database')}>Database</NavLink>
-        <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
+        <NavLinksGroup>
+          <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
+          <NavLink onClick={() => navigate('/database')}>Database</NavLink>
+          <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
+        </NavLinksGroup>
       </LeftGroup>
 
       <RightGroup>
@@ -208,7 +306,6 @@ export default function NavBar() {
             {role === 'admin' && (
               <DropdownWrapper ref={dropdownRef}>
                 <SettingsButton onClick={() => setIsDropdownOpen(prev => !prev)}>
-                  {/* gear icon */}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="3" />
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -231,7 +328,31 @@ export default function NavBar() {
             <PrimaryButton onClick={() => navigate('/signup')}>Get started</PrimaryButton>
           </>
         )}
+
+        <HamburgerButton onClick={() => setIsMobileMenuOpen(prev => !prev)} aria-label="Toggle menu">
+          {isMobileMenuOpen ? (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
+        </HamburgerButton>
       </RightGroup>
+
+      <MobileMenu $open={isMobileMenuOpen}>
+        <MobileMenuLink onClick={() => navigateAndClose('/dashboard')}>Dashboard</MobileMenuLink>
+        <MobileMenuLink onClick={() => navigateAndClose('/database')}>Database</MobileMenuLink>
+        <MobileMenuLink onClick={() => navigateAndClose('/communications')}>Communications</MobileMenuLink>
+        {user && role === 'admin' && (
+          <MobileMenuLink onClick={() => navigateAndClose('/manage-access')}>Manage access</MobileMenuLink>
+        )}
+      </MobileMenu>
 
       <LogoutModal
         isOpen={isModalOpen}

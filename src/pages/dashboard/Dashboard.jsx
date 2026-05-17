@@ -9,67 +9,100 @@ import { useUser } from '@/common/hooks/useUser';
 // --- Styled Components ---
 const PageContainer = styled.div`
   flex: 1;
-  padding: 2rem;
+  padding: 2rem 2.5rem;
   overflow: auto;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
-const HeaderRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
+const PageHeader = styled.div`
+  margin-bottom: 24px;
 `;
 
 const PageTitle = styled.h1`
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0 0 1.5rem 0;
-  color: var(--text);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px 0;
+  color: #0a0a0a;
+`;
+
+const PageSubtitle = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
 `;
 
 const EditButton = styled.button`
   background: none;
   border: none;
-  font-size: 1rem;
-  color: #333;
+  font-size: 13px;
+  color: #555555;
   cursor: pointer;
-  text-decoration: underline;
+  font-family: inherit;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #0a0a0a;
+  }
 `;
 
 const DashboardGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 40px;
-  padding: 30px;
-  background-color: white;
+  gap: 24px;
+  padding: 24px;
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
   border-radius: 0 0 12px 12px;
 `;
 
 const MetricsRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
 `;
 
 const Metric = styled.div`
-  text-align: center;
-`;
-
-const MetricValue = styled.div`
-  font-size: 3rem;
-  font-weight: 600;
+  background-color: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
 `;
 
 const MetricLabel = styled.div`
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 12px;
+  color: #888888;
+  font-weight: 400;
+  margin-bottom: 6px;
+  letter-spacing: 0.2px;
+`;
+
+const MetricValue = styled.div`
+  font-size: 28px;
   font-weight: 500;
+  color: #0a0a0a;
+  letter-spacing: -0.5px;
+  line-height: 1;
 `;
 
 const PieGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  gap: 16px;
+`;
+
+const LoadingState = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  color: #555555;
+  min-height: 100vh;
 `;
 
 // Mock Data (Will be replaced later)
@@ -91,23 +124,23 @@ const mockLineData = [
 const DashboardContent = (props) => (
   <DashboardGrid data-program={props.programId}>
     <PieGrid>
-      <DemographicPieChart data={mockPieData} title="Ethnicity Representation" />
-      <DemographicPieChart data={mockPieData} title="Enrollment by Program" />
-      <DemographicPieChart data={mockPieData} title="Gender Representation" />
-      <DemographicPieChart data={mockPieData} title="Job Placements" />
+      <DemographicPieChart data={mockPieData} title="Ethnicity representation" />
+      <DemographicPieChart data={mockPieData} title="Enrollment by program" />
+      <DemographicPieChart data={mockPieData} title="Gender representation" />
+      <DemographicPieChart data={mockPieData} title="Job placements" />
     </PieGrid>
     <div>
       <MetricsRow>
         <Metric>
-          <MetricLabel>Employment Rate</MetricLabel>
+          <MetricLabel>Employment rate</MetricLabel>
           <MetricValue>87%</MetricValue>
         </Metric>
         <Metric>
-          <MetricLabel>Completion Rate</MetricLabel>
+          <MetricLabel>Completion rate</MetricLabel>
           <MetricValue>87%</MetricValue>
         </Metric>
         <Metric>
-          <MetricLabel>Enrolled Students</MetricLabel>
+          <MetricLabel>Enrolled students</MetricLabel>
           <MetricValue>430</MetricValue>
         </Metric>
       </MetricsRow>
@@ -119,7 +152,7 @@ const DashboardContent = (props) => (
 export default function Dashboard() {
   const { role, assignedPrograms, loading } = useUser();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingState>Loading...</LoadingState>;
 
   const visiblePrograms = role === 'admin'
     ? programs
@@ -133,9 +166,10 @@ export default function Dashboard() {
 
   return (
     <PageContainer>
-      <HeaderRow>
+      <PageHeader>
         <PageTitle>Dashboard</PageTitle>
-      </HeaderRow>
+        <PageSubtitle>Program performance and learner outcomes at a glance.</PageSubtitle>
+      </PageHeader>
       <TabCard tabs={tabs} />
     </PageContainer>
   );

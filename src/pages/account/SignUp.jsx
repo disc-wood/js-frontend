@@ -3,14 +3,42 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import GoogleButton from '@/common/components/atoms/GoogleButton';
 import { FormTitle } from '@/common/components/form/Form';
 import { Input } from '@/common/components/form/Input';
-import SubmitButton from '@/common/components/form/SubmitButton';
 import { useUser } from '@/common/contexts/UserContext';
 import { RedSpan } from '@/common/components/form/styles';
 
 import { StyledPage, StyledForm } from './styles';
+
+const StyledSignUpButton = styled.button`
+  width: 100%;
+  padding: 14px 20px;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #0a0a0a;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    border-color: #0a0a0a;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -114,9 +142,9 @@ export default function SignUp() {
           required
         />
 
-        <SubmitButton disabled={isLoading}>
+        <StyledSignUpButton type="submit" disabled={isLoading}>
           {isLoading ? 'Creating account...' : 'Sign Up'}
-        </SubmitButton>
+        </StyledSignUpButton>
       </StyledForm>
     </StyledPage>
   );

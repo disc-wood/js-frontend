@@ -38,7 +38,7 @@ export const PasswordContainer = styled.div`
 export const IconContainer = styled.div`
   position: absolute;
   right: 10px;
-  top: 8px;
+  top: 14px;
   cursor: pointer;
 `;
 

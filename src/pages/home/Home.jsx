@@ -9,39 +9,45 @@ import { UserContext } from '@/common/contexts/UserContext';
 const TextContainer = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: 750px;
-  gap: 50px;
+  max-width: 720px;
+  gap: 24px;
 `;
 
 const MainText = styled(Title)`
-  font-weight: 400; 
-  line-height: 1.4;
+  font-weight: 500;
+  font-size: 44px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #0a0a0a;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  margin: 0;
 `;
 
 const HomePage = styled.div`
   flex: 1 0 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start; 
+  justify-content: center;
+  align-items: flex-start;
   text-align: left;
-  padding: 100px 80px; 
+  padding: 96px 80px;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
 const BaseButton = styled.button`
-  border: none;
-  padding: 10px 24px;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 10px 20px;
+  border-radius: 8px;
   font-weight: 500;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   color: #ffffff;
   font-family: inherit;
   width: fit-content;
-  display: flex;         /* Added to help center text inside button */
-  align-items: center;   /* Added to help center text inside button */
-  transition: transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  transition: transform 0.1s ease, background-color 0.15s ease;
 
   &:active {
     transform: scale(0.98);
@@ -49,7 +55,12 @@ const BaseButton = styled.button`
 `;
 
 const GetStartedButton = styled(BaseButton)`
-  background-color: #000000;
+  background-color: #0a0a0a;
+  margin-top: 8px;
+
+  &:hover {
+    background-color: #2a2a2a;
+  }
 `;
 
 //Page
@@ -72,7 +83,7 @@ export default function Home() {
           Empowering educators and administrators with a comprehensive system to track learner progress and automate communication.
         </MainText>
         <GetStartedButton onClick={handleGetStarted}>
-          Get Started
+          Get started
         </GetStartedButton>
       </TextContainer>
     </HomePage>

@@ -2,36 +2,51 @@ import { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { programs } from '@/config/programs';
 
+// --- Styled Components ---
 const PageContainer = styled.div`
   flex: 1;
-  padding: 2rem;
+  padding: 2rem 2.5rem;
   overflow: auto;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+`;
+
+const PageHeader = styled.div`
+  margin-bottom: 24px;
 `;
 
 const PageTitle = styled.h1`
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0 0 1.5rem 0;
-  color: var(--text);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px 0;
+  color: #0a0a0a;
+`;
+
+const PageSubtitle = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
 `;
 
 const Section = styled.div`
-  background: #f3f3f3;
+  background: #ffffff;
+  border: 1px solid #eaeaea;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  padding: 24px;
+  margin-bottom: 20px;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0 0 1rem 0;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0 0 16px 0;
+  color: #0a0a0a;
 `;
 
 const Form = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 12px;
   align-items: flex-end;
   flex-wrap: wrap;
 `;
@@ -39,115 +54,175 @@ const Form = styled.div`
 const Field = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 6px;
   flex: 1;
   min-width: 200px;
 `;
 
 const Label = styled.label`
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 500;
-  color: #444;
+  color: #555555;
+  letter-spacing: 0.2px;
 `;
 
 const Input = styled.input`
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  border: 1px solid #d4d4d4;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 13px;
+  font-family: inherit;
+  color: #0a0a0a;
+  background-color: #ffffff;
   outline: none;
-  &:focus { border-color: #2563eb; }
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: #bbbbbb;
+  }
+
+  &:focus {
+    border-color: #0C447C;
+    box-shadow: 0 0 0 3px rgba(12, 68, 124, 0.1);
+  }
 `;
 
 const Select = styled.select`
-  padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  border: 1px solid #d4d4d4;
   border-radius: 8px;
-  font-size: 0.95rem;
-  background: white;
+  font-size: 13px;
+  font-family: inherit;
+  color: #0a0a0a;
+  background-color: #ffffff;
   outline: none;
-  &:focus { border-color: #2563eb; }
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    border-color: #0C447C;
+    box-shadow: 0 0 0 3px rgba(12, 68, 124, 0.1);
+  }
 `;
 
 const Button = styled.button`
-  padding: 0.6rem 1.5rem;
-  background: #000;
-  color: white;
-  border: none;
+  padding: 10px 18px;
+  background-color: #0a0a0a;
+  color: #ffffff;
+  border: 1px solid #0a0a0a;
   border-radius: 8px;
-  font-size: 0.95rem;
+  font-size: 13px;
   font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  &:hover { background: #222; }
-  &:disabled { background: #9ca3af; cursor: not-allowed; }
+  transition: background-color 0.15s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    background-color: #2a2a2a;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const StatusMessage = styled.div`
-  margin-top: 0.75rem;
-  font-size: 0.85rem;
-  color: ${({ $error }) => ($error ? '#dc2626' : '#16a34a')};
+  margin-top: 12px;
+  font-size: 13px;
+  color: ${({ $error }) => ($error ? '#991b1b' : '#085041')};
+  background-color: ${({ $error }) => ($error ? '#fee2e2' : '#E1F5EE')};
+  padding: 8px 12px;
+  border-radius: 6px;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin-top: 0.5rem;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
+  font-family: inherit;
 `;
 
 const Th = styled.th`
   text-align: left;
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid #d1d5db;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #444;
-  background: #f9fafb;
+  padding: 10px 14px;
+  border-bottom: 1px solid #eaeaea;
+  background-color: #fafafa;
+  font-size: 11px;
+  font-weight: 500;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 `;
 
 const Td = styled.td`
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 0.9rem;
+  padding: 12px 14px;
+  border-bottom: 1px solid #f3f3f3;
+  font-size: 13px;
+  color: #0a0a0a;
+`;
+
+const Tr = styled.tr`
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: #fafafa;
+  }
 `;
 
 const StatusBadge = styled.span`
   display: inline-block;
-  padding: 0.15rem 0.5rem;
+  padding: 3px 10px;
   border-radius: 12px;
-  font-size: 0.75rem;
+  font-size: 11px;
   font-weight: 500;
+  text-transform: capitalize;
   background: ${({ $status }) =>
-    $status === 'accepted' ? '#dcfce7' :
-    $status === 'pending' ? '#fef3c7' :
+    $status === 'accepted' ? '#E1F5EE' :
+    $status === 'pending' ? '#FAEEDA' :
     '#fee2e2'};
   color: ${({ $status }) =>
-    $status === 'accepted' ? '#166534' :
-    $status === 'pending' ? '#92400e' :
+    $status === 'accepted' ? '#085041' :
+    $status === 'pending' ? '#854F0B' :
     '#991b1b'};
 `;
 
 const SmallButton = styled.button`
-  padding: 0.3rem 0.7rem;
-  background: white;
-  color: #dc2626;
-  border: 1px solid #dc2626;
+  padding: 5px 12px;
+  background-color: #ffffff;
+  color: #555555;
+  border: 1px solid #d4d4d4;
   border-radius: 6px;
-  font-size: 0.8rem;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  &:hover { background: #fee2e2; }
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    border-color: #991b1b;
+    color: #991b1b;
+  }
 `;
 
 const EmptyState = styled.div`
-  font-size: 0.9rem;
-  color: #6b7280;
-  padding: 1rem 0;
+  font-size: 13px;
+  color: #888888;
+  padding: 20px 0;
   text-align: center;
 `;
 
+const TableWrapper = styled.div`
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  overflow: hidden;
+`;
+
+// --- Component ---
 export default function ManageAccess() {
   const [email, setEmail] = useState('');
   const [programId, setProgramId] = useState(programs[0]?.id || '');
@@ -228,13 +303,16 @@ export default function ManageAccess() {
 
   return (
     <PageContainer>
-      <PageTitle>Manage Access</PageTitle>
+      <PageHeader>
+        <PageTitle>Manage access</PageTitle>
+        <PageSubtitle>Invite supervisors and manage program access.</PageSubtitle>
+      </PageHeader>
 
       <Section>
-        <SectionTitle>Send Invite</SectionTitle>
+        <SectionTitle>Send invite</SectionTitle>
         <Form>
           <Field>
-            <Label>Supervisor Email Address</Label>
+            <Label>Supervisor email</Label>
             <Input
               type="email"
               placeholder="supervisor@example.com"
@@ -253,7 +331,7 @@ export default function ManageAccess() {
             </Select>
           </Field>
           <Button onClick={handleSendInvite} disabled={loading}>
-            {loading ? 'Sending...' : 'Send Invite'}
+            {loading ? 'Sending...' : 'Send invite'}
           </Button>
         </Form>
 
@@ -262,64 +340,68 @@ export default function ManageAccess() {
       </Section>
 
       <Section>
-        <SectionTitle>Pending Invites</SectionTitle>
+        <SectionTitle>Pending invites</SectionTitle>
         {pendingInvites.length === 0 ? (
           <EmptyState>No pending invites.</EmptyState>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <Th>Email</Th>
-                <Th>Program</Th>
-                <Th>Sent</Th>
-                <Th>Status</Th>
-                <Th></Th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingInvites.map((inv) => (
-                <tr key={inv.id}>
-                  <Td>{inv.email}</Td>
-                  <Td>{programLabel(inv.program_id)}</Td>
-                  <Td>{new Date(inv.created_at).toLocaleDateString()}</Td>
-                  <Td><StatusBadge $status={inv.status}>{inv.status}</StatusBadge></Td>
-                  <Td>
-                    <SmallButton onClick={() => handleCancel(inv.token)}>Cancel</SmallButton>
-                  </Td>
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <Th>Email</Th>
+                  <Th>Program</Th>
+                  <Th>Sent</Th>
+                  <Th>Status</Th>
+                  <Th></Th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {pendingInvites.map((inv) => (
+                  <Tr key={inv.id}>
+                    <Td>{inv.email}</Td>
+                    <Td>{programLabel(inv.program_id)}</Td>
+                    <Td>{new Date(inv.created_at).toLocaleDateString()}</Td>
+                    <Td><StatusBadge $status={inv.status}>{inv.status}</StatusBadge></Td>
+                    <Td>
+                      <SmallButton onClick={() => handleCancel(inv.token)}>Cancel</SmallButton>
+                    </Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
         )}
       </Section>
 
       <Section>
-        <SectionTitle>Active Supervisors</SectionTitle>
+        <SectionTitle>Active supervisors</SectionTitle>
         {supervisors.length === 0 ? (
           <EmptyState>No active supervisors.</EmptyState>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <Th>Email</Th>
-                <Th>Program</Th>
-                <Th></Th>
-              </tr>
-            </thead>
-            <tbody>
-              {supervisors.map((sup) => (
-                <tr key={sup.id}>
-                  <Td>{sup.email}</Td>
-                  <Td>{programLabel(sup.program_id)}</Td>
-                  <Td>
-                    <SmallButton onClick={() => handleRevoke(sup.user_id, sup.program_id)}>
-                      Revoke
-                    </SmallButton>
-                  </Td>
+          <TableWrapper>
+            <Table>
+              <thead>
+                <tr>
+                  <Th>Email</Th>
+                  <Th>Program</Th>
+                  <Th></Th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {supervisors.map((sup) => (
+                  <Tr key={sup.id}>
+                    <Td>{sup.email}</Td>
+                    <Td>{programLabel(sup.program_id)}</Td>
+                    <Td>
+                      <SmallButton onClick={() => handleRevoke(sup.user_id, sup.program_id)}>
+                        Revoke
+                      </SmallButton>
+                    </Td>
+                  </Tr>
+                ))}
+              </tbody>
+            </Table>
+          </TableWrapper>
         )}
       </Section>
     </PageContainer>

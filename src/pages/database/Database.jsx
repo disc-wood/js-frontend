@@ -7,51 +7,101 @@ import { useUser } from '@/common/hooks/useUser';
 // --- Styled Components ---
 const PageContainer = styled.div`
   flex: 1;
-  padding: 2rem;
+  padding: 2rem 2.5rem;
   overflow: auto;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+`;
+
+const PageHeader = styled.div`
+  margin-bottom: 24px;
 `;
 
 const PageTitle = styled.h1`
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin: 0 0 1.5rem 0;
-  color: var(--text);
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  margin: 0 0 6px 0;
+  color: #0a0a0a;
+`;
+
+const PageSubtitle = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
 `;
 
 const TableWrapper = styled.div`
-  background: #fff;
-  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 0 0 12px 12px;
   overflow: auto;
-  padding: 1rem;
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
+  font-family: inherit;
 `;
 
 const Th = styled.th`
   text-align: left;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  font-size: 0.9rem;
+  padding: 12px 14px;
+  border-bottom: 1px solid #eaeaea;
+  background-color: #fafafa;
+  font-size: 11px;
+  font-weight: 500;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
 `;
 
 const Td = styled.td`
-  padding: 8px;
-  border-bottom: 1px solid #eee;
+  padding: 0;
+  border-bottom: 1px solid #f3f3f3;
+  vertical-align: middle;
+`;
+
+const Tr = styled.tr`
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: #fafafa;
+  }
 `;
 
 const Input = styled.input`
   width: 100%;
   background: transparent;
   border: none;
-  color: black;
-  font-size: 0.9rem;
+  color: #0a0a0a;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 12px 14px;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #bbbbbb;
+  }
 
   &:focus {
-    outline: 1px solid #6aa9ff;
+    outline: none;
+    background-color: #f0f7ff;
+    box-shadow: inset 0 0 0 1px #0C447C;
   }
+`;
+
+const LoadingState = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  color: #555555;
+  min-height: 100vh;
 `;
 
 function EditableTable({ programId }) {
@@ -99,19 +149,19 @@ function EditableTable({ programId }) {
   };
 
   const columns = [
-    { key: "startDate", label: "Start Date" },
-    { key: "firstName", label: "First Name" },
-    { key: "lastName", label: "Last Name" },
-    { key: "email", label: "Email Address" },
-    { key: "phone", label: "Phone Number" },
+    { key: "startDate", label: "Start date" },
+    { key: "firstName", label: "First name" },
+    { key: "lastName", label: "Last name" },
+    { key: "email", label: "Email" },
+    { key: "phone", label: "Phone" },
     { key: "birthday", label: "Birthday" },
-    { key: "racialIdentity", label: "Racial Identity" },
+    { key: "racialIdentity", label: "Racial identity" },
     { key: "gender", label: "Gender" },
-    { key: "zipCode", label: "Zip Code" },
-    { key: "programInterest", label: "Program of Interest" },
-    { key: "termInterest", label: "Term of Interest" },
-    { key: "workAuthorization", label: "U.S. Work Authorization" },
-    { key: "employment", label: "Employment Status" }
+    { key: "zipCode", label: "Zip code" },
+    { key: "programInterest", label: "Program of interest" },
+    { key: "termInterest", label: "Term of interest" },
+    { key: "workAuthorization", label: "Work authorization" },
+    { key: "employment", label: "Employment status" }
   ];
 
   return (
@@ -126,18 +176,19 @@ function EditableTable({ programId }) {
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
+            <Tr key={rowIndex}>
               {columns.map((col) => (
                 <Td key={col.key}>
                   <Input
                     value={row[col.key] || ""}
+                    placeholder="—"
                     onChange={(e) =>
                       handleChange(rowIndex, col.key, e.target.value)
                     }
                   />
                 </Td>
               ))}
-            </tr>
+            </Tr>
           ))}
         </tbody>
       </Table>
@@ -149,7 +200,7 @@ function EditableTable({ programId }) {
 export default function Database() {
   const { role, assignedPrograms, loading } = useUser();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <LoadingState>Loading...</LoadingState>;
 
   const visiblePrograms = role === 'admin'
     ? programs
@@ -163,7 +214,10 @@ export default function Database() {
 
   return (
     <PageContainer>
-      <PageTitle>Database</PageTitle>
+      <PageHeader>
+        <PageTitle>Database</PageTitle>
+        <PageSubtitle>View, edit, and manage learner data across programs.</PageSubtitle>
+      </PageHeader>
       <TabCard tabs={tabs} />
     </PageContainer>
   );

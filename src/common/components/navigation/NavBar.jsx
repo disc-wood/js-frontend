@@ -11,67 +11,100 @@ const StyledNav = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 40px;
-  background-color: #E2F3FF;
-  color: white;
+  padding: 18px 40px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eaeaea;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
 const LeftGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 35px;
+  gap: 32px;
 `;
 
 const RightGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 20px;
   position: relative;
 `;
 
+const LogoGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+`;
+
+const LogoMark = styled.div`
+  width: 22px;
+  height: 22px;
+  background-color: #0C447C;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+`;
+
 const LogoText = styled.h1`
-  font-size: 32px;
-  font-weight: 400;
+  font-size: 15px;
+  font-weight: 500;
   margin: 0;
   line-height: 1;
-  cursor: pointer;
-  color: #000000;
-  letter-spacing: -0.5px;
+  color: #0a0a0a;
+  letter-spacing: -0.2px;
 `;
 
 const NavLink = styled.span`
-  font-size: 15px;
-  color: #000000;
-  opacity: 0.85;
+  font-size: 13px;
+  color: #555555;
   cursor: pointer;
   line-height: 1;
+  transition: color 0.15s ease;
 
   &:hover {
-    opacity: 1;
+    color: #0a0a0a;
   }
 `;
 
 const BaseButton = styled.button`
-  border: none;
-  padding: 10px 24px;
-  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 8px 16px;
+  border-radius: 8px;
   font-weight: 500;
-  font-size: 15px;
+  font-size: 13px;
   cursor: pointer;
-  color: #ffffff;
   font-family: inherit;
   display: flex;
   align-items: center;
-  transition: transform 0.1s ease;
+  transition: transform 0.1s ease, background-color 0.15s ease, border-color 0.15s ease;
 
   &:active {
     transform: scale(0.98);
   }
 `;
 
-const GetStartedButton = styled(BaseButton)`
-  background-color: #000000;
+const PrimaryButton = styled(BaseButton)`
+  background-color: #0a0a0a;
+  color: #ffffff;
+
+  &:hover {
+    background-color: #2a2a2a;
+  }
+`;
+
+const SecondaryButton = styled(BaseButton)`
+  background-color: #ffffff;
+  color: #0a0a0a;
+  border-color: #d4d4d4;
+
+  &:hover {
+    border-color: #0a0a0a;
+  }
 `;
 
 const SettingsButton = styled.button`
@@ -82,12 +115,11 @@ const SettingsButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000000;
-  opacity: 0.7;
-  transition: opacity 0.15s ease;
+  color: #555555;
+  transition: color 0.15s ease;
 
   &:hover {
-    opacity: 1;
+    color: #0a0a0a;
   }
 `;
 
@@ -97,11 +129,12 @@ const DropdownWrapper = styled.div`
 
 const Dropdown = styled.div`
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   right: 0;
   background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   min-width: 160px;
   z-index: 100;
   overflow: hidden;
@@ -110,16 +143,16 @@ const Dropdown = styled.div`
 const DropdownItem = styled.button`
   width: 100%;
   text-align: left;
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: 10px 14px;
+  font-size: 13px;
   font-family: inherit;
   background: none;
   border: none;
   cursor: pointer;
-  color: #000000;
+  color: #0a0a0a;
 
   &:hover {
-    background: #f3f4f6;
+    background: #f5f5f5;
   }
 `;
 
@@ -160,9 +193,10 @@ export default function NavBar() {
   return (
     <StyledNav>
       <LeftGroup>
-        <LogoText onClick={() => navigate('/')}>
-          Learner Tracking System
-        </LogoText>
+        <LogoGroup onClick={() => navigate('/')}>
+          <LogoMark>L</LogoMark>
+          <LogoText>LearnerTrack</LogoText>
+        </LogoGroup>
         <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
         <NavLink onClick={() => navigate('/database')}>Database</NavLink>
         <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
@@ -175,7 +209,7 @@ export default function NavBar() {
               <DropdownWrapper ref={dropdownRef}>
                 <SettingsButton onClick={() => setIsDropdownOpen(prev => !prev)}>
                   {/* gear icon */}
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="3" />
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
                   </svg>
@@ -183,18 +217,18 @@ export default function NavBar() {
                 {isDropdownOpen && (
                   <Dropdown>
                     <DropdownItem onClick={() => { navigate('/manage-access'); setIsDropdownOpen(false); }}>
-                      Manage Access
+                      Manage access
                     </DropdownItem>
                   </Dropdown>
                 )}
               </DropdownWrapper>
             )}
-            <GetStartedButton onClick={handleLogoutClick}>Log Out</GetStartedButton>
+            <SecondaryButton onClick={handleLogoutClick}>Log out</SecondaryButton>
           </>
         ) : (
           <>
-            <NavLink onClick={() => navigate('/login')}>Sign In</NavLink>
-            <GetStartedButton onClick={() => navigate('/signup')}>Get Started</GetStartedButton>
+            <NavLink onClick={() => navigate('/login')}>Sign in</NavLink>
+            <PrimaryButton onClick={() => navigate('/signup')}>Get started</PrimaryButton>
           </>
         )}
       </RightGroup>

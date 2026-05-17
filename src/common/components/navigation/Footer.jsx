@@ -5,17 +5,15 @@ import styled from 'styled-components';
 const StyledFooter = styled.footer`
   display: flex;
   align-items: center;
-  padding: 20px 40px; /* Increased vertical padding for a clean look */
-  background-color: #e0f2fe; /* White background as per your footer image */
-  border-top: 1px solid #e0e0e0; /* Subtle line seen in the screenshot */
-  
-  /* Matching the clean, modern font-family from the NavBar */
+  padding: 16px 40px;
+  background-color: #ffffff;
+  border-top: 1px solid #eaeaea;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
 const FooterText = styled.p`
-  font-size: 14px;
-  color: #555555; /* Darker grey for readability on white background */
+  font-size: 12px;
+  color: #888888;
   margin: 0;
   font-weight: 400;
 `;
@@ -28,7 +26,7 @@ export default function Footer() {
   return (
     <StyledFooter>
       <FooterText>
-        LearnerTrack. All rights reserved © {currentYear}
+        © {currentYear} LearnerTrack. All rights reserved.
       </FooterText>
     </StyledFooter>
   );

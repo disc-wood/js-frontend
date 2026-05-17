@@ -1,7 +1,4 @@
 // defines shared styled-components used across authentication pages (login, signup, etc.).
-    // - contains layout and UI styling for forms, page centering, buttons, and supporting text elements.
-    // - these styles are used to ensure consistent spacing, alignment, and visual design across all auth screens,
-    // - without containing any application logic.
 
 import styled from 'styled-components';
 import { Button } from '@/common/components/atoms/Button';
@@ -9,16 +6,17 @@ import { Button } from '@/common/components/atoms/Button';
 export const StyledForm = styled.form`
   display: flex;
   flex-direction: column;
-  text-align: center;
-  gap: 20px;
-  border-radius: 16px;
-  width: 25%;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 40px;
-  padding: 40px;
-  background: #DEDEDE;
-  box-shadow: 0 8px 4px 0 rgba(0, 0, 0, 0.25);
+  text-align: left;
+  gap: 16px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.06);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
 export const StyledPage = styled.div`
@@ -26,20 +24,24 @@ export const StyledPage = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: #ffffff;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
 export const StyledButton = styled(Button.Primary)`
-  font-size: 1.1rem;
-  width: content;
-  padding-left: 30px;
-  padding-right: 30px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 24px;
   margin-left: auto;
   margin-right: auto;
+  border-radius: 8px;
 `;
 
 export const SignupText = styled.p`
-  margin: 0;
-  color: black;
-  font-size: 0.9rem;
+  margin: 8px 0 0 0;
+  color: #555555;
+  font-size: 13px;
   text-align: center;
+  font-family: inherit;
 `;

@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import GoogleButton from '@/common/components/atoms/GoogleButton';
 import { FormTitle } from '@/common/components/form/Form';
 import { Input } from '@/common/components/form/Input';
-import SubmitButton from '@/common/components/form/SubmitButton';
 import { RedSpan } from '@/common/components/form/styles';
 
 import {
@@ -18,14 +17,46 @@ import { auth } from '@/firebase-config';
 import { StyledPage, SignupText, StyledForm } from './styles';
 
 const StyledLink = styled(Link)`
-  color: #007bff;
+  color: #0C447C;
   text-decoration: none;
-  font-size: 0.9rem;
-  margin-top: -10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: -4px;
   align-self: flex-end;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: color 0.15s ease;
 
   &:hover {
+    color: #185FA5;
     text-decoration: underline;
+  }
+`;
+
+const StyledLoginButton = styled.button`
+  width: 100%;
+  padding: 14px 20px;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  font-weight: 500;
+  margin-top: 20px; 
+  font-size: 14px;
+  color: #0a0a0a;
+  background-color: #ffffff;
+  cursor: pointer;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    border-color: #0a0a0a;
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
@@ -124,12 +155,12 @@ export default function Login() {
   return (
     <StyledPage>
       <StyledForm onSubmit={handleSubmit}>
-        <FormTitle>{inviteToken ? 'Accept Invitation' : 'Login'}</FormTitle>
+        <FormTitle>{inviteToken ? 'Accept invitation' : 'Log in'}</FormTitle>
 
         <GoogleButton
           onClick={handleGoogleLogin}
           isLoading={isLoading}
-          text="Login with Google"
+          text="Continue with Google"
         />
 
         {error && <RedSpan>{error}</RedSpan>}
@@ -150,11 +181,11 @@ export default function Login() {
           required
         />
 
-        <SubmitButton type="submit" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Login'}
-        </SubmitButton>
+        <StyledLoginButton type="submit" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Log in'}
+        </StyledLoginButton>
 
-        <StyledLink to="/forgot-password">Forgot Password?</StyledLink>
+        <StyledLink to="/forgot-password">Forgot password?</StyledLink>
 
         <SignupText>
           Don't have an account?{' '}

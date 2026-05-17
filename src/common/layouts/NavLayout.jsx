@@ -10,7 +10,7 @@ const Layout = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #C0E6FF;
+  background-color: #ffffff;
 `;
 
 export default function NavLayout() {

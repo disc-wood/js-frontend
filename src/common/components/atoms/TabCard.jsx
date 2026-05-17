@@ -2,24 +2,27 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const TAB_TRIANGLE_BLUE = '#e0f2fe';
-const TAB_INACTIVE_GRAY = '#d1d5db';
-const CARD_BG = '#f3f3f3';
-const TEXT_MUTED = '#6b7280';
+const CARD_BG = '#ffffff';
+const TAB_BAR_BG = '#fafafa';
+const TAB_INACTIVE_BG = '#f3f3f3';
+const TAB_INACTIVE_HOVER = '#eaeaea';
 const BORDER_COLOR = '#d4d4d4';
+const TEXT_PRIMARY = '#0a0a0a';
+const TEXT_MUTED = '#6b7280';
 
 const TabCardWrapper = styled.div`
   background: ${CARD_BG};
   border: 1.5px solid ${BORDER_COLOR};
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 `;
 
 const Tabs = styled.div`
   display: flex;
   align-items: stretch;
-  background: ${TAB_TRIANGLE_BLUE};
+  background: ${TAB_BAR_BG};
+  border-bottom: 1.5px solid ${BORDER_COLOR};
 `;
 
 const Tab = styled.button`
@@ -27,8 +30,8 @@ const Tab = styled.button`
   padding: 0.65rem 1.5rem;
   font-size: 0.95rem;
   font-weight: ${({ $active }) => ($active ? '600' : '500')};
-  color: ${({ $active }) => ($active ? 'var(--text)' : TEXT_MUTED)};
-  background: ${({ $active }) => ($active ? CARD_BG : TAB_INACTIVE_GRAY)};
+  color: ${({ $active }) => ($active ? TEXT_PRIMARY : TEXT_MUTED)};
+  background: ${({ $active }) => ($active ? CARD_BG : TAB_INACTIVE_BG)};
   border: none;
   cursor: pointer;
   position: relative;
@@ -36,10 +39,12 @@ const Tab = styled.button`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: inherit;
+  transition: background-color 0.15s ease, color 0.15s ease;
 
   &:hover {
-    color: var(--text);
-    background: ${({ $active }) => ($active ? CARD_BG : '#c9cdd3')};
+    color: ${TEXT_PRIMARY};
+    background: ${({ $active }) => ($active ? CARD_BG : TAB_INACTIVE_HOVER)};
   }
 
   @media (max-width: 768px) {

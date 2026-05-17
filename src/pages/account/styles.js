@@ -17,6 +17,18 @@ export const StyledForm = styled.form`
   border: 1px solid #eaeaea;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.06);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  @media (max-width: 768px) {
+    margin: 40px auto;
+    padding: 28px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 20px auto;
+    padding: 24px;
+    gap: 14px;
+    border-radius: 10px;
+  }
 `;
 
 export const StyledPage = styled.div`
@@ -27,6 +39,11 @@ export const StyledPage = styled.div`
   background-color: #ffffff;
   min-height: 100vh;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  @media (max-width: 480px) {
+    align-items: flex-start;
+    padding: 0 24px;
+  }
 `;
 
 export const StyledButton = styled(Button.Primary)`
@@ -36,6 +53,11 @@ export const StyledButton = styled(Button.Primary)`
   margin-left: auto;
   margin-right: auto;
   border-radius: 8px;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
 `;
 
 export const SignupText = styled.p`
@@ -44,4 +66,8 @@ export const SignupText = styled.p`
   font-size: 13px;
   text-align: center;
   font-family: inherit;
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+  }
 `;

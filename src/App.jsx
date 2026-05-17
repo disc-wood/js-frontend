@@ -20,6 +20,7 @@ import IhtuIntake from '@/pages/ihtu-intake/ihtu-intake';
 import OaktonIntake from '@/pages/oakton-intake/oakton-intake';
 import ManageAccess from '@/pages/manage-access/ManageAccess';
 import InviteAccept from '@/pages/invite/InviteAccept';
+import Forms from '@/pages/forms/Forms';
 
 import './App.css';
 
@@ -42,6 +43,7 @@ export default function App() {
             <Route path='communications' element={<Communications />} />
             <Route path='dashboard' element={<Dashboard />} />
             <Route path='database' element={<Database />} />
+            <Route path='forms' element={<Forms />} />
             <Route path='manage-access' element={<ManageAccess />} />
             <Route path='invite' element={<InviteAccept />} />
             <Route element={<PublicOnlyRoute />}>

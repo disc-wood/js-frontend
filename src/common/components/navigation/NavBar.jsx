@@ -297,6 +297,7 @@ export default function NavBar() {
           <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
           <NavLink onClick={() => navigate('/database')}>Database</NavLink>
           <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
+          <NavLink onClick={() => navigate('/forms')}>Forms</NavLink>
         </NavLinksGroup>
       </LeftGroup>
 
@@ -349,6 +350,7 @@ export default function NavBar() {
         <MobileMenuLink onClick={() => navigateAndClose('/dashboard')}>Dashboard</MobileMenuLink>
         <MobileMenuLink onClick={() => navigateAndClose('/database')}>Database</MobileMenuLink>
         <MobileMenuLink onClick={() => navigateAndClose('/communications')}>Communications</MobileMenuLink>
+        <MobileMenuLink onClick={() => navigateAndClose('/forms')}>Forms</MobileMenuLink>
         {user && role === 'admin' && (
           <MobileMenuLink onClick={() => navigateAndClose('/manage-access')}>Manage access</MobileMenuLink>
         )}

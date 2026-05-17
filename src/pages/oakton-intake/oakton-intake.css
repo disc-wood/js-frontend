@@ -1,7 +1,7 @@
 .oakton-page-wrapper {
-  background-color: #f0f2f5;
+  background: linear-gradient(180deg, #f8faf9 0%, #f0f2f5 100%);
   min-height: 100vh;
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: #1a1a1a;
   display: flex;
   flex-direction: column;
@@ -13,47 +13,110 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 18px 48px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid #eaeaea;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.oakton-read-more-toggle {
+  background: none;
+  border: none;
+  color: #006853;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-top: -8px;
+  margin-bottom: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.2px;
+  transition: color 0.15s ease;
+}
+
+.oakton-read-more-toggle:hover {
+  color: #004d3d;
+  text-decoration: underline;
+}
+
+.oakton-read-more-toggle:focus {
+  outline: none;
+  text-decoration: underline;
+}
+
+.oakton-inline-link {
+  color: #006853;
+  font-weight: 600;
+  text-decoration: none;
+  transition: text-decoration 0.15s ease;
+}
+
+.oakton-inline-link:hover {
+  text-decoration: underline;
+}
+
+.oakton-disclaimer-inline {
+  margin-top: 14px;
+  margin-bottom: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #555555;
+  font-style: italic;
 }
 
 .oakton-nav-left {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 32px;
 }
 
 .oakton-nav-logo {
-  height: 40px; /* Adjust based on your exported asset */
+  height: 36px;
 }
 
 .oakton-nav-link {
-  color: #006853; /* Oakton Green */
+  color: #006853;
   text-decoration: none;
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  transition: color 0.15s ease;
+}
+
+.oakton-nav-link:hover {
+  color: #004d3d;
+  text-decoration: underline;
 }
 
 .oakton-nav-right h2 {
   color: #006853;
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
+  letter-spacing: -0.2px;
 }
 
 /* --- Main Layout --- */
 .oakton-main {
   max-width: 1200px;
-  margin: 40px auto;
-  padding: 0 20px;
+  width: 100%;
+  margin: 48px auto;
+  padding: 0 32px;
   flex: 1;
+  box-sizing: border-box;
 }
 
 .oakton-welcome-title {
   color: #006853;
   font-weight: 400;
-  font-size: 1.6rem;
-  margin-bottom: 30px;
+  font-size: 2rem;
+  letter-spacing: -0.5px;
+  margin-bottom: 32px;
+  line-height: 1.25;
 }
 
 .oakton-welcome-title strong {
@@ -62,26 +125,30 @@
 
 .oakton-content-grid {
   display: flex;
-  gap: 40px;
+  gap: 48px;
+  align-items: flex-start;
 }
 
 /* --- Left Column (Text & Form) --- */
 .oakton-left-col {
   flex: 1.5;
+  min-width: 0;
 }
 
 .oakton-description {
-  font-size: 1.05rem;
-  line-height: 1.5;
-  margin-bottom: 20px;
+  font-size: 1rem;
+  line-height: 1.65;
+  margin-bottom: 18px;
+  color: #2a2a2a;
 }
 
 .oakton-form-container {
   background-color: #ffffff;
-  border-radius: 8px;
-  padding: 25px;
-  margin-top: 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  border-radius: 16px;
+  padding: 40px;
+  margin-top: 36px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eaeaea;
 }
 
 .oakton-form-row {
@@ -94,128 +161,451 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  margin-bottom: 24px;
+  min-width: 0;
 }
 
-.oakton-form-group label {
-  color: #006853;
+.oakton-form-row .oakton-form-group {
+  margin-bottom: 0;
+}
+
+.oakton-form-group label,
+.oakton-group-label {
+  color: #1a1a1a;
   margin-bottom: 8px;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.1px;
 }
 
-.oakton-form-group input {
-  background-color: #f0f2f5;
-  border: none;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 1rem;
+.oakton-form-group input[type="text"],
+.oakton-form-group input[type="email"],
+.oakton-form-group input[type="tel"],
+.oakton-form-group input[type="date"],
+.oakton-form-group input[type="number"],
+.oakton-form-group select,
+.oakton-form-group textarea {
+  background-color: #ffffff;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
   outline: none;
+  font-family: inherit;
+  color: #1a1a1a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
 }
 
-.oakton-form-group select {
-  background-color: #f0f2f5;
-  border: none;
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 1rem;
-  outline: none;
+.oakton-form-group input::placeholder,
+.oakton-form-group textarea::placeholder {
+  color: #aaaaaa;
 }
 
-.oakton-form-group input:focus {
-  background-color: #e4e6e9;
+.oakton-form-group input:focus,
+.oakton-form-group select:focus,
+.oakton-form-group textarea:focus {
+  border-color: #006853;
+  box-shadow: 0 0 0 3px rgba(0, 104, 83, 0.1);
+  background-color: #ffffff;
 }
 
-.oakton-form-group select:focus {
-  background-color: #e4e6e9;
+.oakton-form-group input:read-only {
+  background-color: #f5f7f6;
+  color: #555555;
+  cursor: not-allowed;
+}
+
+.oakton-form-group textarea {
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.5;
 }
 
 .oakton-form-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 10px;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #eaeaea;
 }
 
 .oakton-submit-button {
   background: #006853;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 12px 18px;
-  font-size: 1rem;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.2px;
+  transition: background-color 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0, 104, 83, 0.1);
+}
+
+.oakton-submit-button:hover:not(:disabled) {
+  background: #004d3d;
+  box-shadow: 0 4px 12px rgba(0, 104, 83, 0.2);
+}
+
+.oakton-submit-button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .oakton-submit-button:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .oakton-submit-message {
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: 6px;
 }
 
 .oakton-submit-message--success {
-  color: #006853;
-  font-weight: 600;
+  color: #085041;
+  background-color: #E1F5EE;
+  font-weight: 500;
 }
 
 .oakton-submit-message--error {
-  color: #b42318;
-  font-weight: 600;
+  color: #991b1b;
+  background-color: #fee2e2;
+  font-weight: 500;
 }
+
+/* --- Radio / Checkbox Groups --- */
+.oakton-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.oakton-radio-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #2a2a2a;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.1s ease;
+}
+
+.oakton-radio-label:hover {
+  background-color: #f5f7f6;
+}
+
+.oakton-radio-label input[type="radio"],
+.oakton-radio-label input[type="checkbox"] {
+  margin: 0;
+  margin-top: 2px;
+  cursor: pointer;
+  accent-color: #006853;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.oakton-other-input {
+  margin-top: 8px;
+  margin-left: 40px;
+  padding: 9px 14px;
+  background-color: #ffffff;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  max-width: 320px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.oakton-other-input:focus {
+  border-color: #006853;
+  box-shadow: 0 0 0 3px rgba(0, 104, 83, 0.1);
+}
+
+/* --- Support Assessment Section Divider --- */
+.oakton-section-divider {
+  margin: 48px 0 28px 0;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #e8f4ef 0%, #f0faf5 100%);
+  border-left: 4px solid #006853;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 104, 83, 0.04);
+}
+
+.oakton-section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #006853;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.3px;
+}
+
+.oakton-section-blurb {
+  font-size: 0.95rem;
+  color: #2a4a3f;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* --- Participation Agreement --- */
+.oakton-agreement-list {
+  padding-left: 24px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #2a2a2a;
+  background-color: #fafafa;
+  padding: 20px 20px 20px 44px;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+}
+
+.oakton-agreement-list li {
+  margin-bottom: 10px;
+}
+
+.oakton-agreement-list li:last-child {
+  margin-bottom: 0;
+}
+
+.oakton-agreement-note {
+  margin: 16px 0;
+  padding: 14px 18px;
+  background-color: #FAEEDA;
+  border-left: 3px solid #BA7517;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #6B3F08;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
 /* --- Right Column (Images & Contact) --- */
 .oakton-right-col {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  position: sticky;
+  top: 100px;
 }
 
 .oakton-image-collage {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: 1fr 1fr;
-  gap: 5px;
-  border-radius: 4px;
+  gap: 6px;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 .oakton-image-collage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
-/* Make the first image span full width on top if matching the exact grid */
+.oakton-image-collage img:hover {
+  transform: scale(1.02);
+}
+
 .oakton-image-collage img:first-child {
   grid-column: 1 / -1;
-  max-height: 400px;
+  max-height: 380px;
 }
 
 .oakton-contact-box {
-  font-size: 1.1rem;
-  line-height: 1.4;
+  background-color: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 24px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.oakton-contact-box p {
+  margin: 0 0 12px 0;
+}
+
+.oakton-contact-box p:last-child {
+  margin-bottom: 0;
 }
 
 .oakton-contact-box a {
-  color: #1a1a1a;
-  font-weight: bold;
+  color: #006853;
+  font-weight: 600;
+  text-decoration: none;
+  transition: text-decoration 0.15s ease;
+}
+
+.oakton-contact-box a:hover {
+  text-decoration: underline;
 }
 
 .oakton-disclaimer {
-  font-weight: bold;
-  font-size: 1.1rem;
-  margin-top: 15px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eaeaea;
+  color: #555555;
+}
+
+.oakton-read-more-toggle {
+  background: none;
+  border: none;
+  color: #006853;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 0;
+  margin-top: -8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.2px;
+  transition: color 0.15s ease;
+}
+
+.oakton-read-more-toggle:hover {
+  color: #004d3d;
+  text-decoration: underline;
+}
+
+.oakton-read-more-toggle:focus {
+  outline: none;
+  text-decoration: underline;
 }
 
 /* --- Footer --- */
 .oakton-footer {
-  padding: 20px 40px;
+  padding: 24px 48px;
   font-size: 0.85rem;
-  color: #666;
-  background-color: #f0f2f5;
-  border-top: 1px solid #e0e0e0;
+  color: #888888;
+  background-color: #ffffff;
+  border-top: 1px solid #eaeaea;
+  text-align: center;
+}
+
+/* --- Responsive --- */
+@media (max-width: 1024px) {
+  .oakton-content-grid {
+    gap: 32px;
+  }
+
+  .oakton-form-container {
+    padding: 32px;
+  }
+}
+
+@media (max-width: 900px) {
+  .oakton-content-grid {
+    flex-direction: column;
+  }
+
+  .oakton-right-col {
+    position: static;
+    order: -1;
+  }
+
+  .oakton-image-collage img:first-child {
+    max-height: 280px;
+  }
+
+  .oakton-form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .oakton-form-row .oakton-form-group {
+    margin-bottom: 24px;
+  }
+
+  .oakton-nav {
+    padding: 16px 24px;
+  }
+
+  .oakton-main {
+    padding: 0 24px;
+    margin: 32px auto;
+  }
+
+  .oakton-welcome-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .oakton-nav {
+    padding: 14px 20px;
+  }
+
+  .oakton-nav-left {
+    gap: 16px;
+  }
+
+  .oakton-nav-logo {
+    height: 30px;
+  }
+
+  .oakton-nav-link {
+    font-size: 0.875rem;
+  }
+
+  .oakton-nav-right h2 {
+    font-size: 0.95rem;
+  }
+
+  .oakton-main {
+    padding: 0 16px;
+    margin: 24px auto;
+  }
+
+  .oakton-welcome-title {
+    font-size: 1.35rem;
+  }
+
+  .oakton-form-container {
+    padding: 24px 20px;
+    border-radius: 12px;
+  }
+
+  .oakton-section-divider {
+    padding: 20px;
+    margin: 32px 0 24px 0;
+  }
+
+  .oakton-section-title {
+    font-size: 1.2rem;
+  }
+
+  .oakton-agreement-list {
+    padding: 16px 16px 16px 36px;
+    font-size: 0.875rem;
+  }
+
+  .oakton-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .oakton-submit-button {
+    width: 100%;
+  }
 }

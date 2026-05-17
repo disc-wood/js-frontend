@@ -167,7 +167,7 @@ const forms = [
   {
     id: 'ihtu',
     title: 'IHTU Application',
-    description: 'Intake form for IHTU program applicants.',
+    description: 'Intake form for I Hope They Understand program applicants.',
     path: '/apply/ihtu',
     initial: 'I',
     programId: 'ihtu',

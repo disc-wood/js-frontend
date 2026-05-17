@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useUser } from '@/common/hooks/useUser';
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -125,6 +126,34 @@ const OpenIcon = styled.span`
   font-weight: 500;
 `;
 
+const LoadingState = styled.div`
+  font-size: 13px;
+  color: #555555;
+  padding: 2rem 0;
+`;
+
+const EmptyState = styled.div`
+  border: 1px dashed #eaeaea;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: #fafafa;
+`;
+
+const EmptyStateTitle = styled.h3`
+  font-size: 15px;
+  font-weight: 500;
+  color: #0a0a0a;
+  margin: 0 0 8px 0;
+`;
+
+const EmptyStateText = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+  line-height: 1.6;
+`;
+
 // --- Form definitions ---
 const forms = [
   {
@@ -133,6 +162,7 @@ const forms = [
     description: 'Workforce Empowerment Initiative intake form for Oakton College applicants.',
     path: '/apply/oakton',
     initial: 'O',
+    programId: 'oakton',
   },
   {
     id: 'ihtu',
@@ -140,12 +170,27 @@ const forms = [
     description: 'Intake form for IHTU program applicants.',
     path: '/apply/ihtu',
     initial: 'I',
+    programId: 'ihtu',
   },
 ];
 
 // --- Component ---
 export default function Forms() {
   const navigate = useNavigate();
+  const { role, assignedPrograms, loading } = useUser();
+
+  if (loading) {
+    return (
+      <PageContainer>
+        <LoadingState>Loading...</LoadingState>
+      </PageContainer>
+    );
+  }
+
+  // Admins see all forms; supervisors only see forms for their assigned programs
+  const visibleForms = role === 'admin'
+    ? forms
+    : forms.filter((f) => assignedPrograms?.includes(f.programId));
 
   return (
     <PageContainer>
@@ -154,21 +199,30 @@ export default function Forms() {
         <PageSubtitle>Share these intake links with prospective applicants.</PageSubtitle>
       </PageHeader>
 
-      <FormGrid>
-        {forms.map((form) => (
-          <FormCard key={form.id} onClick={() => navigate(form.path)}>
-            <FormCardHeader>
-              <FormCardIcon>{form.initial}</FormCardIcon>
-              <FormCardTitle>{form.title}</FormCardTitle>
-            </FormCardHeader>
-            <FormCardDescription>{form.description}</FormCardDescription>
-            <FormCardFooter>
-              <FormCardLink>{form.path}</FormCardLink>
-              <OpenIcon>Open →</OpenIcon>
-            </FormCardFooter>
-          </FormCard>
-        ))}
-      </FormGrid>
+      {visibleForms.length === 0 ? (
+        <EmptyState>
+          <EmptyStateTitle>No forms available</EmptyStateTitle>
+          <EmptyStateText>
+            You don't have access to any program forms yet. Contact an admin to request access.
+          </EmptyStateText>
+        </EmptyState>
+      ) : (
+        <FormGrid>
+          {visibleForms.map((form) => (
+            <FormCard key={form.id} onClick={() => navigate(form.path)}>
+              <FormCardHeader>
+                <FormCardIcon>{form.initial}</FormCardIcon>
+                <FormCardTitle>{form.title}</FormCardTitle>
+              </FormCardHeader>
+              <FormCardDescription>{form.description}</FormCardDescription>
+              <FormCardFooter>
+                <FormCardLink>{form.path}</FormCardLink>
+                <OpenIcon>Open →</OpenIcon>
+              </FormCardFooter>
+            </FormCard>
+          ))}
+        </FormGrid>
+      )}
     </PageContainer>
   );
 }

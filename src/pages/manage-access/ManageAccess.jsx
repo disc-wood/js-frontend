@@ -9,10 +9,18 @@ const PageContainer = styled.div`
   overflow: auto;
   background-color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1.25rem 1rem;
+  }
 `;
 
 const PageHeader = styled.div`
   margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -21,12 +29,21 @@ const PageTitle = styled.h1`
   letter-spacing: -0.5px;
   margin: 0 0 6px 0;
   color: #0a0a0a;
+
+  @media (max-width: 768px) {
+    font-size: 22px;
+    letter-spacing: -0.3px;
+  }
 `;
 
 const PageSubtitle = styled.p`
   font-size: 13px;
   color: #888888;
   margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
 `;
 
 const Section = styled.div`
@@ -35,6 +52,11 @@ const Section = styled.div`
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 20px;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -49,6 +71,12 @@ const Form = styled.div`
   gap: 12px;
   align-items: flex-end;
   flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 `;
 
 const Field = styled.div`
@@ -57,6 +85,11 @@ const Field = styled.div`
   gap: 6px;
   flex: 1;
   min-width: 200px;
+
+  @media (max-width: 600px) {
+    min-width: 0;
+    width: 100%;
+  }
 `;
 
 const Label = styled.label`
@@ -141,10 +174,15 @@ const StatusMessage = styled.div`
   border-radius: 6px;
 `;
 
+// Desktop/tablet table
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-family: inherit;
+
+  @media (max-width: 600px) {
+    display: none;
+  }
 `;
 
 const Th = styled.th`
@@ -220,6 +258,63 @@ const TableWrapper = styled.div`
   border: 1px solid #eaeaea;
   border-radius: 8px;
   overflow: hidden;
+
+  @media (max-width: 600px) {
+    border: none;
+    border-radius: 0;
+  }
+`;
+
+// Mobile card view
+const MobileCardList = styled.div`
+  display: none;
+
+  @media (max-width: 600px) {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+`;
+
+const MobileCard = styled.div`
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+`;
+
+const MobileCardRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+`;
+
+const MobileCardLabel = styled.span`
+  font-size: 11px;
+  font-weight: 500;
+  color: #888888;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+`;
+
+const MobileCardValue = styled.span`
+  font-size: 13px;
+  color: #0a0a0a;
+  text-align: right;
+  word-break: break-word;
+`;
+
+const MobileCardActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 6px;
+  border-top: 1px solid #f3f3f3;
+  margin-top: 4px;
 `;
 
 // --- Component ---
@@ -344,32 +439,60 @@ export default function ManageAccess() {
         {pendingInvites.length === 0 ? (
           <EmptyState>No pending invites.</EmptyState>
         ) : (
-          <TableWrapper>
-            <Table>
-              <thead>
-                <tr>
-                  <Th>Email</Th>
-                  <Th>Program</Th>
-                  <Th>Sent</Th>
-                  <Th>Status</Th>
-                  <Th></Th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingInvites.map((inv) => (
-                  <Tr key={inv.id}>
-                    <Td>{inv.email}</Td>
-                    <Td>{programLabel(inv.program_id)}</Td>
-                    <Td>{new Date(inv.created_at).toLocaleDateString()}</Td>
-                    <Td><StatusBadge $status={inv.status}>{inv.status}</StatusBadge></Td>
-                    <Td>
-                      <SmallButton onClick={() => handleCancel(inv.token)}>Cancel</SmallButton>
-                    </Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableWrapper>
+          <>
+            <TableWrapper>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Email</Th>
+                    <Th>Program</Th>
+                    <Th>Sent</Th>
+                    <Th>Status</Th>
+                    <Th></Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingInvites.map((inv) => (
+                    <Tr key={inv.id}>
+                      <Td>{inv.email}</Td>
+                      <Td>{programLabel(inv.program_id)}</Td>
+                      <Td>{new Date(inv.created_at).toLocaleDateString()}</Td>
+                      <Td><StatusBadge $status={inv.status}>{inv.status}</StatusBadge></Td>
+                      <Td>
+                        <SmallButton onClick={() => handleCancel(inv.token)}>Cancel</SmallButton>
+                      </Td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrapper>
+
+            <MobileCardList>
+              {pendingInvites.map((inv) => (
+                <MobileCard key={inv.id}>
+                  <MobileCardRow>
+                    <MobileCardLabel>Email</MobileCardLabel>
+                    <MobileCardValue>{inv.email}</MobileCardValue>
+                  </MobileCardRow>
+                  <MobileCardRow>
+                    <MobileCardLabel>Program</MobileCardLabel>
+                    <MobileCardValue>{programLabel(inv.program_id)}</MobileCardValue>
+                  </MobileCardRow>
+                  <MobileCardRow>
+                    <MobileCardLabel>Sent</MobileCardLabel>
+                    <MobileCardValue>{new Date(inv.created_at).toLocaleDateString()}</MobileCardValue>
+                  </MobileCardRow>
+                  <MobileCardRow>
+                    <MobileCardLabel>Status</MobileCardLabel>
+                    <MobileCardValue><StatusBadge $status={inv.status}>{inv.status}</StatusBadge></MobileCardValue>
+                  </MobileCardRow>
+                  <MobileCardActions>
+                    <SmallButton onClick={() => handleCancel(inv.token)}>Cancel</SmallButton>
+                  </MobileCardActions>
+                </MobileCard>
+              ))}
+            </MobileCardList>
+          </>
         )}
       </Section>
 
@@ -378,30 +501,52 @@ export default function ManageAccess() {
         {supervisors.length === 0 ? (
           <EmptyState>No active supervisors.</EmptyState>
         ) : (
-          <TableWrapper>
-            <Table>
-              <thead>
-                <tr>
-                  <Th>Email</Th>
-                  <Th>Program</Th>
-                  <Th></Th>
-                </tr>
-              </thead>
-              <tbody>
-                {supervisors.map((sup) => (
-                  <Tr key={sup.id}>
-                    <Td>{sup.email}</Td>
-                    <Td>{programLabel(sup.program_id)}</Td>
-                    <Td>
-                      <SmallButton onClick={() => handleRevoke(sup.user_id, sup.program_id)}>
-                        Revoke
-                      </SmallButton>
-                    </Td>
-                  </Tr>
-                ))}
-              </tbody>
-            </Table>
-          </TableWrapper>
+          <>
+            <TableWrapper>
+              <Table>
+                <thead>
+                  <tr>
+                    <Th>Email</Th>
+                    <Th>Program</Th>
+                    <Th></Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {supervisors.map((sup) => (
+                    <Tr key={sup.id}>
+                      <Td>{sup.email}</Td>
+                      <Td>{programLabel(sup.program_id)}</Td>
+                      <Td>
+                        <SmallButton onClick={() => handleRevoke(sup.user_id, sup.program_id)}>
+                          Revoke
+                        </SmallButton>
+                      </Td>
+                    </Tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrapper>
+
+            <MobileCardList>
+              {supervisors.map((sup) => (
+                <MobileCard key={sup.id}>
+                  <MobileCardRow>
+                    <MobileCardLabel>Email</MobileCardLabel>
+                    <MobileCardValue>{sup.email}</MobileCardValue>
+                  </MobileCardRow>
+                  <MobileCardRow>
+                    <MobileCardLabel>Program</MobileCardLabel>
+                    <MobileCardValue>{programLabel(sup.program_id)}</MobileCardValue>
+                  </MobileCardRow>
+                  <MobileCardActions>
+                    <SmallButton onClick={() => handleRevoke(sup.user_id, sup.program_id)}>
+                      Revoke
+                    </SmallButton>
+                  </MobileCardActions>
+                </MobileCard>
+              ))}
+            </MobileCardList>
+          </>
         )}
       </Section>
     </PageContainer>

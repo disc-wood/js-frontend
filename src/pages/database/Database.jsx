@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import TabCard from "@/common/components/atoms/TabCard";
 import { programs } from "@/config/programs";
@@ -11,10 +11,18 @@ const PageContainer = styled.div`
   overflow: auto;
   background-color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  @media (max-width: 768px) {
+    padding: 1.25rem 1rem;
+  }
 `;
 
 const PageHeader = styled.div`
   margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
 `;
 
 const PageTitle = styled.h1`
@@ -36,6 +44,7 @@ const TableWrapper = styled.div`
   border: 1px solid #eaeaea;
   border-radius: 0 0 12px 12px;
   overflow: auto;
+  max-height: 70vh;
 `;
 
 const Table = styled.table`
@@ -55,12 +64,21 @@ const Th = styled.th`
   text-transform: uppercase;
   letter-spacing: 0.4px;
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 `;
 
 const Td = styled.td`
-  padding: 0;
+  padding: 12px 14px;
   border-bottom: 1px solid #f3f3f3;
-  vertical-align: middle;
+  font-size: 13px;
+  color: #0a0a0a;
+  vertical-align: top;
+  white-space: nowrap;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const Tr = styled.tr`
@@ -71,101 +89,148 @@ const Tr = styled.tr`
   }
 `;
 
-const Input = styled.input`
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: #0a0a0a;
-  font-size: 13px;
-  font-family: inherit;
-  padding: 12px 14px;
-  box-sizing: border-box;
-
-  &::placeholder {
-    color: #bbbbbb;
-  }
-
-  &:focus {
-    outline: none;
-    background-color: #f0f7ff;
-    box-shadow: inset 0 0 0 1px #0C447C;
-  }
-`;
-
 const LoadingState = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
   color: #555555;
-  min-height: 100vh;
+  padding: 2rem;
 `;
 
-function EditableTable({ programId }) {
-  const [rows, setRows] = useState([
-    {
-      startDate: "10/11/2025 17:32:23",
-      firstName: "Hannah",
-      lastName: "Webb",
-      email: "1@gmail.com",
-      phone: "",
-      birthday: "",
-      racialIdentity: "",
-      gender: "",
-      zipCode: "",
-      programInterest: "",
-      termInterest: "",
-      workAuthorization: "",
-      employment: ""
-    },
-    {
-      startDate: "10/11/2025 17:32:23",
-      firstName: "Chris",
-      lastName: "Zhou",
-      email: "1@gmail.com",
-      phone: "",
-      birthday: "",
-      racialIdentity: "",
-      gender: "",
-      zipCode: "",
-      programInterest: "",
-      termInterest: "",
-      workAuthorization: "",
-      employment: ""
-    }
-  ]);
+const EmptyState = styled.div`
+  padding: 60px 24px;
+  text-align: center;
+  background-color: #fafafa;
+  border: 1px dashed #eaeaea;
+  border-radius: 12px;
+  margin: 12px;
+`;
 
-  React.useEffect(() => {
-    console.log("Load data for program:", programId);
+const EmptyStateTitle = styled.h3`
+  font-size: 15px;
+  font-weight: 500;
+  color: #0a0a0a;
+  margin: 0 0 8px 0;
+`;
+
+const EmptyStateText = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+`;
+
+const ErrorState = styled.div`
+  padding: 16px 20px;
+  margin: 12px;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  font-size: 13px;
+`;
+
+const RowCount = styled.div`
+  font-size: 12px;
+  color: #888888;
+  padding: 12px 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #eaeaea;
+`;
+
+// --- Column configuration ---
+// Maps display labels to row keys returned from the backend.
+// Add/remove/reorder rows here to change what shows in the table.
+const OAKTON_COLUMNS = [
+  { key: 'submitted_at', label: 'Submitted', format: (v) => v ? new Date(v).toLocaleString() : '—' },
+  { key: 'first_name', label: 'First name' },
+  { key: 'last_name', label: 'Last name' },
+  { key: 'email', label: 'Email' },
+  { key: 'phone_number', label: 'Phone' },
+  { key: 'date_of_birth', label: 'DOB', format: (v) => v ? new Date(v).toLocaleDateString() : '—' },
+  { key: 'age_at_enrollment', label: 'Age' },
+  { key: 'racial_identity', label: 'Racial identity' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'city_zip', label: 'City / Zip' },
+  { key: 'programs_of_interest', label: 'Programs', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
+  { key: 'term_of_interest', label: 'Term' },
+  { key: 'projected_starting_term', label: 'Starting term' },
+  { key: 'work_authorization', label: 'Work auth' },
+  { key: 'employment_status', label: 'Employment', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
+  { key: 'annual_income', label: 'Income' },
+  { key: 'household_size', label: 'Household' },
+  { key: 'program_format', label: 'Format' },
+  { key: 'highest_education', label: 'Education' },
+  { key: 'long_term_goals', label: 'Long-term goals' },
+  { key: 'has_internet_access', label: 'Internet' },
+  { key: 'has_computer_access', label: 'Computer' },
+  { key: 'agrees_to_terms', label: 'Agreed to terms' },
+  { key: 'how_did_you_hear', label: 'Source' },
+  { key: 'intake_session_date', label: 'Intake session' },
+];
+
+function ProgramTable({ programId }) {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+        // pick endpoint by program
+        const endpoint = programId === 'oakton'
+          ? `${baseUrl}/oaktonInfo/intakes`
+          : programId === 'ihtu'
+          ? `${baseUrl}/ihtuInfo/intakes`
+          : null;
+
+        if (!endpoint) {
+          setRows([]);
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+          throw new Error(`Failed to load data (HTTP ${response.status})`);
+        }
+        const data = await response.json();
+        setRows(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch intakes:', err);
+        setError(err.message || 'Failed to load data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [programId]);
 
-  const handleChange = (rowIndex, field, value) => {
-    const updated = [...rows];
-    updated[rowIndex][field] = value;
-    setRows(updated);
-  };
+  // Pick columns for the active program (currently both use OAKTON_COLUMNS; can diverge later)
+  const columns = OAKTON_COLUMNS;
 
-  const columns = [
-    { key: "startDate", label: "Start date" },
-    { key: "firstName", label: "First name" },
-    { key: "lastName", label: "Last name" },
-    { key: "email", label: "Email" },
-    { key: "phone", label: "Phone" },
-    { key: "birthday", label: "Birthday" },
-    { key: "racialIdentity", label: "Racial identity" },
-    { key: "gender", label: "Gender" },
-    { key: "zipCode", label: "Zip code" },
-    { key: "programInterest", label: "Program of interest" },
-    { key: "termInterest", label: "Term of interest" },
-    { key: "workAuthorization", label: "Work authorization" },
-    { key: "employment", label: "Employment status" }
-  ];
+  if (loading) {
+    return <LoadingState>Loading {programId} submissions...</LoadingState>;
+  }
+
+  if (error) {
+    return <ErrorState>{error}</ErrorState>;
+  }
+
+  if (rows.length === 0) {
+    return (
+      <EmptyState>
+        <EmptyStateTitle>No submissions yet</EmptyStateTitle>
+        <EmptyStateText>When applicants submit the intake form, their data will appear here.</EmptyStateText>
+      </EmptyState>
+    );
+  }
 
   return (
     <TableWrapper>
+      <RowCount>{rows.length} {rows.length === 1 ? 'submission' : 'submissions'}</RowCount>
       <Table>
         <thead>
           <tr>
@@ -175,19 +240,17 @@ function EditableTable({ programId }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, rowIndex) => (
-            <Tr key={rowIndex}>
-              {columns.map((col) => (
-                <Td key={col.key}>
-                  <Input
-                    value={row[col.key] || ""}
-                    placeholder="—"
-                    onChange={(e) =>
-                      handleChange(rowIndex, col.key, e.target.value)
-                    }
-                  />
-                </Td>
-              ))}
+          {rows.map((row) => (
+            <Tr key={row.id}>
+              {columns.map((col) => {
+                const value = row[col.key];
+                const displayValue = col.format ? col.format(value) : (value ?? '—');
+                return (
+                  <Td key={col.key} title={typeof displayValue === 'string' ? displayValue : ''}>
+                    {displayValue}
+                  </Td>
+                );
+              })}
             </Tr>
           ))}
         </tbody>
@@ -209,7 +272,7 @@ export default function Database() {
   const tabs = visiblePrograms.map((p) => ({
     id: p.id,
     label: p.label,
-    content: <EditableTable programId={p.id} />,
+    content: <ProgramTable programId={p.id} />,
   }));
 
   return (

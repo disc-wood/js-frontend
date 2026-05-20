@@ -2,7 +2,7 @@
 export const programs = [
   {
     id: "oakton",
-    label: "Oakton Community College",
+    label: "Oakton College",
   },
   {
     id: "ihtu",

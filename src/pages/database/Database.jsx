@@ -51,6 +51,7 @@ const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
   font-family: inherit;
+  table-layout: fixed;
 `;
 
 const Th = styled.th`
@@ -67,6 +68,9 @@ const Th = styled.th`
   position: sticky;
   top: 0;
   z-index: 1;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
 `;
 
 const Td = styled.td`
@@ -75,18 +79,43 @@ const Td = styled.td`
   font-size: 13px;
   color: #0a0a0a;
   vertical-align: top;
-  white-space: nowrap;
-  max-width: 260px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 180px;
+  min-width: 180px;
+  max-width: 180px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  /* Collapsed: 1 line with ellipsis */
+  white-space: ${({ $expanded }) => ($expanded ? 'normal' : 'nowrap')};
+  overflow: ${({ $expanded }) => ($expanded ? 'visible' : 'hidden')};
+  text-overflow: ${({ $expanded }) => ($expanded ? 'clip' : 'ellipsis')};
 `;
 
 const Tr = styled.tr`
+  cursor: pointer;
   transition: background-color 0.1s ease;
 
   &:hover {
     background-color: #fafafa;
   }
+
+  ${({ $expanded }) => $expanded && `
+    background-color: #f5f9f7;
+
+    &:hover {
+      background-color: #eef5f1;
+    }
+  `}
+`;
+
+const ExpandIndicator = styled.span`
+  display: inline-block;
+  margin-right: 6px;
+  color: #888888;
+  font-size: 10px;
+  width: 12px;
+  transition: transform 0.15s ease;
+  transform: ${({ $expanded }) => ($expanded ? 'rotate(90deg)' : 'rotate(0deg)')};
 `;
 
 const LoadingState = styled.div`
@@ -135,9 +164,14 @@ const RowCount = styled.div`
   border-bottom: 1px solid #eaeaea;
 `;
 
+const ExpandHint = styled.span`
+  font-size: 11px;
+  color: #bbbbbb;
+  margin-left: 8px;
+  font-style: italic;
+`;
+
 // --- Column configuration ---
-// Maps display labels to row keys returned from the backend.
-// Add/remove/reorder rows here to change what shows in the table.
 const OAKTON_COLUMNS = [
   { key: 'submitted_at', label: 'Submitted', format: (v) => v ? new Date(v).toLocaleString() : '—' },
   { key: 'first_name', label: 'First name' },
@@ -159,6 +193,7 @@ const OAKTON_COLUMNS = [
   { key: 'program_format', label: 'Format' },
   { key: 'highest_education', label: 'Education' },
   { key: 'long_term_goals', label: 'Long-term goals' },
+  { key: 'professional_goals', label: 'Professional goals' },
   { key: 'has_internet_access', label: 'Internet' },
   { key: 'has_computer_access', label: 'Computer' },
   { key: 'agrees_to_terms', label: 'Agreed to terms' },
@@ -170,6 +205,7 @@ function ProgramTable({ programId }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [expandedRows, setExpandedRows] = useState(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -178,7 +214,6 @@ function ProgramTable({ programId }) {
 
       try {
         const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-        // pick endpoint by program
         const endpoint = programId === 'oakton'
           ? `${baseUrl}/oaktonInfo/intakes`
           : programId === 'ihtu'
@@ -208,7 +243,18 @@ function ProgramTable({ programId }) {
     fetchData();
   }, [programId]);
 
-  // Pick columns for the active program (currently both use OAKTON_COLUMNS; can diverge later)
+  const toggleRow = (rowId) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      if (next.has(rowId)) {
+        next.delete(rowId);
+      } else {
+        next.add(rowId);
+      }
+      return next;
+    });
+  };
+
   const columns = OAKTON_COLUMNS;
 
   if (loading) {
@@ -230,29 +276,39 @@ function ProgramTable({ programId }) {
 
   return (
     <TableWrapper>
-      <RowCount>{rows.length} {rows.length === 1 ? 'submission' : 'submissions'}</RowCount>
+      <RowCount>
+        {rows.length} {rows.length === 1 ? 'submission' : 'submissions'}
+        <ExpandHint>· Click a row to expand</ExpandHint>
+      </RowCount>
       <Table>
         <thead>
           <tr>
-            {columns.map((col) => (
-              <Th key={col.key}>{col.label}</Th>
+            {columns.map((col, i) => (
+              <Th key={col.key}>
+                {i === 0 && <ExpandIndicator $expanded={false}>›</ExpandIndicator>}
+                {col.label}
+              </Th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <Tr key={row.id}>
-              {columns.map((col) => {
-                const value = row[col.key];
-                const displayValue = col.format ? col.format(value) : (value ?? '—');
-                return (
-                  <Td key={col.key} title={typeof displayValue === 'string' ? displayValue : ''}>
-                    {displayValue}
-                  </Td>
-                );
-              })}
-            </Tr>
-          ))}
+          {rows.map((row) => {
+            const isExpanded = expandedRows.has(row.id);
+            return (
+              <Tr key={row.id} $expanded={isExpanded} onClick={() => toggleRow(row.id)}>
+                {columns.map((col, i) => {
+                  const value = row[col.key];
+                  const displayValue = col.format ? col.format(value) : (value ?? '—');
+                  return (
+                    <Td key={col.key} $expanded={isExpanded}>
+                      {i === 0 && <ExpandIndicator $expanded={isExpanded}>›</ExpandIndicator>}
+                      {displayValue}
+                    </Td>
+                  );
+                })}
+              </Tr>
+            );
+          })}
         </tbody>
       </Table>
     </TableWrapper>

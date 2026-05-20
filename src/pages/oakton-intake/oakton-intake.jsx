@@ -5,6 +5,7 @@ import oaktonLogo from '@/assets/oakton-intake/logo.png';
 import studentSmiling from '@/assets/oakton-intake/student-smiling.png';
 import medicalStudent from '@/assets/oakton-intake/medical-student.png';
 import studentWorking from '@/assets/oakton-intake/student-working.png';
+import { useNavigate } from 'react-router-dom';
 
 function calculateAge(dateOfBirthISO) {
   if (!dateOfBirthISO) return null;
@@ -154,6 +155,7 @@ export default function OaktonIntake() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [submitStatus, setSubmitStatus] = useState({ state: 'idle', message: '' });
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const navigate = useNavigate();
 
   const ageAtEnrollment = useMemo(
     () => calculateAge(formData.dateOfBirth),
@@ -196,8 +198,8 @@ export default function OaktonIntake() {
         return;
       }
 
-      setSubmitStatus({ state: 'success', message: 'Submitted successfully.' });
       setFormData(INITIAL_FORM_DATA);
+      navigate('/apply/success?program=oakton');
     } catch (err) {
       setSubmitStatus({
         state: 'error',

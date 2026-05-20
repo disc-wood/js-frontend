@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import './ihtu-intake.css';
+import { useNavigate } from 'react-router-dom';
 
 function calculateAge(dateOfBirthISO) {
   if (!dateOfBirthISO) return null;
@@ -24,6 +25,7 @@ export default function IhtuIntake() {
     currentCity: '',
     zipCode: '',
   });
+  const navigate = useNavigate();
 
   const [submitStatus, setSubmitStatus] = useState({
     state: 'idle',
@@ -61,7 +63,7 @@ export default function IhtuIntake() {
         return;
       }
 
-      setSubmitStatus({ state: 'success', message: 'Submitted successfully.' });
+      navigate('/apply/success?program=ihtu');
       setFormData({
         firstName: '',
         lastName: '',

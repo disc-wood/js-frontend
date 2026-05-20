@@ -283,11 +283,8 @@ function ProgramTable({ programId }) {
       <Table>
         <thead>
           <tr>
-            {columns.map((col, i) => (
-              <Th key={col.key}>
-                {i === 0 && <ExpandIndicator $expanded={false}>›</ExpandIndicator>}
-                {col.label}
-              </Th>
+            {columns.map((col) => (
+            <Th key={col.key}>{col.label}</Th>
             ))}
           </tr>
         </thead>

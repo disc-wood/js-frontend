@@ -84,8 +84,6 @@ const Td = styled.td`
   max-width: 180px;
   word-wrap: break-word;
   overflow-wrap: break-word;
-
-  /* Collapsed: 1 line with ellipsis */
   white-space: ${({ $expanded }) => ($expanded ? 'normal' : 'nowrap')};
   overflow: ${({ $expanded }) => ($expanded ? 'visible' : 'hidden')};
   text-overflow: ${({ $expanded }) => ($expanded ? 'clip' : 'ellipsis')};
@@ -201,6 +199,20 @@ const OAKTON_COLUMNS = [
   { key: 'intake_session_date', label: 'Intake session' },
 ];
 
+const IHTU_COLUMNS = [
+  { key: 'submitted_at', label: 'Submitted', format: (v) => v ? new Date(v).toLocaleString() : '—' },
+  { key: 'first_name', label: 'First name' },
+  { key: 'last_name', label: 'Last name' },
+  { key: 'email', label: 'Email' },
+  { key: 'phone_number', label: 'Phone' },
+  { key: 'date_of_birth', label: 'DOB', format: (v) => v ? new Date(v).toLocaleDateString() : '—' },
+  { key: 'age_at_enrollment', label: 'Age' },
+  { key: 'gender', label: 'Gender' },
+  { key: 'ethnicity_race', label: 'Ethnicity / Race' },
+  { key: 'current_city', label: 'City' },
+  { key: 'zip_code', label: 'ZIP' },
+];
+
 function ProgramTable({ programId }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -255,7 +267,7 @@ function ProgramTable({ programId }) {
     });
   };
 
-  const columns = OAKTON_COLUMNS;
+  const columns = programId === 'ihtu' ? IHTU_COLUMNS : OAKTON_COLUMNS;
 
   if (loading) {
     return <LoadingState>Loading {programId} submissions...</LoadingState>;
@@ -284,7 +296,7 @@ function ProgramTable({ programId }) {
         <thead>
           <tr>
             {columns.map((col) => (
-            <Th key={col.key}>{col.label}</Th>
+              <Th key={col.key}>{col.label}</Th>
             ))}
           </tr>
         </thead>

@@ -86,9 +86,13 @@ const DashboardSurface = styled.div`
 // --- KPI tiles ---
 const KpiRow = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: ${({ $cols }) => $cols || 'repeat(auto-fit, minmax(180px, 1fr))'};
   gap: 10px;
   margin-bottom: 12px;
+
+  @media (max-width: 1100px) {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
 `;
 
 const KpiTile = styled.div`
@@ -201,34 +205,57 @@ const BarFill = styled.div`
 // --- Filter bar ---
 const FilterBar = styled.div`
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-wrap: nowrap;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 12px 14px;
+  margin-bottom: 16px;
+  padding: 10px 12px;
   background-color: #fafafa;
   border: 1px solid #eaeaea;
   border-radius: 10px;
+  overflow-x: auto;
+  white-space: nowrap;
+`;
+
+// One filter = label + select (or input) grouped, so they never break apart
+const FilterGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 `;
 
 const FilterLabel = styled.span`
   font-size: 12px;
   color: #888888;
   font-weight: 500;
-  margin-right: 4px;
 `;
 
 const FilterSelect = styled.select`
   font-family: inherit;
-  font-size: 13px;
-  padding: 6px 10px;
+  font-size: 12px;
+  padding: 5px 8px;
   border-radius: 6px;
   border: 1px solid #d4d4d4;
   background-color: #ffffff;
   color: #0a0a0a;
   cursor: pointer;
   outline: none;
-  min-width: 160px;
+  min-width: 0;
+  max-width: 130px;
+
+  &:hover { border-color: #0C447C; }
+  &:focus { border-color: #0C447C; }
+`;
+
+const FilterNumberInput = styled.input`
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #d4d4d4;
+  width: 60px;
+  outline: none;
 
   &:hover { border-color: #0C447C; }
   &:focus { border-color: #0C447C; }
@@ -674,64 +701,75 @@ function MasterDashboard() {
 
   return (
     <DashboardSurface>
-      {/* ─── Filters ─── */}
+      {/* ─── Filters (single line) ─── */}
       <FilterBar>
-        <FilterLabel>Status:</FilterLabel>
-        <FilterSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-          <option value="__all__">All</option>
-          {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
-        </FilterSelect>
+        <FilterGroup>
+          <FilterLabel>Status:</FilterLabel>
+          <FilterSelect value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+          </FilterSelect>
+        </FilterGroup>
 
-        <FilterLabel>Grant Year:</FilterLabel>
-        <FilterSelect value={grantYearFilter} onChange={(e) => setGrantYearFilter(e.target.value)}>
-          <option value="__all__">All</option>
-          {grantYearOptions.map(y => <option key={y} value={y}>{y}</option>)}
-        </FilterSelect>
+        <FilterGroup>
+          <FilterLabel>Grant Year:</FilterLabel>
+          <FilterSelect value={grantYearFilter} onChange={(e) => setGrantYearFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {grantYearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+          </FilterSelect>
+        </FilterGroup>
 
-        <FilterLabel>Residency:</FilterLabel>
-        <FilterSelect value={residencyFilter} onChange={(e) => setResidencyFilter(e.target.value)}>
-          <option value="__all__">All</option>
-          {residencyOptions.map(c => <option key={c} value={c}>{c}</option>)}
-        </FilterSelect>
+        <FilterGroup>
+          <FilterLabel>Residency:</FilterLabel>
+          <FilterSelect value={residencyFilter} onChange={(e) => setResidencyFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {residencyOptions.map(c => <option key={c} value={c}>{c}</option>)}
+          </FilterSelect>
+        </FilterGroup>
 
-        <FilterLabel>Program:</FilterLabel>
-        <FilterSelect value={programFilter} onChange={(e) => setProgramFilter(e.target.value)}>
-          <option value="__all__">All</option>
-          {programOptions.map(p => <option key={p} value={p}>{p}</option>)}
-        </FilterSelect>
+        <FilterGroup>
+          <FilterLabel>Program:</FilterLabel>
+          <FilterSelect value={programFilter} onChange={(e) => setProgramFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {programOptions.map(p => <option key={p} value={p}>{p}</option>)}
+          </FilterSelect>
+        </FilterGroup>
 
-        <FilterLabel>Industry:</FilterLabel>
-        <FilterSelect value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)}>
-          <option value="__all__">All</option>
-          {industryOptions.map(i => <option key={i} value={i}>{i}</option>)}
-        </FilterSelect>
+        <FilterGroup>
+          <FilterLabel>Industry:</FilterLabel>
+          <FilterSelect value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {industryOptions.map(i => <option key={i} value={i}>{i}</option>)}
+          </FilterSelect>
+        </FilterGroup>
 
-        <FilterLabel>Age at Enrollment:</FilterLabel>
-        <FilterSelect value={ageOp} onChange={(e) => setAgeOp(e.target.value)} style={{ minWidth: 110 }}>
-          <option>Equals</option>
-          <option>Greater than</option>
-          <option>Less than</option>
-        </FilterSelect>
-        <input
-          type="number"
-          value={ageValue}
-          onChange={(e) => setAgeValue(e.target.value)}
-          placeholder="value"
-          style={{
-            fontFamily: 'inherit', fontSize: 13, padding: '6px 10px',
-            borderRadius: 6, border: '1px solid #d4d4d4', width: 80, outline: 'none',
-          }}
-        />
+        <FilterGroup>
+          <FilterLabel>Age:</FilterLabel>
+          <FilterSelect value={ageOp} onChange={(e) => setAgeOp(e.target.value)} style={{ maxWidth: 110 }}>
+            <option>Equals</option>
+            <option>Greater than</option>
+            <option>Less than</option>
+          </FilterSelect>
+          <FilterNumberInput
+            type="number"
+            value={ageValue}
+            onChange={(e) => setAgeValue(e.target.value)}
+            placeholder="value"
+          />
+        </FilterGroup>
       </FilterBar>
 
-      {/* ─── Top earnings strip ─── */}
-      <Card style={{ background: '#fafafa' }}>
-        <KpiLabel style={{ color: '#991b1b' }}>Estimated Total Cumulative Earnings</KpiLabel>
-        <KpiValue style={{ color: '#991b1b', fontSize: 32 }}>{fmtMoney(cumulativeEarnings)}</KpiValue>
-      </Card>
-
-      {/* ─── KPI tiles ─── */}
-      <KpiRow>
+      {/* ─── Top row: earnings + KPI tiles all inline ─── */}
+      <KpiRow $cols="repeat(7, minmax(0, 1fr))">
+        <KpiTile style={{
+          background: 'linear-gradient(135deg,rgb(231, 247, 239) 100%, #fff 100%)',
+          borderColor: '#006853',
+          gridColumn: 'span 2',
+        }}>
+          <KpiLabel style={{ color: '#006853' }}>Estimated Total Cumulative Earnings</KpiLabel>
+          <KpiValue style={{ color: '#006853' }}>{fmtMoney(cumulativeEarnings)}</KpiValue>
+          <KpiSubtext style={{ color: '#006853' }}>Sum of reported annual wages</KpiSubtext>
+        </KpiTile>
         <KpiTile>
           <KpiLabel># of Students</KpiLabel>
           <KpiValue>{totalStudents}</KpiValue>
@@ -792,6 +830,17 @@ function MasterDashboard() {
           <BreakdownList data={placementsByYear} valueLabel="#" colorIdx={0} />
         </Card>
       </SectionGrid>
+      {/* ─── Demographics ─── */}
+      <SectionGrid>
+        <Card>
+          <CardTitle>Ethnicity Representation</CardTitle>
+          <DonutWithLegend data={ethnicityData} size={150} />
+        </Card>
+        <Card>
+          <CardTitle>Gender Representation</CardTitle>
+          <DonutWithLegend data={genderData} size={150} />
+        </Card>
+      </SectionGrid>
 
       {/* ─── Wage Breakdown ─── */}
       <Card>
@@ -823,18 +872,6 @@ function MasterDashboard() {
           </BreakdownTable>
         )}
       </Card>
-
-      {/* ─── Demographics ─── */}
-      <SectionGrid>
-        <Card>
-          <CardTitle>Ethnicity Representation</CardTitle>
-          <DonutWithLegend data={ethnicityData} size={150} />
-        </Card>
-        <Card>
-          <CardTitle>Gender Representation</CardTitle>
-          <DonutWithLegend data={genderData} size={150} />
-        </Card>
-      </SectionGrid>
     </DashboardSurface>
   );
 }
@@ -930,21 +967,21 @@ function EmploymentSnapshot() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: 'linear-gradient(135deg, #fef2f2 0%, #fff 100%)',
-        border: '1px solid #fecaca',
+        background: 'linear-gradient(135deg,rgb(231, 247, 239) 100%, #fff 100%)',
+        border: '1px solid #006853',
         borderRadius: 10,
         padding: '14px 20px',
         marginBottom: 16,
       }}>
         <div>
-          <div style={{ fontSize: 11, color: '#991b1b', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
+          <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
             Estimated Total Cumulative Earnings
           </div>
-          <div style={{ fontSize: 26, fontWeight: 700, color: '#991b1b', letterSpacing: '-0.5px' }}>
+          <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
             {fmtMoney(cumulativeEarnings)}
           </div>
         </div>
-        <div style={{ textAlign: 'right', fontSize: 12, color: '#7f1d1d' }}>
+        <div style={{ textAlign: 'right', fontSize: 12, color: '#006853' }}>
           From {annualWages.length} reported wages
         </div>
       </div>

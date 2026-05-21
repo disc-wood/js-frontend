@@ -172,14 +172,14 @@ export default function IhtuIntake() {
                 </select>
               </div>
               <div className="ihtu-form-group">
-                <label htmlFor="dateOfBirth">Date of Birth *</label>
+                <label htmlFor="dateOfBirth">Child's Date of Birth *</label>
                 <input type="date" id="dateOfBirth" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
               </div>
             </div>
 
             <div className="ihtu-form-row">
               <div className="ihtu-form-group">
-                <label htmlFor="ageAtEnrollment">Age at Time of Enrollment</label>
+                <label htmlFor="ageAtEnrollment">Child's Age</label>
                 <input type="number" id="ageAtEnrollment" name="ageAtEnrollment" value={ageAtEnrollment ?? ''} readOnly aria-readonly="true" placeholder="Calculated from DOB" />
               </div>
               <div className="ihtu-form-group">

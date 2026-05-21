@@ -18,6 +18,19 @@ function calculateAge(dateOfBirthISO) {
   return age;
 }
 
+// Generate years from current year through current+4
+const CURRENT_YEAR = new Date().getFullYear();
+const TERM_YEARS = Array.from({ length: 5 }, (_, i) => String(CURRENT_YEAR + i));
+
+const TERM_SEASONS = ['Fall', 'Spring', 'Summer'];
+
+const SUMMER_SESSIONS = [
+  'Three-week session',
+  'Four-week session',
+  'Seven-week session',
+  'Eight-week session',
+];
+
 const INITIAL_FORM_DATA = {
   // Basic info
   firstName: '',
@@ -33,8 +46,12 @@ const INITIAL_FORM_DATA = {
 
   // Program interest
   programsOfInterest: [],
-  termOfInterest: '',
-  projectedStartingTerm: '',
+  termOfInterestYear: '',
+  termOfInterestSeason: '',
+  termOfInterestSummerSession: '',
+  projectedStartingTermYear: '',
+  projectedStartingTermSeason: '',
+  projectedStartingTermSummerSession: '',
 
   // Work authorization & employment
   workAuthorization: '',
@@ -96,7 +113,7 @@ const INITIAL_FORM_DATA = {
 
 const LIKERT_OPTIONS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
 
-// --- Reusable field components (defined outside OaktonIntake to avoid re-creation on every render) ---
+// --- Reusable field components ---
 
 function RadioGroup({ name, options, otherFieldName, formData, handleChange }) {
   return (
@@ -145,6 +162,93 @@ function CheckboxGroup({ name, options, formData, handleCheckboxChange }) {
           <span>{opt}</span>
         </label>
       ))}
+    </div>
+  );
+}
+
+// --- Term selector: year + season + optional summer session ---
+// Used for both "term of interest" and "projected starting term"
+function TermSelector({ yearField, seasonField, summerSessionField, formData, handleChange, required }) {
+  const selectedSeason = formData[seasonField];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Year */}
+      <div>
+        <label
+          htmlFor={yearField}
+          style={{ display: 'block', fontSize: '13px', color: '#555', marginBottom: '6px' }}
+        >
+          Year
+        </label>
+        <select
+          id={yearField}
+          name={yearField}
+          value={formData[yearField]}
+          onChange={handleChange}
+          required={required}
+          className="oakton-select"
+        >
+          <option value="">Select a year</option>
+          {TERM_YEARS.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Season */}
+      <div>
+        <label
+          htmlFor={seasonField}
+          style={{ display: 'block', fontSize: '13px', color: '#555', marginBottom: '6px' }}
+        >
+          Term
+        </label>
+        <select
+          id={seasonField}
+          name={seasonField}
+          value={formData[seasonField]}
+          onChange={(e) => {
+            handleChange(e);
+            // Clear summer session if switching away from Summer
+            if (e.target.value !== 'Summer') {
+              handleChange({ target: { name: summerSessionField, value: '' } });
+            }
+          }}
+          required={required}
+          className="oakton-select"
+        >
+          <option value="">Select a term</option>
+          {TERM_SEASONS.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Summer session — only shown when Summer is selected */}
+      {selectedSeason === 'Summer' && (
+        <div>
+          <label
+            htmlFor={summerSessionField}
+            style={{ display: 'block', fontSize: '13px', color: '#555', marginBottom: '6px' }}
+          >
+            Summer session
+          </label>
+          <select
+            id={summerSessionField}
+            name={summerSessionField}
+            value={formData[summerSessionField]}
+            onChange={handleChange}
+            required={required}
+            className="oakton-select"
+          >
+            <option value="">Select a session</option>
+            {SUMMER_SESSIONS.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   );
 }
@@ -372,27 +476,30 @@ export default function OaktonIntake() {
                   />
                 </div>
 
+                {/* PROJECTED STARTING TERM — separated year / season / summer session */}
                 <div className="oakton-form-group">
-                  <div className="oakton-group-label">Term of interest. *Some programs may have limited spacing or not be available. *</div>
-                  <RadioGroup
-                    name="termOfInterest"
-                    options={[
-                      'Spring (Classes will convene any time from January through May)',
-                      'Summer (Classes will convene any time from May through August)',
-                      'Fall (Classes will convene any time from August through December)',
-                    ]}
+                  <div className="oakton-group-label">
+                    Projected Starting Term *
+                    <span style={{ fontWeight: 400, fontSize: '13px', color: '#888', display: 'block', marginTop: '4px' }}>
+                      Reference the{' '}
+                      <a
+                        href="https://catalog.oakton.edu/academic-calendar/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="oakton-inline-link"
+                      >
+                        Oakton Academic Calendar
+                      </a>
+                      {' '}for session dates.
+                    </span>
+                  </div>
+                  <TermSelector
+                    yearField="projectedStartingTermYear"
+                    seasonField="projectedStartingTermSeason"
+                    summerSessionField="projectedStartingTermSummerSession"
                     formData={formData}
                     handleChange={handleChange}
-                  />
-                </div>
-
-                <div className="oakton-form-group">
-                  <div className="oakton-group-label">Projected Starting Term *</div>
-                  <RadioGroup
-                    name="projectedStartingTerm"
-                    options={['Summer 2026', 'Fall 2026', 'Spring 2027']}
-                    formData={formData}
-                    handleChange={handleChange}
+                    required
                   />
                 </div>
 

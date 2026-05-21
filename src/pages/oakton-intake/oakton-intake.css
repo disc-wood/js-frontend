@@ -609,3 +609,21 @@
     width: 100%;
   }
 }
+.oakton-select {
+  font-family: inherit;
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid #d4d4d4;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #0a0a0a;
+  width: 100%;
+  max-width: 280px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.oakton-select:focus {
+  border-color: #0C447C;
+}

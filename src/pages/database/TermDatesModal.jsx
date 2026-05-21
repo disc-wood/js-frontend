@@ -112,10 +112,31 @@ export default function TermDatesModal({ onClose }) {
   }
 
   async function handleSave() {
-    if (!form.startDate || !form.endDate) {
-      setFormError("Start date and end date are required.");
-      return;
-    }
+  if (!form.startDate || !form.endDate) {
+    setFormError("Start date and end date are required.");
+    return;
+  }
+
+  // Check for duplicate term/year combo (skip if editing the same record)
+  const sessionToCheck = form.season === "Summer" ? form.session || null : null;
+  const duplicate = terms.find(
+    (t) =>
+      t.id !== editingId &&
+      String(t.year) === String(form.year) &&
+      t.season === form.season &&
+      (t.session || null) === sessionToCheck
+  );
+
+  if (duplicate) {
+    setFormError(
+      `A date range has already been assigned to ${form.season} ${form.year}${sessionToCheck ? ` — ${sessionToCheck}` : ""}. Edit the existing entry instead.`
+    );
+    return;
+  }
+
+  setSaving(true);
+  setFormError(null);
+  // ... rest unchanged
     setSaving(true);
     setFormError(null);
     try {

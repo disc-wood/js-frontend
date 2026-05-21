@@ -1140,49 +1140,48 @@ function IhtuDashboard() {
   // ─── KPIs ───
   const totalApplicants = filtered.length;
 
-  const ages = filtered.map(i => i.ageAtEnrollment).filter(a => a != null && !isNaN(a));
+  const ages = filtered.map(i => i.age_at_enrollment).filter(a => a != null && !isNaN(a));
   const avgAge = ages.length ? (ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1) : '—';
 
   const knowsRacialIdentityPct = filtered.length
-    ? ((filtered.filter(i => i.knowsHealthyRacialIdentity === 'Yes').length / filtered.length) * 100).toFixed(1)
+    ? ((filtered.filter(i => i.knows_healthy_racial_identity === 'Yes').length / filtered.length) * 100).toFixed(1)
     : '—';
 
   const discussedRacialPct = filtered.length
-    ? ((filtered.filter(i => i.discussedRacialIdentity === 'Yes').length / filtered.length) * 100).toFixed(1)
+    ? ((filtered.filter(i => i.discussed_racial_identity === 'Yes').length / filtered.length) * 100).toFixed(1)
     : '—';
 
   const discussedCulturalPct = filtered.length
-    ? ((filtered.filter(i => i.discussedCulturalCompetence === 'Yes').length / filtered.length) * 100).toFixed(1)
+    ? ((filtered.filter(i => i.discussed_cultural_competence === 'Yes').length / filtered.length) * 100).toFixed(1)
     : '—';
 
   // ─── Breakdowns ───
-  const ethnicityData = useMemo(() => tallyBy(filtered, r => r.ethnicityRace), [filtered]);
+  const ethnicityData = useMemo(() => tallyBy(filtered, r => r.ethnicity_race), [filtered]);
   const genderData = useMemo(() => tallyBy(filtered, r => r.gender), [filtered]);
-  const cityData = useMemo(() => tallyBy(filtered, r => r.currentCity), [filtered]);
+  const cityData = useMemo(() => tallyBy(filtered, r => r.current_city), [filtered]);
 
   const racialIdentityAwarenessData = useMemo(() => {
-    const yes = filtered.filter(i => i.knowsHealthyRacialIdentity === 'Yes').length;
-    const no = filtered.filter(i => i.knowsHealthyRacialIdentity === 'No').length;
+    const yes = filtered.filter(i => i.knows_healthy_racial_identity === 'Yes').length;
+    const no = filtered.filter(i => i.knows_healthy_racial_identity === 'No').length;
     return [{ label: 'Yes', count: yes }, { label: 'No', count: no }].filter(d => d.count > 0);
   }, [filtered]);
 
   const discussedRacialData = useMemo(() => {
-    const yes = filtered.filter(i => i.discussedRacialIdentity === 'Yes').length;
-    const no = filtered.filter(i => i.discussedRacialIdentity === 'No').length;
+    const yes = filtered.filter(i => i.discussed_racial_identity === 'Yes').length;
+    const no = filtered.filter(i => i.discussed_racial_identity === 'No').length;
     return [{ label: 'Yes', count: yes }, { label: 'No', count: no }].filter(d => d.count > 0);
   }, [filtered]);
 
   const discussedCulturalData = useMemo(() => {
-    const yes = filtered.filter(i => i.discussedCulturalCompetence === 'Yes').length;
-    const no = filtered.filter(i => i.discussedCulturalCompetence === 'No').length;
+    const yes = filtered.filter(i => i.discussed_cultural_competence === 'Yes').length;
+    const no = filtered.filter(i => i.discussed_cultural_competence === 'No').length;
     return [{ label: 'Yes', count: yes }, { label: 'No', count: no }].filter(d => d.count > 0);
   }, [filtered]);
 
   // ─── Filter options ───
-  const cityOptions = useMemo(() => [...new Set(intakes.map(i => i.currentCity).filter(Boolean))].sort(), [intakes]);
+  const cityOptions = useMemo(() => [...new Set(intakes.map(i => i.current_city).filter(Boolean))].sort(), [intakes]);
   const genderOptions = useMemo(() => [...new Set(intakes.map(i => i.gender).filter(Boolean))].sort(), [intakes]);
-  const ethnicityOptions = useMemo(() => [...new Set(intakes.map(i => i.ethnicityRace).filter(Boolean))].sort(), [intakes]);
-
+  const ethnicityOptions = useMemo(() => [...new Set(intakes.map(i => i.ethnicity_race).filter(Boolean))].sort(), [intakes]);
   if (loading) return <DashboardSurface><div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Loading IHTU data...</div></DashboardSurface>;
   if (error) return <DashboardSurface><div style={{ padding: 40, color: '#991b1b' }}>Error: {error}</div></DashboardSurface>;
 

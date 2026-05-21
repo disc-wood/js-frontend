@@ -503,6 +503,33 @@ const cityOf = (cityZip) => {
   return cityZip.split(':')[0].trim();
 };
 
+function EarningsStrip({ amount, reportedCount }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      background: 'linear-gradient(135deg, rgb(231, 247, 239) 100%, #fff 100%)',
+      border: '1px solid #006853',
+      borderRadius: 10,
+      padding: '14px 20px',
+      marginBottom: 16,
+    }}>
+      <div>
+        <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
+          Estimated Total Cumulative Earnings
+        </div>
+        <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
+          {fmtMoney(amount)}
+        </div>
+      </div>
+      <div style={{ textAlign: 'right', fontSize: 12, color: '#006853' }}>
+        From {reportedCount} reported wages
+      </div>
+    </div>
+  );
+}
+
 // ===== MASTER DASHBOARD =====
 function MasterDashboard() {
   const { intakes, enrolled, loading, error } = useOaktonData();
@@ -759,42 +786,48 @@ function MasterDashboard() {
       </FilterBar>
 
       {/* ─── Top row: earnings + KPI tiles all inline ─── */}
-      <KpiRow $cols="repeat(7, minmax(0, 1fr))">
-        <KpiTile style={{
-          background: 'linear-gradient(135deg,rgb(231, 247, 239) 100%, #fff 100%)',
-          borderColor: '#006853',
-          gridColumn: 'span 2',
-        }}>
-          <KpiLabel style={{ color: '#006853' }}>Estimated Total Cumulative Earnings</KpiLabel>
-          <KpiValue style={{ color: '#006853' }}>{fmtMoney(cumulativeEarnings)}</KpiValue>
-          <KpiSubtext style={{ color: '#006853' }}>Sum of reported annual wages</KpiSubtext>
-        </KpiTile>
-        <KpiTile>
-          <KpiLabel># of Students</KpiLabel>
-          <KpiValue>{totalStudents}</KpiValue>
-          <KpiSubtext>Enrolled in selection</KpiSubtext>
-        </KpiTile>
-        <KpiTile>
-          <KpiLabel># of Completers</KpiLabel>
-          <KpiValue>{completers.length}</KpiValue>
-          <KpiSubtext>{completionRatePct.toFixed(1)}% completion rate</KpiSubtext>
-        </KpiTile>
-        <KpiTile>
-          <KpiLabel># Employed</KpiLabel>
-          <KpiValue>{employed.length}</KpiValue>
-          <KpiSubtext>{totalStudents ? `${((employed.length / totalStudents) * 100).toFixed(1)}% rate` : '—'}</KpiSubtext>
-        </KpiTile>
-        <KpiTile>
-          <KpiLabel>Wages Under $25/hr</KpiLabel>
-          <KpiValue>{wagesUnder25}</KpiValue>
-          <KpiSubtext>{wages.length ? `${((wagesUnder25 / wages.length) * 100).toFixed(1)}% of reported` : '—'}</KpiSubtext>
-        </KpiTile>
-        <KpiTile>
-          <KpiLabel>Wages ≥ $25/hr</KpiLabel>
-          <KpiValue>{wagesAtOrAbove25}</KpiValue>
-          <KpiSubtext>{wages.length ? `${((wagesAtOrAbove25 / wages.length) * 100).toFixed(1)}% of reported` : '—'}</KpiSubtext>
-        </KpiTile>
-      </KpiRow>
+<KpiRow $cols="2fr repeat(5, minmax(0, 1fr))">
+  <KpiTile style={{
+    background: 'linear-gradient(135deg, rgb(231, 247, 239) 100%, #fff 100%)',
+    border: '1px solid #006853',
+  }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div>
+        <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
+          Estimated Total Cumulative Earnings
+        </div>
+        <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
+          {fmtMoney(cumulativeEarnings)}
+        </div>
+      </div>
+    </div>
+  </KpiTile>
+  <KpiTile>
+    <KpiLabel># of Students</KpiLabel>
+    <KpiValue>{totalStudents}</KpiValue>
+    <KpiSubtext>Enrolled in selection</KpiSubtext>
+  </KpiTile>
+  <KpiTile>
+    <KpiLabel># of Completers</KpiLabel>
+    <KpiValue>{completers.length}</KpiValue>
+    <KpiSubtext>{completionRatePct.toFixed(1)}% completion rate</KpiSubtext>
+  </KpiTile>
+  <KpiTile>
+    <KpiLabel># Employed</KpiLabel>
+    <KpiValue>{employed.length}</KpiValue>
+    <KpiSubtext>{totalStudents ? `${((employed.length / totalStudents) * 100).toFixed(1)}% rate` : '—'}</KpiSubtext>
+  </KpiTile>
+  <KpiTile>
+    <KpiLabel>Wages Under $25/hr</KpiLabel>
+    <KpiValue>{wagesUnder25}</KpiValue>
+    <KpiSubtext>{wages.length ? `${((wagesUnder25 / wages.length) * 100).toFixed(1)}% of reported` : '—'}</KpiSubtext>
+  </KpiTile>
+  <KpiTile>
+    <KpiLabel>Wages ≥ $25/hr</KpiLabel>
+    <KpiValue>{wagesAtOrAbove25}</KpiValue>
+    <KpiSubtext>{wages.length ? `${((wagesAtOrAbove25 / wages.length) * 100).toFixed(1)}% of reported` : '—'}</KpiSubtext>
+  </KpiTile>
+</KpiRow>
 
       <KpiRow>
         <KpiTile>
@@ -962,28 +995,7 @@ function EmploymentSnapshot() {
       </FilterBar>
 
       {/* ─── Earnings strip ─── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        background: 'linear-gradient(135deg,rgb(231, 247, 239) 100%, #fff 100%)',
-        border: '1px solid #006853',
-        borderRadius: 10,
-        padding: '14px 20px',
-        marginBottom: 16,
-      }}>
-        <div>
-          <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
-            Estimated Total Cumulative Earnings
-          </div>
-          <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
-            {fmtMoney(cumulativeEarnings)}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right', fontSize: 12, color: '#006853' }}>
-          From {annualWages.length} reported wages
-        </div>
-      </div>
+      <EarningsStrip amount={cumulativeEarnings} reportedCount={annualWages.length} />
 
       {/* ─── KPI tiles ─── */}
       <KpiRow>

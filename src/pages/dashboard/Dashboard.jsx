@@ -1254,19 +1254,6 @@ function IhtuDashboard() {
         </Card>
       </SectionGrid>
 
-      {/* ─── City distribution ─── */}
-      <Card>
-        <CardTitle>Applicants by City</CardTitle>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          <div style={{ flex: 1 }}>
-            <BreakdownList data={cityData} valueLabel="#" colorIdx={0} />
-          </div>
-          <div style={{ flexShrink: 0 }}>
-            <Donut data={cityData} size={150} />
-          </div>
-        </div>
-      </Card>
-
       {/* ─── Awareness & Conversations ─── */}
       <SectionGrid $cols="1fr 1fr 1fr">
         <Card>
@@ -1282,6 +1269,19 @@ function IhtuDashboard() {
           <DonutWithLegend data={discussedCulturalData} size={130} />
         </Card>
       </SectionGrid>
+
+      {/* ─── City distribution ─── */}
+      <Card>
+        <CardTitle>Applicants by City</CardTitle>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <BreakdownList data={cityData} valueLabel="#" colorIdx={0} />
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            <Donut data={cityData} size={150} />
+          </div>
+        </div>
+      </Card>
 
     </DashboardSurface>
   );

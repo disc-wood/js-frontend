@@ -1022,17 +1022,30 @@ function EmploymentSnapshot() {
       </KpiRow>
 
       {/* ─── Industry + City breakdown ─── */}
-      <SectionGrid>
-        <Card>
-          <CardTitle>Hires by Industry</CardTitle>
-          <BreakdownList data={industryData} valueLabel="#" colorIdx={0} />
-        </Card>
-        <Card>
-          <CardTitle>Hires by Employer City</CardTitle>
-          <BreakdownList data={cityData} valueLabel="#" colorIdx={2} />
-        </Card>
-      </SectionGrid>
-
+      <SectionGrid $cols="1fr 1fr" style={{ width: '100%' }}>
+  <Card>
+    <CardTitle>Hires by Industry</CardTitle>
+    <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+      <div style={{ flex: 1 }}>
+        <BreakdownList data={industryData} valueLabel="#" colorIdx={0} />
+      </div>
+      <div style={{ flexShrink: 0 }}>
+        <Donut data={industryData} size={140} />
+      </div>
+    </div>
+  </Card>
+  <Card>
+    <CardTitle>Hires by Employer City</CardTitle>
+    <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+      <div style={{ flex: 1 }}>
+        <BreakdownList data={cityData} valueLabel="#" colorIdx={2} />
+      </div>
+      <div style={{ flexShrink: 0 }}>
+        <Donut data={cityData} size={140} />
+      </div>
+    </div>
+  </Card>
+</SectionGrid>
       {/* ─── Employer listing ─── */}
       <Card>
         <CardTitle>Employer Listing</CardTitle>

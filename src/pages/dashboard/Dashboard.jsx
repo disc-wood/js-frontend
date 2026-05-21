@@ -836,14 +836,14 @@ function MasterDashboard() {
           <KpiSubtext>Sum of annual wages</KpiSubtext>
         </KpiTile>
         <KpiTile>
-          <KpiLabel>Average Hourly Wage</KpiLabel>
-          <KpiValue>{avgHourlyWage != null ? fmtMoney(avgHourlyWage) : '—'}</KpiValue>
-          <KpiSubtext>{wages.length} reported</KpiSubtext>
-        </KpiTile>
-        <KpiTile>
           <KpiLabel>Avg Annual Wage</KpiLabel>
           <KpiValue>{avgAnnualWage != null ? fmtMoney(avgAnnualWage) : '—'}</KpiValue>
           <KpiSubtext>{annualWages.length} reported</KpiSubtext>
+        </KpiTile>
+        <KpiTile>
+          <KpiLabel>Average Hourly Wage</KpiLabel>
+          <KpiValue>{avgHourlyWage != null ? fmtMoney(avgHourlyWage) : '—'}</KpiValue>
+          <KpiSubtext>{wages.length} reported</KpiSubtext>
         </KpiTile>
       </KpiRow>
 

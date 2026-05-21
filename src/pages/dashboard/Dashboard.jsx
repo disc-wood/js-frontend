@@ -87,15 +87,33 @@ const DashboardSurface = styled.div`
 const KpiRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 12px;
 `;
 
 const KpiTile = styled.div`
   background-color: #fafafa;
   border: 1px solid #eaeaea;
   border-radius: 10px;
+  padding: 14px 16px;
+`;
+
+const Card = styled.div`
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
   padding: 16px 18px;
+  margin-bottom: 12px;
+`;
+
+const SectionGrid = styled.div`
+  display: grid;
+  grid-template-columns: ${({ $cols }) => $cols || '1fr 1fr'};
+  gap: 12px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const KpiLabel = styled.div`
@@ -119,25 +137,6 @@ const KpiSubtext = styled.div`
   font-size: 11px;
   color: #888888;
   margin-top: 4px;
-`;
-
-// --- Cards / Sections ---
-const SectionGrid = styled.div`
-  display: grid;
-  grid-template-columns: ${({ $cols }) => $cols || '1fr 1fr'};
-  gap: 16px;
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Card = styled.div`
-  background: #ffffff;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
-  padding: 18px 20px;
-  margin-bottom: 16px;
 `;
 
 const CardTitle = styled.h3`
@@ -471,6 +470,12 @@ function useOaktonData() {
   return { intakes, enrolled, loading, error };
 }
 
+// ===== Shared helper used in both dashboards =====
+const cityOf = (cityZip) => {
+  if (!cityZip) return null;
+  return cityZip.split(':')[0].trim();
+};
+
 // ===== MASTER DASHBOARD =====
 function MasterDashboard() {
   const { intakes, enrolled, loading, error } = useOaktonData();
@@ -498,12 +503,6 @@ function MasterDashboard() {
       _applicant: intakeById.get(e.intake_id) || null,
     }));
   }, [enrolled, intakeById]);
-
-  // Residency: derive city from "Evanston: 60201" → "Evanston"
-  const cityOf = (cityZip) => {
-    if (!cityZip) return null;
-    return cityZip.split(':')[0].trim();
-  };
 
   // ─── Apply filters to enrolled (this drives most stats) ───
   const filteredEnrolled = useMemo(() => {
@@ -560,17 +559,29 @@ function MasterDashboard() {
   const avgAnnualWage = annualWages.length ? annualWages.reduce((a, b) => a + b, 0) / annualWages.length : null;
   const combinedEarningPower = annualWages.reduce((a, b) => a + b, 0);
 
-  // Estimated cumulative earnings: avg annual wage * # employed * years tracked
-  // (Simplified: just sum of all reported annual wages — same as combined earning power.
-  // If you have a multi-year concept later, expand this.)
+  // Estimated cumulative earnings: same as combined earning power for now
   const cumulativeEarnings = combinedEarningPower;
 
   // ─── Breakdown tables ───
-  // Completion Rate (Active / Completed / On hold / Dropped / Inactive)
-  const completionData = useMemo(
-    () => tallyBy(filteredEnrolled, r => r.program_status || 'Active'),
-    [filteredEnrolled]
-  );
+  const completionData = useMemo(() => {
+    const completed = filteredEnrolled.filter(e => e.program_status === 'Completed').length;
+    const inProgress = filteredEnrolled.filter(e =>
+      e.program_status === 'Active' || e.program_status === 'On hold' || !e.program_status
+    ).length;
+    const dropped = filteredEnrolled.filter(e => e.program_status === 'Dropped').length;
+    const inactive = filteredEnrolled.filter(e => e.program_status === 'Inactive').length;
+
+    return [
+      { label: 'Completed', count: completed },
+      { label: 'In Progress', count: inProgress },
+      { label: 'Dropped', count: dropped },
+      { label: 'Inactive', count: inactive },
+    ].filter(d => d.count > 0);
+  }, [filteredEnrolled]);
+
+  const completionRatePct = filteredEnrolled.length
+    ? (filteredEnrolled.filter(e => e.program_status === 'Completed').length / filteredEnrolled.length) * 100
+    : 0;
 
   // Employment Rate (Yes / No / Unknown — based on is_employed boolean)
   const employmentData = useMemo(() => {
@@ -614,7 +625,6 @@ function MasterDashboard() {
     const rows = filteredEnrolled
       .map(e => e._applicant?.racial_identity)
       .filter(Boolean);
-    // Fall back to applicants if no enrolled data
     if (rows.length === 0) {
       return tallyBy(filteredApplicants, r => r.racial_identity);
     }
@@ -730,7 +740,7 @@ function MasterDashboard() {
         <KpiTile>
           <KpiLabel># of Completers</KpiLabel>
           <KpiValue>{completers.length}</KpiValue>
-          <KpiSubtext>Status = Completed</KpiSubtext>
+          <KpiSubtext>{completionRatePct.toFixed(1)}% completion rate</KpiSubtext>
         </KpiTile>
         <KpiTile>
           <KpiLabel># Employed</KpiLabel>
@@ -851,6 +861,11 @@ function EmploymentSnapshot() {
   const wages = filtered.map(e => Number(e.hourly_wage)).filter(n => !isNaN(n) && n > 0);
   const avgWage = wages.length ? wages.reduce((a, b) => a + b, 0) / wages.length : null;
 
+  // Annual wage stats for cumulative earnings
+  const annualWages = filtered.map(e => Number(e.annual_wage)).filter(n => !isNaN(n) && n > 0);
+  const cumulativeEarnings = annualWages.reduce((a, b) => a + b, 0);
+  const avgAnnualWage = annualWages.length ? annualWages.reduce((a, b) => a + b, 0) / annualWages.length : null;
+
   // Employer listing (group by employer name + industry)
   const employerListing = useMemo(() => {
     const map = new Map();
@@ -895,84 +910,107 @@ function EmploymentSnapshot() {
 
   return (
     <DashboardSurface>
+      {/* ─── Filters ─── */}
       <FilterBar>
         <FilterLabel>Industry:</FilterLabel>
         <FilterSelect value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)}>
-          <option value="__all__">All industries</option>
+          <option value="__all__">All</option>
           {industryOptions.map(i => <option key={i} value={i}>{i}</option>)}
         </FilterSelect>
 
-        <FilterLabel>City:</FilterLabel>
+        <FilterLabel>Employer City:</FilterLabel>
         <FilterSelect value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}>
-          <option value="__all__">All cities</option>
+          <option value="__all__">All</option>
           {cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
         </FilterSelect>
       </FilterBar>
 
+      {/* ─── Earnings strip ─── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: 'linear-gradient(135deg, #fef2f2 0%, #fff 100%)',
+        border: '1px solid #fecaca',
+        borderRadius: 10,
+        padding: '14px 20px',
+        marginBottom: 16,
+      }}>
+        <div>
+          <div style={{ fontSize: 11, color: '#991b1b', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
+            Estimated Total Cumulative Earnings
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 700, color: '#991b1b', letterSpacing: '-0.5px' }}>
+            {fmtMoney(cumulativeEarnings)}
+          </div>
+        </div>
+        <div style={{ textAlign: 'right', fontSize: 12, color: '#7f1d1d' }}>
+          From {annualWages.length} reported wages
+        </div>
+      </div>
+
+      {/* ─── KPI tiles ─── */}
       <KpiRow>
-        <KpiTile>
-          <KpiLabel>Average Hourly Wage</KpiLabel>
-          <KpiValue>{avgWage != null ? fmtMoney(avgWage) : '—'}</KpiValue>
-          <KpiSubtext>{wages.length} reported wages</KpiSubtext>
-        </KpiTile>
         <KpiTile>
           <KpiLabel>Total Hires</KpiLabel>
           <KpiValue>{totalHires}</KpiValue>
-          <KpiSubtext>Across {employerListing.length} employers</KpiSubtext>
+          <KpiSubtext>In current selection</KpiSubtext>
         </KpiTile>
         <KpiTile>
-          <KpiLabel>Industries</KpiLabel>
-          <KpiValue>{industryData.length}</KpiValue>
-          <KpiSubtext>Distinct industries</KpiSubtext>
+          <KpiLabel>Average Hourly Wage</KpiLabel>
+          <KpiValue>{avgWage != null ? fmtMoney(avgWage) : '—'}</KpiValue>
+          <KpiSubtext>{wages.length} reported</KpiSubtext>
         </KpiTile>
         <KpiTile>
-          <KpiLabel>Cities</KpiLabel>
-          <KpiValue>{cityData.length}</KpiValue>
-          <KpiSubtext>Hiring locations</KpiSubtext>
+          <KpiLabel>Avg Annual Wage</KpiLabel>
+          <KpiValue>{avgAnnualWage != null ? fmtMoney(avgAnnualWage) : '—'}</KpiValue>
+          <KpiSubtext>{annualWages.length} reported</KpiSubtext>
+        </KpiTile>
+        <KpiTile>
+          <KpiLabel>Unique Employers</KpiLabel>
+          <KpiValue>{employerListing.length}</KpiValue>
+          <KpiSubtext>Hiring grads</KpiSubtext>
         </KpiTile>
       </KpiRow>
 
+      {/* ─── Industry + City breakdown ─── */}
+      <SectionGrid>
+        <Card>
+          <CardTitle>Hires by Industry</CardTitle>
+          <BreakdownList data={industryData} valueLabel="#" colorIdx={0} />
+        </Card>
+        <Card>
+          <CardTitle>Hires by Employer City</CardTitle>
+          <BreakdownList data={cityData} valueLabel="#" colorIdx={2} />
+        </Card>
+      </SectionGrid>
+
+      {/* ─── Employer listing ─── */}
       <Card>
         <CardTitle>Employer Listing</CardTitle>
         {employerListing.length === 0 ? (
-          <div style={{ color: '#888', fontSize: 12 }}>No employment data yet — employer info will appear here once entered for enrolled students.</div>
+          <div style={{ color: '#888', fontSize: 12 }}>No employer data yet.</div>
         ) : (
           <BreakdownTable>
             <thead>
               <tr>
                 <BreakdownTh>Employer</BreakdownTh>
                 <BreakdownTh>Industry</BreakdownTh>
-                <BreakdownTh style={{ textAlign: 'right' }}># of Hires</BreakdownTh>
+                <BreakdownTh style={{ textAlign: 'right' }}># Hires</BreakdownTh>
               </tr>
             </thead>
             <tbody>
-              {employerListing.map((e, i) => (
-                <tr key={i}>
-                  <BreakdownTd>{e.employer}</BreakdownTd>
-                  <BreakdownTd style={{ color: '#555' }}>{e.industry}</BreakdownTd>
-                  <NumCell>{e.count}</NumCell>
+              {employerListing.map((row) => (
+                <tr key={`${row.employer}|${row.industry}`}>
+                  <BreakdownTd>{row.employer}</BreakdownTd>
+                  <BreakdownTd>{row.industry}</BreakdownTd>
+                  <NumCell>{row.count}</NumCell>
                 </tr>
               ))}
-              <tr>
-                <BreakdownTd style={{ fontWeight: 600 }}>Grand total</BreakdownTd>
-                <BreakdownTd></BreakdownTd>
-                <NumCell style={{ fontWeight: 600, color: '#0a0a0a' }}>{totalHires}</NumCell>
-              </tr>
             </tbody>
           </BreakdownTable>
         )}
       </Card>
-
-      <SectionGrid>
-        <Card>
-          <CardTitle>By Industry</CardTitle>
-          <DonutWithLegend data={industryData} size={150} />
-        </Card>
-        <Card>
-          <CardTitle>By Employer City</CardTitle>
-          <BreakdownList data={cityData} valueLabel="# of Hires" colorIdx={2} />
-        </Card>
-      </SectionGrid>
     </DashboardSurface>
   );
 }

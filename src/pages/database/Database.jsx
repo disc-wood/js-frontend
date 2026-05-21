@@ -310,10 +310,18 @@ const ModalButton = styled.button`
   &.primary:hover { background-color: #004d3d; }
 `;
 
-// --- Column configs ---
+// Helper: combines a primary answer with its "Other" specification
+const withOther = (primary, other) => {
+  if (primary === 'Other' && other) return `Other: ${other}`;
+  return primary || '—';
+};
+
 const OAKTON_APPLICANT_COLUMNS = [
+  // Status & meta
   { key: 'status', label: 'Status', isStatus: true, statusOptions: ['Applied', 'Accepted', 'Rejected', 'Waitlisted'] },
   { key: 'submitted_at', label: 'Submitted', format: (v) => v ? new Date(v).toLocaleString() : '—' },
+
+  // Basic info
   { key: 'first_name', label: 'First name' },
   { key: 'last_name', label: 'Last name' },
   { key: 'email', label: 'Email' },
@@ -321,24 +329,88 @@ const OAKTON_APPLICANT_COLUMNS = [
   { key: 'date_of_birth', label: 'DOB', format: (v) => v ? new Date(v).toLocaleDateString() : '—' },
   { key: 'age_at_enrollment', label: 'Age' },
   { key: 'racial_identity', label: 'Racial identity' },
-  { key: 'gender', label: 'Gender' },
-  { key: 'city_zip', label: 'City / Zip' },
+  {
+    key: 'gender',
+    label: 'Gender',
+    format: (v, row) => withOther(v, row?.gender_other),
+  },
+  {
+    key: 'city_zip',
+    label: 'City / Zip',
+    format: (v, row) => withOther(v, row?.city_zip_other),
+  },
+
+  // Program interest
   { key: 'programs_of_interest', label: 'Programs', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
   { key: 'projected_starting_term_year', label: 'Starting year' },
   { key: 'projected_starting_term_season', label: 'Starting term' },
   { key: 'projected_starting_term_summer_session', label: 'Summer session' },
-  { key: 'work_authorization', label: 'Work auth' },
+
+  // Work authorization & employment
+  {
+    key: 'work_authorization',
+    label: 'Work auth',
+    format: (v, row) => withOther(v, row?.work_authorization_other),
+  },
   { key: 'employment_status', label: 'Employment', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
+  { key: 'weekly_work_hours', label: 'Weekly hours' },
+
+  // Financial
   { key: 'annual_income', label: 'Income' },
   { key: 'household_size', label: 'Household' },
-  { key: 'program_format', label: 'Format' },
+
+  // Education
+  {
+    key: 'program_format',
+    label: 'Format',
+    format: (v, row) => withOther(v, row?.program_format_other),
+  },
+  {
+    key: 'english_proficiency',
+    label: 'English proficiency',
+    format: (v, row) => withOther(v, row?.english_proficiency_other),
+  },
+  { key: 'esl_level', label: 'ESL level' },
+  { key: 'is_current_oakton_student', label: 'Current Oakton student' },
+  { key: 'has_taken_oakton_classes', label: 'Past Oakton classes' },
+  { key: 'current_enrollment_details', label: 'Current enrollment' },
+  { key: 'has_applied_for_fafsa', label: 'FAFSA' },
+  { key: 'has_received_wei', label: 'Prior WEI' },
+  { key: 'other_programs_applied_to', label: 'Other programs', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
   { key: 'highest_education', label: 'Education' },
   { key: 'long_term_goals', label: 'Long-term goals' },
   { key: 'professional_goals', label: 'Professional goals' },
+
+  // Support assessment
+  { key: 'has_personal_issues', label: 'Personal issues' },
+  { key: 'personal_issues_explanation', label: 'Personal issues notes' },
+  { key: 'transportation_concern', label: 'Transportation' },
+  { key: 'transportation_explanation', label: 'Transportation notes' },
+  { key: 'childcare_concern', label: 'Childcare' },
+  { key: 'childcare_explanation', label: 'Childcare notes' },
+
+  // Self-assessment (Likert)
+  { key: 'can_attend_classes', label: 'Can attend classes' },
+  { key: 'has_good_study_habits', label: 'Study habits' },
+  { key: 'can_spend_study_hours', label: 'Can study outside class' },
   { key: 'has_internet_access', label: 'Internet' },
   { key: 'has_computer_access', label: 'Computer' },
+  { key: 'is_self_motivated', label: 'Self-motivated' },
+
+  // Accommodations
+  { key: 'needs_accommodations', label: 'Needs accommodations' },
+  { key: 'accommodations_explanation', label: 'Accommodations notes' },
+
+  // Agreement
   { key: 'agrees_to_terms', label: 'Agreed to terms' },
-  { key: 'how_did_you_hear', label: 'Source' },
+
+  // Comments & source
+  { key: 'other_comments', label: 'Other comments' },
+  {
+    key: 'how_did_you_hear',
+    label: 'Source',
+    format: (v, row) => withOther(v, row?.how_did_you_hear_other),
+  },
   { key: 'intake_session_date', label: 'Intake session' },
 ];
 
@@ -517,7 +589,7 @@ function ApplicantsTable({ programId }) {
                         </Td>
                       );
                     }
-                    const displayValue = col.format ? col.format(value) : (value ?? '—');
+                    const displayValue = col.format ? col.format(value, row) : (value ?? '—');
                     return <Td key={col.key} $expanded={isExpanded}>{displayValue}</Td>;
                   })}
                 </Tr>

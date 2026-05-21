@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 const API = "/api/oakton-info"; // adjust if your base path differs
 
 async function fetchTermDates() {
-  const res = await fetch(`${API}/term-dates`);
+  const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+  const res = await fetch(`${baseUrl}/oaktonInfo/term-dates`);
   if (!res.ok) throw new Error("Failed to fetch term dates");
   return res.json();
 }
 
 async function upsertTermDate(payload) {
-  const res = await fetch(`${API}/term-dates`, {
+  const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+  const res = await fetch(`${baseUrl}/oaktonInfo/term-dates`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -20,7 +22,8 @@ async function upsertTermDate(payload) {
 }
 
 async function deleteTermDate(id) {
-  const res = await fetch(`${API}/term-dates/${id}`, { method: "DELETE" });
+  const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+  const res = await fetch(`${baseUrl}/oaktonInfo/term-dates/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete term date");
   return res.json();
 }

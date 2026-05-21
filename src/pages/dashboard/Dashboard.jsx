@@ -580,8 +580,7 @@ function MasterDashboard() {
   const wages = filteredEnrolled.map(e => Number(e.hourly_wage)).filter(n => !isNaN(n) && n > 0);
   const wagesUnder25 = wages.filter(w => w < 25).length;
   const wagesAtOrAbove25 = wages.filter(w => w >= 25).length;
-  const annualWages = filteredEnrolled.map(e => Number(e.annual_wage)).filter(n => !isNaN(n) && n > 0);
-
+  const annualWages = filteredEnrolled.filter(e => e.is_employed).map(e => Number(e.annual_wage)).filter(n => !isNaN(n) && n > 0);
   const avgHourlyWage = wages.length ? wages.reduce((a, b) => a + b, 0) / wages.length : null;
   const avgAnnualWage = annualWages.length ? annualWages.reduce((a, b) => a + b, 0) / annualWages.length : null;
   const combinedEarningPower = annualWages.reduce((a, b) => a + b, 0);

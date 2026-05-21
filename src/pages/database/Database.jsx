@@ -310,18 +310,102 @@ const ModalButton = styled.button`
   &.primary:hover { background-color: #004d3d; }
 `;
 
+// --- Term filter ---
+const TermFilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: #fafafa;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 13px;
+`;
+
+const TermFilterLabel = styled.span`
+  color: #888888;
+  font-weight: 500;
+`;
+
+const TermFilterSelect = styled.select`
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #d4d4d4;
+  background-color: #ffffff;
+  color: #0a0a0a;
+  cursor: pointer;
+  outline: none;
+  min-width: 220px;
+
+  &:hover { border-color: #0C447C; }
+  &:focus { border-color: #0C447C; }
+`;
+
+function termValueKey(t) {
+  return `${t.year}|${t.season}|${t.session || ''}`;
+}
+
+function termLabelText(t) {
+  return t.session ? `${t.season} ${t.year} — ${t.session}` : `${t.season} ${t.year}`;
+}
+
+function TermFilter({ terms, value, onChange, currentTermKey }) {
+  return (
+    <TermFilterBar>
+      <TermFilterLabel>Filter by term:</TermFilterLabel>
+      <TermFilterSelect value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="__all__">All terms</option>
+        {terms.map((t) => {
+          const key = termValueKey(t);
+          const isCurrent = key === currentTermKey;
+          return (
+            <option key={key} value={key}>
+              {termLabelText(t)}{isCurrent ? ' (current)' : ''}
+            </option>
+          );
+        })}
+      </TermFilterSelect>
+    </TermFilterBar>
+  );
+}
+
+function useTermFilter() {
+  const [terms, setTerms] = useState([]);
+  const [currentTermKey, setCurrentTermKey] = useState('__all__');
+  const [selectedTermKey, setSelectedTermKey] = useState('__all__');
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+
+    Promise.all([
+      fetch(`${baseUrl}/oaktonInfo/term-dates`).then(r => r.ok ? r.json() : []),
+      fetch(`${baseUrl}/oaktonInfo/term-dates/current`).then(r => r.ok ? r.json() : null),
+    ]).then(([allTerms, current]) => {
+      setTerms(Array.isArray(allTerms) ? allTerms : []);
+      if (current && current.year) {
+        const key = termValueKey(current);
+        setCurrentTermKey(key);
+        setSelectedTermKey(key);
+      }
+      setReady(true);
+    }).catch(() => setReady(true));
+  }, []);
+
+  return { terms, selectedTermKey, setSelectedTermKey, currentTermKey, ready };
+}
+
 // Helper: combines a primary answer with its "Other" specification
 const withOther = (primary, other) => {
   if (primary === 'Other' && other) return `Other: ${other}`;
   return primary || '—';
 };
 
+// --- Column configs ---
 const OAKTON_APPLICANT_COLUMNS = [
-  // Status & meta
   { key: 'status', label: 'Status', isStatus: true, statusOptions: ['Applied', 'Accepted', 'Rejected', 'Waitlisted'] },
   { key: 'submitted_at', label: 'Submitted', format: (v) => v ? new Date(v).toLocaleString() : '—' },
-
-  // Basic info
   { key: 'first_name', label: 'First name' },
   { key: 'last_name', label: 'Last name' },
   { key: 'email', label: 'Email' },
@@ -329,47 +413,19 @@ const OAKTON_APPLICANT_COLUMNS = [
   { key: 'date_of_birth', label: 'DOB', format: (v) => v ? new Date(v).toLocaleDateString() : '—' },
   { key: 'age_at_enrollment', label: 'Age' },
   { key: 'racial_identity', label: 'Racial identity' },
-  {
-    key: 'gender',
-    label: 'Gender',
-    format: (v, row) => withOther(v, row?.gender_other),
-  },
-  {
-    key: 'city_zip',
-    label: 'City / Zip',
-    format: (v, row) => withOther(v, row?.city_zip_other),
-  },
-
-  // Program interest
+  { key: 'gender', label: 'Gender', format: (v, row) => withOther(v, row?.gender_other) },
+  { key: 'city_zip', label: 'City / Zip', format: (v, row) => withOther(v, row?.city_zip_other) },
   { key: 'programs_of_interest', label: 'Programs', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
   { key: 'projected_starting_term_year', label: 'Starting year' },
   { key: 'projected_starting_term_season', label: 'Starting term' },
   { key: 'projected_starting_term_summer_session', label: 'Summer session' },
-
-  // Work authorization & employment
-  {
-    key: 'work_authorization',
-    label: 'Work auth',
-    format: (v, row) => withOther(v, row?.work_authorization_other),
-  },
+  { key: 'work_authorization', label: 'Work auth', format: (v, row) => withOther(v, row?.work_authorization_other) },
   { key: 'employment_status', label: 'Employment', format: (v) => Array.isArray(v) ? v.join(', ') : '—' },
   { key: 'weekly_work_hours', label: 'Weekly hours' },
-
-  // Financial
   { key: 'annual_income', label: 'Income' },
   { key: 'household_size', label: 'Household' },
-
-  // Education
-  {
-    key: 'program_format',
-    label: 'Format',
-    format: (v, row) => withOther(v, row?.program_format_other),
-  },
-  {
-    key: 'english_proficiency',
-    label: 'English proficiency',
-    format: (v, row) => withOther(v, row?.english_proficiency_other),
-  },
+  { key: 'program_format', label: 'Format', format: (v, row) => withOther(v, row?.program_format_other) },
+  { key: 'english_proficiency', label: 'English proficiency', format: (v, row) => withOther(v, row?.english_proficiency_other) },
   { key: 'esl_level', label: 'ESL level' },
   { key: 'is_current_oakton_student', label: 'Current Oakton student' },
   { key: 'has_taken_oakton_classes', label: 'Past Oakton classes' },
@@ -380,37 +436,23 @@ const OAKTON_APPLICANT_COLUMNS = [
   { key: 'highest_education', label: 'Education' },
   { key: 'long_term_goals', label: 'Long-term goals' },
   { key: 'professional_goals', label: 'Professional goals' },
-
-  // Support assessment
   { key: 'has_personal_issues', label: 'Personal issues' },
   { key: 'personal_issues_explanation', label: 'Personal issues notes' },
   { key: 'transportation_concern', label: 'Transportation' },
   { key: 'transportation_explanation', label: 'Transportation notes' },
   { key: 'childcare_concern', label: 'Childcare' },
   { key: 'childcare_explanation', label: 'Childcare notes' },
-
-  // Self-assessment (Likert)
   { key: 'can_attend_classes', label: 'Can attend classes' },
   { key: 'has_good_study_habits', label: 'Study habits' },
   { key: 'can_spend_study_hours', label: 'Can study outside class' },
   { key: 'has_internet_access', label: 'Internet' },
   { key: 'has_computer_access', label: 'Computer' },
   { key: 'is_self_motivated', label: 'Self-motivated' },
-
-  // Accommodations
   { key: 'needs_accommodations', label: 'Needs accommodations' },
   { key: 'accommodations_explanation', label: 'Accommodations notes' },
-
-  // Agreement
   { key: 'agrees_to_terms', label: 'Agreed to terms' },
-
-  // Comments & source
   { key: 'other_comments', label: 'Other comments' },
-  {
-    key: 'how_did_you_hear',
-    label: 'Source',
-    format: (v, row) => withOther(v, row?.how_did_you_hear_other),
-  },
+  { key: 'how_did_you_hear', label: 'Source', format: (v, row) => withOther(v, row?.how_did_you_hear_other) },
   { key: 'intake_session_date', label: 'Intake session' },
 ];
 
@@ -458,8 +500,22 @@ const IHTU_COLUMNS = [
   { key: 'discussed_cultural_competence', label: 'Discussed cultural competence' },
 ];
 
+function matchesTermFilter(row, selectedKey, isEnrolled) {
+  if (selectedKey === '__all__') return true;
+  const [year, season] = selectedKey.split('|');
+
+  if (isEnrolled) {
+    return String(row.program_year) === year && row.term === season;
+  } else {
+    return (
+      String(row.projected_starting_term_year) === year &&
+      row.projected_starting_term_season === season
+    );
+  }
+}
+
 // --- Applicants Table (intake submissions) ---
-function ApplicantsTable({ programId }) {
+function ApplicantsTable({ programId, termFilter }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -545,6 +601,12 @@ function ApplicantsTable({ programId }) {
 
   const columns = programId === 'ihtu' ? IHTU_COLUMNS : OAKTON_APPLICANT_COLUMNS;
 
+  // Filter rows based on selected term (Oakton only — IHTU has no term data)
+  const selectedKey = termFilter?.selectedTermKey || '__all__';
+  const filteredRows = programId === 'oakton'
+    ? rows.filter(r => matchesTermFilter(r, selectedKey, false))
+    : rows;
+
   if (loading) return <LoadingState>Loading applicants...</LoadingState>;
   if (error) return <ErrorState>{error}</ErrorState>;
   if (rows.length === 0) {
@@ -560,7 +622,9 @@ function ApplicantsTable({ programId }) {
     <>
       <TableWrapper>
         <RowCount>
-          {rows.length} {rows.length === 1 ? 'applicant' : 'applicants'}
+          {selectedKey === '__all__' || programId !== 'oakton'
+            ? `${rows.length} ${rows.length === 1 ? 'applicant' : 'applicants'}`
+            : `${filteredRows.length} of ${rows.length} applicants`}
           <ExpandHint>· Click a row to expand</ExpandHint>
         </RowCount>
         <Table>
@@ -568,7 +632,7 @@ function ApplicantsTable({ programId }) {
             <tr>{columns.map((col) => <Th key={col.key}>{col.label}</Th>)}</tr>
           </thead>
           <tbody>
-            {rows.map((row) => {
+            {filteredRows.map((row) => {
               const isExpanded = expandedRows.has(row.id);
               return (
                 <Tr key={row.id} $expanded={isExpanded} onClick={() => toggleRow(row.id)}>
@@ -618,7 +682,7 @@ function ApplicantsTable({ programId }) {
 }
 
 // --- Enrolled Table (operational tracking) ---
-function EnrolledTable({ programId }) {
+function EnrolledTable({ programId, termFilter }) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -662,6 +726,9 @@ function EnrolledTable({ programId }) {
     }
   };
 
+  const selectedKey = termFilter?.selectedTermKey || '__all__';
+  const filteredRows = rows.filter(r => matchesTermFilter(r, selectedKey, true));
+
   if (loading) return <LoadingState>Loading enrolled students...</LoadingState>;
   if (error) return <ErrorState>{error}</ErrorState>;
   if (rows.length === 0) {
@@ -676,7 +743,9 @@ function EnrolledTable({ programId }) {
   return (
     <TableWrapper>
       <RowCount>
-        {rows.length} enrolled {rows.length === 1 ? 'student' : 'students'}
+        {selectedKey === '__all__'
+          ? `${rows.length} enrolled ${rows.length === 1 ? 'student' : 'students'}`
+          : `${filteredRows.length} of ${rows.length} enrolled students`}
         <ExpandHint>· Click cells to edit</ExpandHint>
       </RowCount>
       <Table>
@@ -684,7 +753,7 @@ function EnrolledTable({ programId }) {
           <tr>{OAKTON_ENROLLED_COLUMNS.map((col) => <Th key={col.key}>{col.label}</Th>)}</tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
+          {filteredRows.map((row) => (
             <Tr key={row.id}>
               {OAKTON_ENROLLED_COLUMNS.map((col) => (
                 <EnrolledCell
@@ -772,6 +841,7 @@ function ProgramView({ programId }) {
   const [activeSubTab, setActiveSubTab] = useState('applicants');
   const [applicantCount, setApplicantCount] = useState(null);
   const [enrolledCount, setEnrolledCount] = useState(null);
+  const termFilter = useTermFilter();
 
   useEffect(() => {
     if (programId !== 'oakton') return;
@@ -790,7 +860,7 @@ function ProgramView({ programId }) {
   }, [programId, activeSubTab]);
 
   if (programId !== 'oakton') {
-    return <ApplicantsTable programId={programId} />;
+    return <ApplicantsTable programId={programId} termFilter={termFilter} />;
   }
 
   return (
@@ -809,7 +879,19 @@ function ProgramView({ programId }) {
           )}
         </SubTab>
       </SubTabBar>
-      {activeSubTab === 'applicants' ? <ApplicantsTable programId={programId} /> : <EnrolledTable programId={programId} />}
+
+      {termFilter.ready && (
+        <TermFilter
+          terms={termFilter.terms}
+          value={termFilter.selectedTermKey}
+          onChange={termFilter.setSelectedTermKey}
+          currentTermKey={termFilter.currentTermKey}
+        />
+      )}
+
+      {activeSubTab === 'applicants'
+        ? <ApplicantsTable programId={programId} termFilter={termFilter} />
+        : <EnrolledTable programId={programId} termFilter={termFilter} />}
     </>
   );
 }

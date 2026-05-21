@@ -161,7 +161,7 @@ export default function IhtuIntake() {
 
             <div className="ihtu-form-row">
               <div className="ihtu-form-group">
-                <label htmlFor="gender">Gender *</label>
+                <label htmlFor="gender">Child's Gender *</label>
                 <select id="gender" name="gender" value={formData.gender} onChange={handleChange} required>
                   <option value="" disabled>Select…</option>
                   <option value="Female">Female</option>

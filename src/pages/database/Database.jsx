@@ -3,6 +3,7 @@ import styled from "styled-components";
 import TabCard from "@/common/components/atoms/TabCard";
 import { programs } from "@/config/programs";
 import { useUser } from '@/common/hooks/useUser';
+import TermDatesModal from "./TermDatesModal";
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -572,7 +573,6 @@ function EnrolledTable({ programId }) {
   }, [programId]);
 
   const updateField = async (id, field, value) => {
-    // Optimistic update
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, [field]: value } : r));
 
     try {
@@ -585,7 +585,6 @@ function EnrolledTable({ programId }) {
       if (!response.ok) throw new Error(`Failed to update (HTTP ${response.status})`);
     } catch (err) {
       console.error('Update failed, reverting:', err);
-      // Re-fetch on error to revert
       fetchData();
       alert(`Failed to save: ${err.message}`);
     }
@@ -616,9 +615,6 @@ function EnrolledTable({ programId }) {
           {rows.map((row) => (
             <Tr key={row.id}>
               {OAKTON_ENROLLED_COLUMNS.map((col) => (
-                // FIX: key includes the cell value so React remounts EnrolledCell
-                // when the value changes externally (e.g. after optimistic update),
-                // resetting localValue without needing a useEffect or ref.
                 <EnrolledCell
                   key={`${row.id}-${col.key}-${row[col.key]}`}
                   row={row}
@@ -637,11 +633,8 @@ function EnrolledTable({ programId }) {
 // --- Individual cell renderer for enrolled table ---
 function EnrolledCell({ row, col, updateField }) {
   const value = row[col.key];
-  // FIX: plain useState initializer — no useEffect or ref needed.
-  // When the parent value changes, the key above causes a remount with fresh state.
   const [localValue, setLocalValue] = useState(value ?? '');
 
-  // Status dropdown
   if (col.isStatus) {
     const currentStatus = value || 'Active';
     return (
@@ -657,7 +650,6 @@ function EnrolledCell({ row, col, updateField }) {
     );
   }
 
-  // Boolean toggle
   if (col.editable && col.type === 'boolean') {
     return (
       <Td>
@@ -668,7 +660,6 @@ function EnrolledCell({ row, col, updateField }) {
     );
   }
 
-  // Editable text/date/number input
   if (col.editable) {
     const handleBlur = () => {
       if (String(localValue) !== String(value ?? '')) {
@@ -682,7 +673,6 @@ function EnrolledCell({ row, col, updateField }) {
       }
     };
 
-    // Format dates for the date input
     let inputValue = localValue;
     if (col.type === 'date' && localValue) {
       inputValue = String(localValue).slice(0, 10);
@@ -701,7 +691,6 @@ function EnrolledCell({ row, col, updateField }) {
     );
   }
 
-  // Read-only display
   const displayValue = col.format ? col.format(value) : (value ?? '—');
   return <Td>{displayValue}</Td>;
 }
@@ -728,7 +717,6 @@ function ProgramView({ programId }) {
       .catch(() => {});
   }, [programId, activeSubTab]);
 
-  // IHTU just shows the intake table without sub-tabs
   if (programId !== 'oakton') {
     return <ApplicantsTable programId={programId} />;
   }
@@ -757,6 +745,7 @@ function ProgramView({ programId }) {
 // --- Main Page ---
 export default function Database() {
   const { role, assignedPrograms, loading } = useUser();
+  const [showTermDates, setShowTermDates] = useState(false);
 
   if (loading) return <LoadingState>Loading...</LoadingState>;
 
@@ -775,8 +764,26 @@ export default function Database() {
       <PageHeader>
         <PageTitle>Database</PageTitle>
         <PageSubtitle>View, edit, and manage learner data across programs.</PageSubtitle>
+        <button
+          onClick={() => setShowTermDates(true)}
+          style={{
+            marginTop: 12,
+            padding: '8px 16px',
+            fontSize: 13,
+            fontWeight: 500,
+            borderRadius: 8,
+            border: '1px solid #c8d8eb',
+            backgroundColor: '#eef3f9',
+            color: '#0C447C',
+            cursor: 'pointer',
+            fontFamily: 'inherit',
+          }}
+        >
+          Manage Term Dates
+        </button>
       </PageHeader>
       <TabCard tabs={tabs} />
+      {showTermDates && <TermDatesModal onClose={() => setShowTermDates(false)} />}
     </PageContainer>
   );
 }

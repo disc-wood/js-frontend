@@ -1097,12 +1097,193 @@ function OaktonDashboard() {
 }
 
 // ===== IHTU PLACEHOLDER =====
+// ===== IHTU DATA HOOK =====
+function useIhtuData() {
+  const [intakes, setIntakes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+    fetch(`${baseUrl}/ihtuInfo/intakes`)
+      .then(r => r.ok ? r.json() : [])
+      .then(data => {
+        setIntakes(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  return { intakes, loading, error };
+}
+
+// ===== IHTU DASHBOARD =====
 function IhtuDashboard() {
+  const { intakes, loading, error } = useIhtuData();
+
+  const [cityFilter, setCityFilter] = useState('__all__');
+  const [genderFilter, setGenderFilter] = useState('__all__');
+  const [ethnicityFilter, setEthnicityFilter] = useState('__all__');
+
+  const filtered = useMemo(() => {
+    return intakes.filter(i => {
+      if (cityFilter !== '__all__' && i.currentCity !== cityFilter) return false;
+      if (genderFilter !== '__all__' && i.gender !== genderFilter) return false;
+      if (ethnicityFilter !== '__all__' && i.ethnicityRace !== ethnicityFilter) return false;
+      return true;
+    });
+  }, [intakes, cityFilter, genderFilter, ethnicityFilter]);
+
+  // ─── KPIs ───
+  const totalApplicants = filtered.length;
+
+  const ages = filtered.map(i => i.ageAtEnrollment).filter(a => a != null && !isNaN(a));
+  const avgAge = ages.length ? (ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1) : '—';
+
+  const knowsRacialIdentityPct = filtered.length
+    ? ((filtered.filter(i => i.knowsHealthyRacialIdentity === 'Yes').length / filtered.length) * 100).toFixed(1)
+    : '—';
+
+  const discussedRacialPct = filtered.length
+    ? ((filtered.filter(i => i.discussedRacialIdentity === 'Yes').length / filtered.length) * 100).toFixed(1)
+    : '—';
+
+  const discussedCulturalPct = filtered.length
+    ? ((filtered.filter(i => i.discussedCulturalCompetence === 'Yes').length / filtered.length) * 100).toFixed(1)
+    : '—';
+
+  // ─── Breakdowns ───
+  const ethnicityData = useMemo(() => tallyBy(filtered, r => r.ethnicityRace), [filtered]);
+  const genderData = useMemo(() => tallyBy(filtered, r => r.gender), [filtered]);
+  const cityData = useMemo(() => tallyBy(filtered, r => r.currentCity), [filtered]);
+
+  const racialIdentityAwarenessData = useMemo(() => {
+    const yes = filtered.filter(i => i.knowsHealthyRacialIdentity === 'Yes').length;
+    const no = filtered.filter(i => i.knowsHealthyRacialIdentity === 'No').length;
+    return [{ label: 'Yes', count: yes }, { label: 'No', count: no }].filter(d => d.count > 0);
+  }, [filtered]);
+
+  const discussedRacialData = useMemo(() => {
+    const yes = filtered.filter(i => i.discussedRacialIdentity === 'Yes').length;
+    const no = filtered.filter(i => i.discussedRacialIdentity === 'No').length;
+    return [{ label: 'Yes', count: yes }, { label: 'No', count: no }].filter(d => d.count > 0);
+  }, [filtered]);
+
+  const discussedCulturalData = useMemo(() => {
+    const yes = filtered.filter(i => i.discussedCulturalCompetence === 'Yes').length;
+    const no = filtered.filter(i => i.discussedCulturalCompetence === 'No').length;
+    return [{ label: 'Yes', count: yes }, { label: 'No', count: no }].filter(d => d.count > 0);
+  }, [filtered]);
+
+  // ─── Filter options ───
+  const cityOptions = useMemo(() => [...new Set(intakes.map(i => i.currentCity).filter(Boolean))].sort(), [intakes]);
+  const genderOptions = useMemo(() => [...new Set(intakes.map(i => i.gender).filter(Boolean))].sort(), [intakes]);
+  const ethnicityOptions = useMemo(() => [...new Set(intakes.map(i => i.ethnicityRace).filter(Boolean))].sort(), [intakes]);
+
+  if (loading) return <DashboardSurface><div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Loading IHTU data...</div></DashboardSurface>;
+  if (error) return <DashboardSurface><div style={{ padding: 40, color: '#991b1b' }}>Error: {error}</div></DashboardSurface>;
+
   return (
     <DashboardSurface>
-      <PlaceholderBox>
-        IHTU dashboard coming soon. Once IHTU data is being tracked operationally, demographic and outcome widgets will appear here.
-      </PlaceholderBox>
+
+      {/* ─── Filters ─── */}
+      <FilterBar>
+        <FilterGroup>
+          <FilterLabel>City:</FilterLabel>
+          <FilterSelect value={cityFilter} onChange={e => setCityFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {cityOptions.map(c => <option key={c} value={c}>{c}</option>)}
+          </FilterSelect>
+        </FilterGroup>
+        <FilterGroup>
+          <FilterLabel>Gender:</FilterLabel>
+          <FilterSelect value={genderFilter} onChange={e => setGenderFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {genderOptions.map(g => <option key={g} value={g}>{g}</option>)}
+          </FilterSelect>
+        </FilterGroup>
+        <FilterGroup>
+          <FilterLabel>Ethnicity:</FilterLabel>
+          <FilterSelect value={ethnicityFilter} onChange={e => setEthnicityFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {ethnicityOptions.map(e => <option key={e} value={e}>{e}</option>)}
+          </FilterSelect>
+        </FilterGroup>
+      </FilterBar>
+
+      {/* ─── KPI row ─── */}
+      <KpiRow $cols="repeat(5, minmax(0, 1fr))">
+        <KpiTile>
+          <KpiLabel>Total Applicants</KpiLabel>
+          <KpiValue>{totalApplicants}</KpiValue>
+          <KpiSubtext>In current selection</KpiSubtext>
+        </KpiTile>
+        <KpiTile>
+          <KpiLabel>Avg Child Age</KpiLabel>
+          <KpiValue>{avgAge}</KpiValue>
+          <KpiSubtext>{ages.length} reported</KpiSubtext>
+        </KpiTile>
+        <KpiTile>
+          <KpiLabel>Know Racial Identity</KpiLabel>
+          <KpiValue>{knowsRacialIdentityPct}{knowsRacialIdentityPct !== '—' ? '%' : ''}</KpiValue>
+          <KpiSubtext>Aware of healthy racial identity</KpiSubtext>
+        </KpiTile>
+        <KpiTile>
+          <KpiLabel>Discussed Racial Identity</KpiLabel>
+          <KpiValue>{discussedRacialPct}{discussedRacialPct !== '—' ? '%' : ''}</KpiValue>
+          <KpiSubtext>With their child</KpiSubtext>
+        </KpiTile>
+        <KpiTile>
+          <KpiLabel>Discussed Cultural Competence</KpiLabel>
+          <KpiValue>{discussedCulturalPct}{discussedCulturalPct !== '—' ? '%' : ''}</KpiValue>
+          <KpiSubtext>With their child</KpiSubtext>
+        </KpiTile>
+      </KpiRow>
+
+      {/* ─── Demographics ─── */}
+      <SectionGrid $cols="1fr 1fr">
+        <Card>
+          <CardTitle>Ethnicity / Race</CardTitle>
+          <DonutWithLegend data={ethnicityData} size={150} />
+        </Card>
+        <Card>
+          <CardTitle>Gender</CardTitle>
+          <DonutWithLegend data={genderData} size={150} />
+        </Card>
+      </SectionGrid>
+
+      {/* ─── City distribution ─── */}
+      <Card>
+        <CardTitle>Applicants by City</CardTitle>
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <BreakdownList data={cityData} valueLabel="#" colorIdx={0} />
+          </div>
+          <div style={{ flexShrink: 0 }}>
+            <Donut data={cityData} size={150} />
+          </div>
+        </div>
+      </Card>
+
+      {/* ─── Awareness & Conversations ─── */}
+      <SectionGrid $cols="1fr 1fr 1fr">
+        <Card>
+          <CardTitle>Knows Healthy Racial Identity</CardTitle>
+          <DonutWithLegend data={racialIdentityAwarenessData} size={130} />
+        </Card>
+        <Card>
+          <CardTitle>Discussed Racial Identity</CardTitle>
+          <DonutWithLegend data={discussedRacialData} size={130} />
+        </Card>
+        <Card>
+          <CardTitle>Discussed Cultural Competence</CardTitle>
+          <DonutWithLegend data={discussedCulturalData} size={130} />
+        </Card>
+      </SectionGrid>
+
     </DashboardSurface>
   );
 }

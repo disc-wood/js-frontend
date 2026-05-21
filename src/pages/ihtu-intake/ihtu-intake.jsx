@@ -196,7 +196,7 @@ export default function IhtuIntake() {
             </div>
 
             <div className="ihtu-form-group">
-              <div className="ihtu-group-label">Ethnicity / Race *</div>
+              <div className="ihtu-group-label">Child's Ethnicity / Race *</div>
               <RadioGroup
                 name="ethnicityRace"
                 options={[

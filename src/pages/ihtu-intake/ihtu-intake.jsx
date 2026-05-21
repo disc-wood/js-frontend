@@ -13,18 +13,60 @@ function calculateAge(dateOfBirthISO) {
   return age;
 }
 
+const INITIAL_FORM_DATA = {
+  // Basic info
+  firstName: '',
+  lastName: '',
+  email: '',
+  phoneNumber: '',
+  gender: '',
+  dateOfBirth: '',
+  ethnicityRace: '',
+  ethnicityRaceOther: '',
+  currentCity: '',
+  zipCode: '',
+
+  // Demographic information
+  knowsHealthyRacialIdentity: '',
+  discussedRacialIdentity: '',
+  discussedCulturalCompetence: '',
+};
+
+// --- Reusable field component (defined outside to avoid re-creation on every render) ---
+function RadioGroup({ name, options, otherFieldName, formData, handleChange }) {
+  return (
+    <div className="ihtu-radio-group" role="radiogroup">
+      {options.map((opt) => (
+        <label key={opt} className="ihtu-radio-label">
+          <input
+            type="radio"
+            name={name}
+            value={opt}
+            checked={formData[name] === opt}
+            onChange={handleChange}
+            required
+          />
+          <span>{opt}</span>
+        </label>
+      ))}
+      {otherFieldName && formData[name] === 'Other' && (
+        <input
+          type="text"
+          name={otherFieldName}
+          placeholder="Please specify"
+          value={formData[otherFieldName]}
+          onChange={handleChange}
+          className="ihtu-other-input"
+          aria-label="Please specify"
+          required
+        />
+      )}
+    </div>
+  );
+}
+
 export default function IhtuIntake() {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    gender: '',
-    dateOfBirth: '',
-    ethnicityRace: '',
-    currentCity: '',
-    zipCode: '',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const navigate = useNavigate();
 
   const [submitStatus, setSubmitStatus] = useState({
@@ -63,18 +105,8 @@ export default function IhtuIntake() {
         return;
       }
 
+      setFormData(INITIAL_FORM_DATA);
       navigate('/apply/success?program=ihtu');
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        gender: '',
-        dateOfBirth: '',
-        ethnicityRace: '',
-        currentCity: '',
-        zipCode: '',
-      });
     } catch (err) {
       setSubmitStatus({
         state: 'error',
@@ -104,31 +136,32 @@ export default function IhtuIntake() {
         <div className="ihtu-form-container">
           <form onSubmit={handleSubmit}>
 
+            {/* === BASIC INFO === */}
             <div className="ihtu-form-row">
               <div className="ihtu-form-group">
-                <label htmlFor="firstName">First Name</label>
+                <label htmlFor="firstName">First Name *</label>
                 <input type="text" id="firstName" name="firstName" placeholder="Your Answer" value={formData.firstName} onChange={handleChange} required />
               </div>
               <div className="ihtu-form-group">
-                <label htmlFor="lastName">Last Name</label>
+                <label htmlFor="lastName">Last Name *</label>
                 <input type="text" id="lastName" name="lastName" placeholder="Your Answer" value={formData.lastName} onChange={handleChange} required />
               </div>
             </div>
 
             <div className="ihtu-form-row">
               <div className="ihtu-form-group">
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">Email *</label>
                 <input type="email" id="email" name="email" placeholder="Your Answer" value={formData.email} onChange={handleChange} required />
               </div>
               <div className="ihtu-form-group">
-                <label htmlFor="phoneNumber">Phone Number</label>
+                <label htmlFor="phoneNumber">Phone Number *</label>
                 <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Your Answer" value={formData.phoneNumber} onChange={handleChange} required />
               </div>
             </div>
 
             <div className="ihtu-form-row">
               <div className="ihtu-form-group">
-                <label htmlFor="gender">Gender</label>
+                <label htmlFor="gender">Gender *</label>
                 <select id="gender" name="gender" value={formData.gender} onChange={handleChange} required>
                   <option value="" disabled>Select…</option>
                   <option value="Female">Female</option>
@@ -139,7 +172,7 @@ export default function IhtuIntake() {
                 </select>
               </div>
               <div className="ihtu-form-group">
-                <label htmlFor="dateOfBirth">Date of Birth</label>
+                <label htmlFor="dateOfBirth">Date of Birth *</label>
                 <input type="date" id="dateOfBirth" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
               </div>
             </div>
@@ -150,20 +183,75 @@ export default function IhtuIntake() {
                 <input type="number" id="ageAtEnrollment" name="ageAtEnrollment" value={ageAtEnrollment ?? ''} readOnly aria-readonly="true" placeholder="Calculated from DOB" />
               </div>
               <div className="ihtu-form-group">
-                <label htmlFor="ethnicityRace">Ethnicity / Race</label>
-                <input type="text" id="ethnicityRace" name="ethnicityRace" placeholder="Your Answer" value={formData.ethnicityRace} onChange={handleChange} required />
+                <label htmlFor="currentCity">Current City *</label>
+                <input type="text" id="currentCity" name="currentCity" placeholder="Your Answer" value={formData.currentCity} onChange={handleChange} required />
               </div>
             </div>
 
             <div className="ihtu-form-row">
               <div className="ihtu-form-group">
-                <label htmlFor="currentCity">Current City</label>
-                <input type="text" id="currentCity" name="currentCity" placeholder="Your Answer" value={formData.currentCity} onChange={handleChange} required />
-              </div>
-              <div className="ihtu-form-group">
-                <label htmlFor="zipCode">ZIP Code</label>
+                <label htmlFor="zipCode">ZIP Code *</label>
                 <input type="text" id="zipCode" name="zipCode" placeholder="Your Answer" value={formData.zipCode} onChange={handleChange} required />
               </div>
+            </div>
+
+            <div className="ihtu-form-group">
+              <div className="ihtu-group-label">Ethnicity / Race *</div>
+              <RadioGroup
+                name="ethnicityRace"
+                options={[
+                  'Black/African American',
+                  'American Indian or Alaska Native',
+                  'Asian',
+                  'Hispanic or Latino',
+                  'Native Hawaiian or Pacific Islander',
+                  'White/Caucasian',
+                  'Multiracial',
+                  'Prefer not to say',
+                  'Other',
+                ]}
+                otherFieldName="ethnicityRaceOther"
+                formData={formData}
+                handleChange={handleChange}
+              />
+            </div>
+
+            {/* === DEMOGRAPHIC INFORMATION SECTION === */}
+            <div className="ihtu-section-divider">
+              <h2 className="ihtu-section-title">Demographic Information</h2>
+              <p className="ihtu-section-blurb">
+                The following questions help us understand the conversations you've had with your child about racial identity and cultural competence.
+              </p>
+            </div>
+
+            <div className="ihtu-form-group">
+              <div className="ihtu-group-label">Do you know what a healthy racial identity means? *</div>
+              <RadioGroup
+                name="knowsHealthyRacialIdentity"
+                options={['Yes', 'No']}
+                formData={formData}
+                handleChange={handleChange}
+              />
+            </div>
+
+            <div className="ihtu-form-group">
+              <div className="ihtu-group-label">Have you ever talked about the importance of building racial identities with your child? *</div>
+              <RadioGroup
+                name="discussedRacialIdentity"
+                options={['Yes', 'No']}
+                formData={formData}
+                handleChange={handleChange}
+              />
+            </div>
+
+            <div className="ihtu-form-group">
+              <div className="ihtu-group-label">Have you ever talked about the importance of building cultural competence with your child? *</div>
+              <RadioGroup
+                name="discussedCulturalCompetence"
+                options={['Yes', 'No']}
+                formData={formData}
+                handleChange={handleChange}
+              />
             </div>
 
             <div className="ihtu-form-actions">

@@ -233,12 +233,16 @@ const IHTU_COLUMNS = [
   { key: 'last_name', label: 'Last name' },
   { key: 'email', label: 'Email' },
   { key: 'phone_number', label: 'Phone' },
-  { key: 'date_of_birth', label: 'DOB', format: (v) => v ? new Date(v).toLocaleDateString() : '—' },
-  { key: 'age_at_enrollment', label: 'Age' },
   { key: 'gender', label: 'Gender' },
-  { key: 'ethnicity_race', label: 'Ethnicity / Race' },
+  { key: 'date_of_birth', label: 'DOB', format: (v) => v ? new Date(v).toLocaleDateString() : '—' },
+  { key: 'age_at_enrollment', label: 'Age (at enrollment)' },
+  { key: 'age', label: 'Age' },
+  { key: 'ethnicity_race', label: 'Race / Ethnicity' },
   { key: 'current_city', label: 'City' },
-  { key: 'zip_code', label: 'ZIP' },
+  { key: 'zip_code', label: 'Zip' },
+  { key: 'knows_healthy_racial_identity', label: 'Knows healthy racial identity' },
+  { key: 'discussed_racial_identity', label: 'Discussed racial identity' },
+  { key: 'discussed_cultural_competence', label: 'Discussed cultural competence' },
 ];
 
 function ProgramTable({ programId }) {

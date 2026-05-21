@@ -347,7 +347,6 @@ const OAKTON_ENROLLED_COLUMNS = [
   { key: 'first_name', label: 'First name', editable: true, type: 'text' },
   { key: 'last_name', label: 'Last name', editable: true, type: 'text' },
   { key: 'email', label: 'Email', editable: true, type: 'email' },
-  { key: 'racial_identity', label: 'Racial identity' },
   { key: 'phone_number', label: 'Phone', editable: true, type: 'tel' },
   { key: 'program_name', label: 'Program', editable: true, type: 'text' },
   { key: 'term', label: 'Term', editable: true, type: 'text' },

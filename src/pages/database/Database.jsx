@@ -668,8 +668,7 @@ function ApplicantsTable({ programId, termFilter }) {
           <ModalCard onClick={(e) => e.stopPropagation()}>
             <ModalTitle>Accept {confirmAccept.name}?</ModalTitle>
             <ModalText>
-              This will mark them as accepted and automatically create an enrolled student record where you can track their attendance, certification, and employment progress.
-            </ModalText>
+              This will mark them as accepted, send them an acceptance email, and automatically create an enrolled student record where you can track their attendance, certification, and employment progress.            </ModalText>
             <ModalActions>
               <ModalButton onClick={() => setConfirmAccept(null)}>Cancel</ModalButton>
               <ModalButton className="primary" onClick={confirmAcceptApplicant}>Accept applicant</ModalButton>

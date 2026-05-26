@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
+import { authFetch } from "@/common/utils/authFetch";
 
 // ─── API helpers ────────────────────────────────────────────────────────────
-const API = "/api/oakton-info"; // adjust if your base path differs
-
 async function fetchTermDates() {
   const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-  const res = await fetch(`${baseUrl}/oaktonInfo/term-dates`);
+  const res = await authFetch(`${baseUrl}/oaktonInfo/term-dates`);
   if (!res.ok) throw new Error("Failed to fetch term dates");
   return res.json();
 }
 
 async function upsertTermDate(payload) {
   const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-  const res = await fetch(`${baseUrl}/oaktonInfo/term-dates`, {
+  const res = await authFetch(`${baseUrl}/oaktonInfo/term-dates`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -23,7 +22,7 @@ async function upsertTermDate(payload) {
 
 async function deleteTermDate(id) {
   const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-  const res = await fetch(`${baseUrl}/oaktonInfo/term-dates/${id}`, { method: "DELETE" });
+  const res = await authFetch(`${baseUrl}/oaktonInfo/term-dates/${id}`, { method: "DELETE" });
   if (!res.ok) throw new Error("Failed to delete term date");
   return res.json();
 }

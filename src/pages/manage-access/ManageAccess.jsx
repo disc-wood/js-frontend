@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { programs } from '@/config/programs';
+import { authFetch } from '@/common/utils/authFetch';
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -334,8 +335,8 @@ export default function ManageAccess() {
   const fetchData = useCallback(async () => {
     try {
       const [invRes, supRes] = await Promise.all([
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/list`),
-        fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/active`),
+        authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/list`),
+        authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/active`),
       ]);
       const invData = await invRes.json();
       const supData = await supRes.json();
@@ -357,7 +358,7 @@ export default function ManageAccess() {
     setSuccess('');
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/generate`, {
+      const res = await authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, programId }),
@@ -378,7 +379,7 @@ export default function ManageAccess() {
 
   const handleCancel = async (token) => {
     if (!window.confirm('Cancel this pending invite?')) return;
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/cancel/${token}`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/cancel/${token}`, {
       method: 'DELETE',
     });
     fetchData();
@@ -386,7 +387,7 @@ export default function ManageAccess() {
 
   const handleRevoke = async (userId, progId) => {
     if (!window.confirm("Revoke this supervisor's access?")) return;
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/revoke`, {
+    await authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/revoke`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, programId: progId }),

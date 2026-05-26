@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TabCard from '@/common/components/atoms/TabCard';
 import { programs } from "@/config/programs";
 import { useUser } from '@/common/hooks/useUser';
+import { authFetch } from '@/common/utils/authFetch';
 
 // ===== Styled Components =====
 const PageContainer = styled.div`
@@ -480,8 +481,8 @@ function useOaktonData() {
   useEffect(() => {
     const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
     Promise.all([
-      fetch(`${baseUrl}/oaktonInfo/intakes`).then(r => r.ok ? r.json() : []),
-      fetch(`${baseUrl}/oaktonInfo/enrolled`).then(r => r.ok ? r.json() : []),
+      authFetch(`${baseUrl}/oaktonInfo/intakes`).then(r => r.ok ? r.json() : []),
+      authFetch(`${baseUrl}/oaktonInfo/enrolled`).then(r => r.ok ? r.json() : []),
     ])
       .then(([i, e]) => {
         setIntakes(Array.isArray(i) ? i : []);
@@ -1105,7 +1106,7 @@ function useIhtuData() {
 
   useEffect(() => {
     const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-    fetch(`${baseUrl}/ihtuInfo/intakes`)
+    authFetch(`${baseUrl}/ihtuInfo/intakes`)
       .then(r => r.ok ? r.json() : [])
       .then(data => {
         setIntakes(Array.isArray(data) ? data : []);

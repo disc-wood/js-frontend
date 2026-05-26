@@ -4,6 +4,7 @@ import TabCard from "@/common/components/atoms/TabCard";
 import { programs } from "@/config/programs";
 import { useUser } from '@/common/hooks/useUser';
 import TermDatesModal from "./TermDatesModal";
+import { authFetch } from '@/common/utils/authFetch';
 
 // --- Styled Components ---
 const PageContainer = styled.div`
@@ -380,8 +381,8 @@ function useTermFilter() {
     const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
 
     Promise.all([
-      fetch(`${baseUrl}/oaktonInfo/term-dates`).then(r => r.ok ? r.json() : []),
-      fetch(`${baseUrl}/oaktonInfo/term-dates/current`).then(r => r.ok ? r.json() : null),
+      authFetch(`${baseUrl}/oaktonInfo/term-dates`).then(r => r.ok ? r.json() : []),
+      authFetch(`${baseUrl}/oaktonInfo/term-dates/current`).then(r => r.ok ? r.json() : null),
     ]).then(([allTerms, current]) => {
       setTerms(Array.isArray(allTerms) ? allTerms : []);
       if (current && current.year) {
@@ -541,7 +542,7 @@ function ApplicantsTable({ programId, termFilter }) {
         return;
       }
 
-      const response = await fetch(endpoint);
+      const response = await authFetch(endpoint);
       if (!response.ok) throw new Error(`Failed to load data (HTTP ${response.status})`);
       const data = await response.json();
       setRows(Array.isArray(data) ? data : []);
@@ -570,7 +571,7 @@ function ApplicantsTable({ programId, termFilter }) {
     setUpdatingStatus(id);
     try {
       const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-      const response = await fetch(`${baseUrl}/oaktonInfo/intakes/${id}/status`, {
+      const response = await authFetch(`${baseUrl}/oaktonInfo/intakes/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -692,7 +693,7 @@ function EnrolledTable({ programId, termFilter }) {
 
     try {
       const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-      const response = await fetch(`${baseUrl}/oaktonInfo/enrolled`);
+      const response = await authFetch(`${baseUrl}/oaktonInfo/enrolled`);
       if (!response.ok) throw new Error(`Failed to load data (HTTP ${response.status})`);
       const data = await response.json();
       setRows(Array.isArray(data) ? data : []);
@@ -712,7 +713,7 @@ function EnrolledTable({ programId, termFilter }) {
 
     try {
       const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-      const response = await fetch(`${baseUrl}/oaktonInfo/enrolled/${id}`, {
+      const response = await authFetch(`${baseUrl}/oaktonInfo/enrolled/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [field]: value }),
@@ -847,12 +848,12 @@ function ProgramView({ programId }) {
 
     const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
 
-    fetch(`${baseUrl}/oaktonInfo/intakes`)
+    authFetch(`${baseUrl}/oaktonInfo/intakes`)
       .then((r) => r.ok ? r.json() : [])
       .then((data) => setApplicantCount(Array.isArray(data) ? data.length : 0))
       .catch(() => {});
 
-    fetch(`${baseUrl}/oaktonInfo/enrolled`)
+    authFetch(`${baseUrl}/oaktonInfo/enrolled`)
       .then((r) => r.ok ? r.json() : [])
       .then((data) => setEnrolledCount(Array.isArray(data) ? data.length : 0))
       .catch(() => {});

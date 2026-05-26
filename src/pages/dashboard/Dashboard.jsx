@@ -53,6 +53,8 @@ const SubTabBar = styled.div`
   padding: 12px 16px 0;
   background-color: #fafafa;
   border-bottom: 1px solid #eaeaea;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 `;
 
 const SubTab = styled.button`
@@ -268,6 +270,12 @@ const DonutWrap = styled.div`
   align-items: center;
   gap: 18px;
   flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
 `;
 
 const Legend = styled.ul`
@@ -276,6 +284,11 @@ const Legend = styled.ul`
   margin: 0;
   flex: 1;
   min-width: 140px;
+
+  @media (max-width: 640px) {
+    width: 100%;
+    min-width: 0;
+  }
 `;
 
 const LegendItem = styled.li`
@@ -297,14 +310,28 @@ const LegendDot = styled.span`
 
 const LegendLabel = styled.span`
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
 `;
 
 const LegendValue = styled.span`
   color: #888;
   font-variant-numeric: tabular-nums;
+`;
+
+const TableScrollWrapper = styled.div`
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+`;
+
+const ChartRow = styled.div`
+  display: flex;
+  gap: 24px;
+  align-items: center;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 // Coming-soon
@@ -441,33 +468,35 @@ function BreakdownList({ data, valueLabel = '#', colorIdx = 0 }) {
     return <div style={{ color: '#888', fontSize: 12, padding: '8px 0' }}>No data</div>;
   }
   return (
-    <BreakdownTable>
-      <thead>
-        <tr>
-          <BreakdownTh>Label</BreakdownTh>
-          <BreakdownTh style={{ textAlign: 'right' }}>{valueLabel}</BreakdownTh>
-          <BreakdownTh style={{ textAlign: 'right' }}>%</BreakdownTh>
-          <BreakdownTh>{/* bar */}</BreakdownTh>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((d, i) => {
-          const pct = (d.count / total) * 100;
-          return (
-            <tr key={d.label}>
-              <BreakdownTd>{d.label}</BreakdownTd>
-              <NumCell>{d.count}</NumCell>
-              <NumCell>{pct.toFixed(1)}%</NumCell>
-              <BarCell>
-                <BarTrack>
-                  <BarFill $pct={pct} $color={PALETTE[(colorIdx + i) % PALETTE.length]} />
-                </BarTrack>
-              </BarCell>
-            </tr>
-          );
-        })}
-      </tbody>
-    </BreakdownTable>
+    <TableScrollWrapper>
+      <BreakdownTable>
+        <thead>
+          <tr>
+            <BreakdownTh>Label</BreakdownTh>
+            <BreakdownTh style={{ textAlign: 'right' }}>{valueLabel}</BreakdownTh>
+            <BreakdownTh style={{ textAlign: 'right' }}>%</BreakdownTh>
+            <BreakdownTh>{/* bar */}</BreakdownTh>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((d, i) => {
+            const pct = (d.count / total) * 100;
+            return (
+              <tr key={d.label}>
+                <BreakdownTd>{d.label}</BreakdownTd>
+                <NumCell>{d.count}</NumCell>
+                <NumCell>{pct.toFixed(1)}%</NumCell>
+                <BarCell>
+                  <BarTrack>
+                    <BarFill $pct={pct} $color={PALETTE[(colorIdx + i) % PALETTE.length]} />
+                  </BarTrack>
+                </BarCell>
+              </tr>
+            );
+          })}
+        </tbody>
+      </BreakdownTable>
+    </TableScrollWrapper>
   );
 }
 
@@ -510,6 +539,8 @@ function EarningsStrip({ amount, reportedCount }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
+      flexWrap: 'wrap',
+      gap: 8,
       background: 'linear-gradient(135deg, rgb(231, 247, 239) 100%, #fff 100%)',
       border: '1px solid #006853',
       borderRadius: 10,
@@ -881,28 +912,30 @@ function MasterDashboard() {
         {wagesByProgram.length === 0 ? (
           <div style={{ color: '#888', fontSize: 12 }}>No wage data yet.</div>
         ) : (
-          <BreakdownTable>
-            <thead>
-              <tr>
-                <BreakdownTh>Program</BreakdownTh>
-                <BreakdownTh style={{ textAlign: 'right' }}>#</BreakdownTh>
-                <BreakdownTh style={{ textAlign: 'right' }}>Avg</BreakdownTh>
-                <BreakdownTh style={{ textAlign: 'right' }}>Min</BreakdownTh>
-                <BreakdownTh style={{ textAlign: 'right' }}>Max</BreakdownTh>
-              </tr>
-            </thead>
-            <tbody>
-              {wagesByProgram.map((w) => (
-                <tr key={w.program}>
-                  <BreakdownTd>{w.program}</BreakdownTd>
-                  <NumCell>{w.count}</NumCell>
-                  <NumCell>{fmtMoney(w.avg)}</NumCell>
-                  <NumCell>{fmtMoney(w.min)}</NumCell>
-                  <NumCell>{fmtMoney(w.max)}</NumCell>
+          <TableScrollWrapper>
+            <BreakdownTable>
+              <thead>
+                <tr>
+                  <BreakdownTh>Program</BreakdownTh>
+                  <BreakdownTh style={{ textAlign: 'right' }}>#</BreakdownTh>
+                  <BreakdownTh style={{ textAlign: 'right' }}>Avg</BreakdownTh>
+                  <BreakdownTh style={{ textAlign: 'right' }}>Min</BreakdownTh>
+                  <BreakdownTh style={{ textAlign: 'right' }}>Max</BreakdownTh>
                 </tr>
-              ))}
-            </tbody>
-          </BreakdownTable>
+              </thead>
+              <tbody>
+                {wagesByProgram.map((w) => (
+                  <tr key={w.program}>
+                    <BreakdownTd>{w.program}</BreakdownTd>
+                    <NumCell>{w.count}</NumCell>
+                    <NumCell>{fmtMoney(w.avg)}</NumCell>
+                    <NumCell>{fmtMoney(w.min)}</NumCell>
+                    <NumCell>{fmtMoney(w.max)}</NumCell>
+                  </tr>
+                ))}
+              </tbody>
+            </BreakdownTable>
+          </TableScrollWrapper>
         )}
       </Card>
     </DashboardSurface>
@@ -1026,25 +1059,25 @@ function EmploymentSnapshot() {
       <SectionGrid $cols="1fr 1fr" style={{ width: '100%' }}>
   <Card>
     <CardTitle>Hires by Industry</CardTitle>
-    <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-      <div style={{ flex: 1 }}>
+    <ChartRow>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <BreakdownList data={industryData} valueLabel="#" colorIdx={0} />
       </div>
       <div style={{ flexShrink: 0 }}>
         <Donut data={industryData} size={140} />
       </div>
-    </div>
+    </ChartRow>
   </Card>
   <Card>
     <CardTitle>Hires by Employer City</CardTitle>
-    <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-      <div style={{ flex: 1 }}>
+    <ChartRow>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <BreakdownList data={cityData} valueLabel="#" colorIdx={2} />
       </div>
       <div style={{ flexShrink: 0 }}>
         <Donut data={cityData} size={140} />
       </div>
-    </div>
+    </ChartRow>
   </Card>
 </SectionGrid>
       {/* ─── Employer listing ─── */}
@@ -1053,24 +1086,26 @@ function EmploymentSnapshot() {
         {employerListing.length === 0 ? (
           <div style={{ color: '#888', fontSize: 12 }}>No employer data yet.</div>
         ) : (
-          <BreakdownTable>
-            <thead>
-              <tr>
-                <BreakdownTh>Employer</BreakdownTh>
-                <BreakdownTh>Industry</BreakdownTh>
-                <BreakdownTh style={{ textAlign: 'right' }}># Hires</BreakdownTh>
-              </tr>
-            </thead>
-            <tbody>
-              {employerListing.map((row) => (
-                <tr key={`${row.employer}|${row.industry}`}>
-                  <BreakdownTd>{row.employer}</BreakdownTd>
-                  <BreakdownTd>{row.industry}</BreakdownTd>
-                  <NumCell>{row.count}</NumCell>
+          <TableScrollWrapper>
+            <BreakdownTable>
+              <thead>
+                <tr>
+                  <BreakdownTh>Employer</BreakdownTh>
+                  <BreakdownTh>Industry</BreakdownTh>
+                  <BreakdownTh style={{ textAlign: 'right' }}># Hires</BreakdownTh>
                 </tr>
-              ))}
-            </tbody>
-          </BreakdownTable>
+              </thead>
+              <tbody>
+                {employerListing.map((row) => (
+                  <tr key={`${row.employer}|${row.industry}`}>
+                    <BreakdownTd>{row.employer}</BreakdownTd>
+                    <BreakdownTd>{row.industry}</BreakdownTd>
+                    <NumCell>{row.count}</NumCell>
+                  </tr>
+                ))}
+              </tbody>
+            </BreakdownTable>
+          </TableScrollWrapper>
         )}
       </Card>
     </DashboardSurface>
@@ -1274,14 +1309,14 @@ function IhtuDashboard() {
       {/* ─── City distribution ─── */}
       <Card>
         <CardTitle>Applicants by City</CardTitle>
-        <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
-          <div style={{ flex: 1 }}>
+        <ChartRow>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <BreakdownList data={cityData} valueLabel="#" colorIdx={0} />
           </div>
           <div style={{ flexShrink: 0 }}>
             <Donut data={cityData} size={150} />
           </div>
-        </div>
+        </ChartRow>
       </Card>
 
     </DashboardSurface>

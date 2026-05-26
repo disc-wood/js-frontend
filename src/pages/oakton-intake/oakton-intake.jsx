@@ -364,10 +364,6 @@ export default function OaktonIntake() {
               Please block about 10-20 minutes of your time to complete the <strong>Workforce Empowerment Initiative</strong> application.
             </p>
 
-            <p className="oakton-disclaimer-inline">
-              **Spots may be limited at times and approval is not guaranteed**
-            </p>
-
             <div className="oakton-form-container">
               <form onSubmit={handleSubmit}>
 

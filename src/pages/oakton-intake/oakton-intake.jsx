@@ -361,7 +361,7 @@ export default function OaktonIntake() {
             </button>
 
             <p className="oakton-description" style={{ marginTop: '20px', marginBottom: '0' }}>
-              Please block about 10-20 minutes of your time to complete the <strong>Workforce Empowerment Initiative</strong> application. Questions about how to complete the application? Email <a href="mailto:wei@oakton.edu" className="oakton-inline-link">wei@oakton.edu</a>.
+              Please block about 10-20 minutes of your time to complete the <strong>Workforce Empowerment Initiative</strong> application.
             </p>
 
             <p className="oakton-disclaimer-inline">

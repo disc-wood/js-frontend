@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import {
   PrivateRoute,
   PublicOnlyRoute,
+  ProgramRoute,
 } from '@/common/components/routes/ProtectedRoutes';
 import { UserProvider } from '@/common/contexts/UserContext';
 import NavLayout from '@/common/layouts/NavLayout';
@@ -19,6 +20,8 @@ import NotFound from '@/pages/not-found/NotFound';
 import IhtuIntake from '@/pages/ihtu-intake/ihtu-intake';
 import OaktonIntake from '@/pages/oakton-intake/oakton-intake';
 import ManageAccess from '@/pages/manage-access/ManageAccess';
+import ManageOakton from '@/pages/manage-oakton/ManageOakton';
+import ManageIhtu from '@/pages/manage-ihtu/ManageIhtu';
 import InviteAccept from '@/pages/invite/InviteAccept';
 import Forms from '@/pages/forms/Forms';
 import SubmissionSuccess from '@/pages/submission-success/SubmissionSuccess';
@@ -49,6 +52,12 @@ export default function App() {
             <Route path='database' element={<Database />} />
             <Route path='forms' element={<Forms />} />
             <Route path='manage-access' element={<ManageAccess />} />
+            <Route element={<ProgramRoute programId='oakton' />}>
+              <Route path='manage/oakton' element={<ManageOakton />} />
+            </Route>
+            <Route element={<ProgramRoute programId='ihtu' />}>
+              <Route path='manage/ihtu' element={<ManageIhtu />} />
+            </Route>
             <Route path='invite' element={<InviteAccept />} />
 
             <Route element={<PublicOnlyRoute />}>

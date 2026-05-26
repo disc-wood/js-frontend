@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import './oakton-intake.css';
 
 import oaktonLogo from '@/assets/oakton-intake/logo.png';
@@ -109,6 +109,9 @@ const INITIAL_FORM_DATA = {
 
   // Intake session
   intakeSessionDate: '',
+
+  // Custom question
+  customAnswer: '',
 };
 
 const LIKERT_OPTIONS = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
@@ -259,7 +262,22 @@ export default function OaktonIntake() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [submitStatus, setSubmitStatus] = useState({ state: 'idle', message: '' });
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [intakeSessions, setIntakeSessions] = useState([]);
+  const [customQuestion, setCustomQuestion] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+    Promise.all([
+      fetch(`${baseUrl}/oaktonInfo/intake-sessions`).then((r) => r.json()),
+      fetch(`${baseUrl}/customQuestions/oakton`).then((r) => r.json()),
+    ]).then(([sessions, question]) => {
+      setIntakeSessions(Array.isArray(sessions) ? sessions.filter((s) => s.is_active) : []);
+      if (question?.is_active && question?.question_text) {
+        setCustomQuestion(question);
+      }
+    }).catch(() => {});
+  }, []);
 
   const ageAtEnrollment = useMemo(
     () => calculateAge(formData.dateOfBirth),
@@ -285,7 +303,11 @@ export default function OaktonIntake() {
     e.preventDefault();
     setSubmitStatus({ state: 'submitting', message: '' });
 
-    const payload = { ...formData, ageAtEnrollment };
+    const payload = {
+      ...formData,
+      ageAtEnrollment,
+      customQuestion: customQuestion?.question_text || null,
+    };
 
     try {
       const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
@@ -828,21 +850,31 @@ export default function OaktonIntake() {
 
                 <div className="oakton-form-group">
                   <div className="oakton-group-label">As a grant requirement you must attend a virtual intake session to learn more about program details. Please choose a day and time that works best. Remember to check your email for the zoom link after submitting your application. ***If you are interested in the Medical Assistant Apprenticeship, please select "N/A" and someone will be in contact with you.*** *</div>
-                  <RadioGroup
-                    name="intakeSessionDate"
-                    options={[
-                      'April 28, 2026 @5pm',
-                      'April 30, 2026 @3pm',
-                      'May 5, 2026 @ 3pm',
-                      'May 7, 2026 @2pm',
-                      'May 19, 2026 @5pm',
-                      'May 20, 2026 @2pm',
-                      'N/A',
-                    ]}
-                    formData={formData}
-                    handleChange={handleChange}
-                  />
+                  {intakeSessions.length > 0 ? (
+                    <RadioGroup
+                      name="intakeSessionDate"
+                      options={intakeSessions.map((s) => s.label)}
+                      formData={formData}
+                      handleChange={handleChange}
+                    />
+                  ) : (
+                    <p style={{ fontSize: '14px', color: '#888' }}>Loading available dates…</p>
+                  )}
                 </div>
+
+                {customQuestion && (
+                  <div className="oakton-form-group">
+                    <div className="oakton-group-label">{customQuestion.question_text} *</div>
+                    <textarea
+                      name="customAnswer"
+                      value={formData.customAnswer}
+                      onChange={handleChange}
+                      required
+                      rows={4}
+                      placeholder="Your answer"
+                    />
+                  </div>
+                )}
 
                 <div className="oakton-form-actions">
                   <button

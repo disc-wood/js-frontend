@@ -250,7 +250,7 @@ export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useUser();
-  const { role } = useUserRole();
+  const { role, assignedPrograms } = useUserRole();
   const dropdownRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
@@ -304,7 +304,7 @@ export default function NavBar() {
       <RightGroup>
         {user ? (
           <>
-            {role === 'admin' && (
+            {(role === 'admin' || role === 'supervisor') && (
               <DropdownWrapper ref={dropdownRef}>
                 <SettingsButton onClick={() => setIsDropdownOpen(prev => !prev)}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -314,9 +314,21 @@ export default function NavBar() {
                 </SettingsButton>
                 {isDropdownOpen && (
                   <Dropdown>
-                    <DropdownItem onClick={() => { navigate('/manage-access'); setIsDropdownOpen(false); }}>
-                      Manage access
-                    </DropdownItem>
+                    {role === 'admin' && (
+                      <DropdownItem onClick={() => { navigate('/manage-access'); setIsDropdownOpen(false); }}>
+                        Manage access
+                      </DropdownItem>
+                    )}
+                    {(role === 'admin' || assignedPrograms.includes('oakton')) && (
+                      <DropdownItem onClick={() => { navigate('/manage/oakton'); setIsDropdownOpen(false); }}>
+                        Manage Oakton College
+                      </DropdownItem>
+                    )}
+                    {(role === 'admin' || assignedPrograms.includes('ihtu')) && (
+                      <DropdownItem onClick={() => { navigate('/manage/ihtu'); setIsDropdownOpen(false); }}>
+                        Manage IHTU
+                      </DropdownItem>
+                    )}
                   </Dropdown>
                 )}
               </DropdownWrapper>
@@ -353,6 +365,12 @@ export default function NavBar() {
         <MobileMenuLink onClick={() => navigateAndClose('/forms')}>Forms</MobileMenuLink>
         {user && role === 'admin' && (
           <MobileMenuLink onClick={() => navigateAndClose('/manage-access')}>Manage access</MobileMenuLink>
+        )}
+        {user && (role === 'admin' || assignedPrograms.includes('oakton')) && (
+          <MobileMenuLink onClick={() => navigateAndClose('/manage/oakton')}>Manage Oakton College</MobileMenuLink>
+        )}
+        {user && (role === 'admin' || assignedPrograms.includes('ihtu')) && (
+          <MobileMenuLink onClick={() => navigateAndClose('/manage/ihtu')}>Manage IHTU</MobileMenuLink>
         )}
       </MobileMenu>
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import './ihtu-intake.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,6 +30,9 @@ const INITIAL_FORM_DATA = {
   knowsHealthyRacialIdentity: '',
   discussedRacialIdentity: '',
   discussedCulturalCompetence: '',
+
+  // Custom question
+  customAnswer: '',
 };
 
 // --- Reusable field component (defined outside to avoid re-creation on every render) ---
@@ -67,7 +70,20 @@ function RadioGroup({ name, options, otherFieldName, formData, handleChange }) {
 
 export default function IhtuIntake() {
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const [customQuestion, setCustomQuestion] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+    fetch(`${baseUrl}/customQuestions/ihtu`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.is_active && data?.question_text) {
+          setCustomQuestion(data);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const [submitStatus, setSubmitStatus] = useState({
     state: 'idle',
@@ -88,7 +104,11 @@ export default function IhtuIntake() {
     e.preventDefault();
     setSubmitStatus({ state: 'submitting', message: '' });
 
-    const payload = { ...formData, ageAtEnrollment };
+    const payload = {
+      ...formData,
+      ageAtEnrollment,
+      customQuestion: customQuestion?.question_text || null,
+    };
 
     try {
       const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
@@ -253,6 +273,20 @@ export default function IhtuIntake() {
                 handleChange={handleChange}
               />
             </div>
+
+            {customQuestion && (
+              <div className="ihtu-form-group">
+                <label>{customQuestion.question_text} *</label>
+                <textarea
+                  name="customAnswer"
+                  value={formData.customAnswer}
+                  onChange={handleChange}
+                  required
+                  rows={4}
+                  placeholder="Your answer"
+                />
+              </div>
+            )}
 
             <div className="ihtu-form-actions">
               <button

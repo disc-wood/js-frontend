@@ -3,7 +3,6 @@ import styled from "styled-components";
 import TabCard from "@/common/components/atoms/TabCard";
 import { programs } from "@/config/programs";
 import { useUser } from '@/common/hooks/useUser';
-import TermDatesModal from "./TermDatesModal";
 import { authFetch } from '@/common/utils/authFetch';
 
 // --- Styled Components ---
@@ -455,6 +454,8 @@ const OAKTON_APPLICANT_COLUMNS = [
   { key: 'other_comments', label: 'Other comments' },
   { key: 'how_did_you_hear', label: 'Source', format: (v, row) => withOther(v, row?.how_did_you_hear_other) },
   { key: 'intake_session_date', label: 'Intake session' },
+  { key: 'custom_question', label: 'Custom question' },
+  { key: 'custom_answer', label: 'Custom answer' },
 ];
 
 const OAKTON_ENROLLED_COLUMNS = [
@@ -499,6 +500,8 @@ const IHTU_COLUMNS = [
   { key: 'knows_healthy_racial_identity', label: 'Knows healthy racial identity' },
   { key: 'discussed_racial_identity', label: 'Discussed racial identity' },
   { key: 'discussed_cultural_competence', label: 'Discussed cultural competence' },
+  { key: 'custom_question', label: 'Custom question' },
+  { key: 'custom_answer', label: 'Custom answer' },
 ];
 
 function matchesTermFilter(row, selectedKey, isEnrolled) {
@@ -899,8 +902,6 @@ function ProgramView({ programId }) {
 // --- Main Page ---
 export default function Database() {
   const { role, assignedPrograms, loading } = useUser();
-  const [showTermDates, setShowTermDates] = useState(false);
-
   if (loading) return <LoadingState>Loading...</LoadingState>;
 
   const visiblePrograms = role === 'admin'
@@ -918,26 +919,8 @@ export default function Database() {
       <PageHeader>
         <PageTitle>Database</PageTitle>
         <PageSubtitle>View, edit, and manage learner data across programs.</PageSubtitle>
-        <button
-          onClick={() => setShowTermDates(true)}
-          style={{
-            marginTop: 12,
-            padding: '8px 16px',
-            fontSize: 13,
-            fontWeight: 500,
-            borderRadius: 8,
-            border: '1px solid #c8d8eb',
-            backgroundColor: '#eef3f9',
-            color: '#0C447C',
-            cursor: 'pointer',
-            fontFamily: 'inherit',
-          }}
-        >
-          Manage Term Dates
-        </button>
       </PageHeader>
       <TabCard tabs={tabs} />
-      {showTermDates && <TermDatesModal onClose={() => setShowTermDates(false)} />}
     </PageContainer>
   );
 }

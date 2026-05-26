@@ -275,8 +275,8 @@ export default function IhtuIntake() {
             </div>
 
             {customQuestion && (
-              <div className="ihtu-form-group">
-                <label>{customQuestion.question_text} *</label>
+              <div className="ihtu-form-group" style={{ marginTop: '24px' }}>
+                <div className="ihtu-group-label">{customQuestion.question_text} *</div>
                 <textarea
                   name="customAnswer"
                   value={formData.customAnswer}

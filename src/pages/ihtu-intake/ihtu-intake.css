@@ -84,17 +84,21 @@
 }
 
 .ihtu-form-group input,
-.ihtu-form-group select {
+.ihtu-form-group select,
+.ihtu-form-group textarea {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 0.95rem;
+  font-family: inherit;
   background: #fafafa;
   transition: border-color 0.2s;
+  resize: vertical;
 }
 
 .ihtu-form-group input:focus,
-.ihtu-form-group select:focus {
+.ihtu-form-group select:focus,
+.ihtu-form-group textarea:focus {
   outline: none;
   border-color: #2c3e7a;
 }

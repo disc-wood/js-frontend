@@ -385,9 +385,7 @@ function useTermFilter() {
     ]).then(([allTerms, current]) => {
       setTerms(Array.isArray(allTerms) ? allTerms : []);
       if (current && current.year) {
-        const key = termValueKey(current);
-        setCurrentTermKey(key);
-        setSelectedTermKey(key);
+        setCurrentTermKey(termValueKey(current));
       }
       setReady(true);
     }).catch(() => setReady(true));

@@ -481,7 +481,6 @@ const OAKTON_ENROLLED_COLUMNS = [
   { key: 'employer_industry', label: 'Industry', editable: true, type: 'text' },
   { key: 'hourly_wage', label: 'Hourly wage', editable: true, type: 'number' },
   { key: 'annual_wage', label: 'Annual wage', editable: true, type: 'number' },
-  { key: 'program_completed', label: 'Program completed', editable: true, type: 'boolean' },
   { key: 'general_notes', label: 'Notes', editable: true, type: 'text' },
 ];
 

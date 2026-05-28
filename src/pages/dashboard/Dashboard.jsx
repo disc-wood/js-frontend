@@ -634,7 +634,7 @@ function MasterDashboard() {
 
   // ─── KPI calculations ───
   const totalStudents = filteredEnrolled.length;
-  const completers = filteredEnrolled.filter(e => e.program_completed === true);
+  const completers = filteredEnrolled.filter(e => e.program_status === 'Completed');
   const employed = filteredEnrolled.filter(e => e.is_employed);
   const wages = filteredEnrolled.map(e => Number(e.hourly_wage)).filter(n => !isNaN(n) && n > 0);
   const wagesUnder25 = wages.filter(w => w < 25).length;
@@ -665,7 +665,7 @@ function MasterDashboard() {
   }, [filteredEnrolled]);
 
   const completionRatePct = filteredEnrolled.length
-    ? (filteredEnrolled.filter(e => e.program_completed === true).length / filteredEnrolled.length) * 100
+    ? (filteredEnrolled.filter(e => e.program_status === 'Completed').length / filteredEnrolled.length) * 100
     : 0;
 
   // Employment Rate (Yes / No / Unknown — based on is_employed boolean)

@@ -315,10 +315,13 @@ const TermFilterBar = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background-color: #fafafa;
   border-bottom: 1px solid #eaeaea;
   font-size: 13px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 `;
 
 const TermFilterLabel = styled.span`
@@ -342,33 +345,54 @@ const TermFilterSelect = styled.select`
   &:focus { border-color: #0C447C; }
 `;
 
+const EnrolledFilterGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+`;
+
+const EnrolledFilterLabel = styled.span`
+  font-size: 12px;
+  color: #888888;
+  font-weight: 500;
+`;
+
+const EnrolledFilterSelect = styled.select`
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #d4d4d4;
+  background-color: #ffffff;
+  color: #0a0a0a;
+  cursor: pointer;
+  outline: none;
+  min-width: 0;
+  max-width: 140px;
+
+  &:hover { border-color: #0C447C; }
+  &:focus { border-color: #0C447C; }
+`;
+
+const EnrolledFilterNumberInput = styled.input`
+  font-family: inherit;
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #d4d4d4;
+  width: 60px;
+  outline: none;
+
+  &:hover { border-color: #0C447C; }
+  &:focus { border-color: #0C447C; }
+`;
+
 function termValueKey(t) {
   return `${t.year}|${t.season}|${t.session || ''}`;
 }
 
-function termLabelText(t) {
-  return t.session ? `${t.season} ${t.year} — ${t.session}` : `${t.season} ${t.year}`;
-}
 
-function TermFilter({ terms, value, onChange, currentTermKey }) {
-  return (
-    <TermFilterBar>
-      <TermFilterLabel>Filter by term:</TermFilterLabel>
-      <TermFilterSelect value={value} onChange={(e) => onChange(e.target.value)}>
-        <option value="__all__">All terms</option>
-        {terms.map((t) => {
-          const key = termValueKey(t);
-          const isCurrent = key === currentTermKey;
-          return (
-            <option key={key} value={key}>
-              {termLabelText(t)}{isCurrent ? ' (current)' : ''}
-            </option>
-          );
-        })}
-      </TermFilterSelect>
-    </TermFilterBar>
-  );
-}
 
 function useTermFilter() {
   const [terms, setTerms] = useState([]);
@@ -517,48 +541,32 @@ function matchesTermFilter(row, selectedKey, isEnrolled) {
   }
 }
 
-// --- Applicants Table (intake submissions) ---
-function ApplicantsTable({ programId, termFilter }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+// --- Applicants Table ---
+// Accepts external rows/filteredRows from ProgramView (Oakton), or fetches its own (IHTU).
+function ApplicantsTable({ programId, termFilter, rows: externalRows, filteredRows: externalFilteredRows, onStatusUpdate }) {
+  const isExternal = externalRows !== undefined;
+  const [internalRows, setInternalRows] = useState([]);
+  const [loading, setLoading] = useState(!isExternal);
   const [error, setError] = useState(null);
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [updatingStatus, setUpdatingStatus] = useState(null);
   const [confirmAccept, setConfirmAccept] = useState(null);
 
-  const fetchData = async () => {
+  useEffect(() => {
+    if (isExternal) return;
     setLoading(true);
     setError(null);
+    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+    const endpoint = programId === 'ihtu' ? `${baseUrl}/ihtuInfo/intakes` : null;
+    if (!endpoint) { setInternalRows([]); setLoading(false); return; }
+    authFetch(endpoint)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(data => setInternalRows(Array.isArray(data) ? data : []))
+      .catch(err => setError(err.message || 'Failed to load data'))
+      .finally(() => setLoading(false));
+  }, [programId, isExternal]);
 
-    try {
-      const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-      const endpoint = programId === 'oakton'
-        ? `${baseUrl}/oaktonInfo/intakes`
-        : programId === 'ihtu'
-        ? `${baseUrl}/ihtuInfo/intakes`
-        : null;
-
-      if (!endpoint) {
-        setRows([]);
-        setLoading(false);
-        return;
-      }
-
-      const response = await authFetch(endpoint);
-      if (!response.ok) throw new Error(`Failed to load data (HTTP ${response.status})`);
-      const data = await response.json();
-      setRows(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err.message || 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [programId]);
+  const rows = isExternal ? externalRows : internalRows;
 
   const toggleRow = (rowId) => {
     setExpandedRows((prev) => {
@@ -579,7 +587,11 @@ function ApplicantsTable({ programId, termFilter }) {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!response.ok) throw new Error(`Failed to update status (HTTP ${response.status})`);
-      setRows((prev) => prev.map((r) => r.id === id ? { ...r, status: newStatus } : r));
+      if (isExternal) {
+        onStatusUpdate?.(id, newStatus);
+      } else {
+        setInternalRows((prev) => prev.map((r) => r.id === id ? { ...r, status: newStatus } : r));
+      }
     } catch (err) {
       alert(`Failed to update status: ${err.message}`);
     } finally {
@@ -604,11 +616,12 @@ function ApplicantsTable({ programId, termFilter }) {
 
   const columns = programId === 'ihtu' ? IHTU_COLUMNS : OAKTON_APPLICANT_COLUMNS;
 
-  // Filter rows based on selected term (Oakton only — IHTU has no term data)
   const selectedKey = termFilter?.selectedTermKey || '__all__';
-  const filteredRows = programId === 'oakton'
-    ? rows.filter(r => matchesTermFilter(r, selectedKey, false))
-    : rows;
+  const filteredRows = externalFilteredRows ?? (
+    programId === 'oakton'
+      ? rows.filter(r => matchesTermFilter(r, selectedKey, false))
+      : rows
+  );
 
   if (loading) return <LoadingState>Loading applicants...</LoadingState>;
   if (error) return <ErrorState>{error}</ErrorState>;
@@ -625,7 +638,7 @@ function ApplicantsTable({ programId, termFilter }) {
     <>
       <TableWrapper>
         <RowCount>
-          {selectedKey === '__all__' || programId !== 'oakton'
+          {filteredRows.length === rows.length
             ? `${rows.length} ${rows.length === 1 ? 'applicant' : 'applicants'}`
             : `${filteredRows.length} of ${rows.length} applicants`}
           <ExpandHint>· Click a row to expand</ExpandHint>
@@ -671,7 +684,8 @@ function ApplicantsTable({ programId, termFilter }) {
           <ModalCard onClick={(e) => e.stopPropagation()}>
             <ModalTitle>Accept {confirmAccept.name}?</ModalTitle>
             <ModalText>
-              This will mark them as accepted, send them an acceptance email, and automatically create an enrolled student record where you can track their attendance, certification, and employment progress.            </ModalText>
+              This will mark them as accepted, send them an acceptance email, and automatically create an enrolled student record where you can track their attendance, certification, and employment progress.
+            </ModalText>
             <ModalActions>
               <ModalButton onClick={() => setConfirmAccept(null)}>Cancel</ModalButton>
               <ModalButton className="primary" onClick={confirmAcceptApplicant}>Accept applicant</ModalButton>
@@ -683,36 +697,15 @@ function ApplicantsTable({ programId, termFilter }) {
   );
 }
 
-// --- Enrolled Table (operational tracking) ---
-function EnrolledTable({ programId, termFilter }) {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const cityOf = (cityZip) => {
+  if (!cityZip) return null;
+  return cityZip.split(':')[0].trim();
+};
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-      const response = await authFetch(`${baseUrl}/oaktonInfo/enrolled`);
-      if (!response.ok) throw new Error(`Failed to load data (HTTP ${response.status})`);
-      const data = await response.json();
-      setRows(Array.isArray(data) ? data : []);
-    } catch (err) {
-      setError(err.message || 'Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, [programId]);
-
+// --- Enrolled Table — data and filters provided by ProgramView ---
+function EnrolledTable({ rows, filteredRows, setRows, refetch }) {
   const updateField = async (id, field, value) => {
     setRows((prev) => prev.map((r) => r.id === id ? { ...r, [field]: value } : r));
-
     try {
       const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
       const response = await authFetch(`${baseUrl}/oaktonInfo/enrolled/${id}`, {
@@ -723,16 +716,11 @@ function EnrolledTable({ programId, termFilter }) {
       if (!response.ok) throw new Error(`Failed to update (HTTP ${response.status})`);
     } catch (err) {
       console.error('Update failed, reverting:', err);
-      fetchData();
+      refetch();
       alert(`Failed to save: ${err.message}`);
     }
   };
 
-  const selectedKey = termFilter?.selectedTermKey || '__all__';
-  const filteredRows = rows.filter(r => matchesTermFilter(r, selectedKey, true));
-
-  if (loading) return <LoadingState>Loading enrolled students...</LoadingState>;
-  if (error) return <ErrorState>{error}</ErrorState>;
   if (rows.length === 0) {
     return (
       <EmptyState>
@@ -745,7 +733,7 @@ function EnrolledTable({ programId, termFilter }) {
   return (
     <TableWrapper>
       <RowCount>
-        {selectedKey === '__all__'
+        {filteredRows.length === rows.length
           ? `${rows.length} enrolled ${rows.length === 1 ? 'student' : 'students'}`
           : `${filteredRows.length} of ${rows.length} enrolled students`}
         <ExpandHint>· Click cells to edit</ExpandHint>
@@ -838,62 +826,270 @@ function EnrolledCell({ row, col, updateField }) {
   return <Td>{displayValue}</Td>;
 }
 
-// --- Combined program view with sub-tabs (only Oakton has sub-tabs) ---
+// --- Combined program view with sub-tabs (Oakton only) ---
 function ProgramView({ programId }) {
   const [activeSubTab, setActiveSubTab] = useState('applicants');
-  const [applicantCount, setApplicantCount] = useState(null);
-  const [enrolledCount, setEnrolledCount] = useState(null);
   const termFilter = useTermFilter();
 
+  // Data owned here so both tables and the filter bar share it
+  const [intakes, setIntakes] = useState([]);
+  const [enrolled, setEnrolled] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Shared filter state
+  const [statusFilter, setStatusFilter] = useState('__all__');
+  const [racialIdentityFilter, setRacialIdentityFilter] = useState('__all__');
+  const [residencyFilter, setResidencyFilter] = useState('__all__');
+  const [programFilter, setProgramFilter] = useState('__all__');
+  const [industryFilter, setIndustryFilter] = useState('__all__');
+  const [employedFilter, setEmployedFilter] = useState('__all__');
+  const [employerFilter, setEmployerFilter] = useState('__all__');
+  const [ageOp, setAgeOp] = useState('Equals');
+  const [ageValue, setAgeValue] = useState('');
+  const [wageOp, setWageOp] = useState('Equals');
+  const [wageValue, setWageValue] = useState('');
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+      const [intakeData, enrolledData] = await Promise.all([
+        authFetch(`${baseUrl}/oaktonInfo/intakes`).then(r => r.ok ? r.json() : []),
+        authFetch(`${baseUrl}/oaktonInfo/enrolled`).then(r => r.ok ? r.json() : []),
+      ]);
+      setIntakes(Array.isArray(intakeData) ? intakeData : []);
+      setEnrolled(Array.isArray(enrolledData) ? enrolledData : []);
+    } catch (err) {
+      setError(err.message || 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (programId !== 'oakton') return;
+    if (programId === 'oakton') fetchData();
+  }, [programId]);
 
-    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-
-    authFetch(`${baseUrl}/oaktonInfo/intakes`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data) => setApplicantCount(Array.isArray(data) ? data.length : 0))
-      .catch(() => {});
-
-    authFetch(`${baseUrl}/oaktonInfo/enrolled`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data) => setEnrolledCount(Array.isArray(data) ? data.length : 0))
-      .catch(() => {});
-  }, [programId, activeSubTab]);
-
+  // Non-Oakton programs: just render the applicants table with its own fetching
   if (programId !== 'oakton') {
     return <ApplicantsTable programId={programId} termFilter={termFilter} />;
   }
 
+  const selectedKey = termFilter?.selectedTermKey || '__all__';
+  const isApplicants = activeSubTab === 'applicants';
+
+  const applyAgeFilter = (r) => {
+    if (ageValue === '' || isNaN(Number(ageValue))) return true;
+    const age = r.age_at_enrollment;
+    if (age == null) return false;
+    const target = Number(ageValue);
+    if (ageOp === 'Equals') return age === target;
+    if (ageOp === 'Greater than') return age > target;
+    if (ageOp === 'Less than') return age < target;
+    return true;
+  };
+
+  const filteredIntakes = intakes
+    .filter(r => matchesTermFilter(r, selectedKey, false))
+    .filter(r => {
+      if (statusFilter !== '__all__' && r.status !== statusFilter) return false;
+      if (racialIdentityFilter !== '__all__' && r.racial_identity !== racialIdentityFilter) return false;
+      if (residencyFilter !== '__all__' && cityOf(r.city_zip) !== residencyFilter) return false;
+      if (programFilter !== '__all__' && !(r.programs_of_interest || []).includes(programFilter)) return false;
+      return applyAgeFilter(r);
+    });
+
+  const filteredEnrolled = enrolled
+    .filter(r => matchesTermFilter(r, selectedKey, true))
+    .filter(r => {
+      if (statusFilter !== '__all__' && r.program_status !== statusFilter) return false;
+      if (racialIdentityFilter !== '__all__' && r.racial_identity !== racialIdentityFilter) return false;
+      if (employedFilter === 'yes' && r.is_employed !== true) return false;
+      if (employedFilter === 'no' && r.is_employed !== false) return false;
+      if (employerFilter !== '__all__' && r.employer_name !== employerFilter) return false;
+      if (residencyFilter !== '__all__' && r.employer_city !== residencyFilter) return false;
+      if (programFilter !== '__all__' && r.program_name !== programFilter) return false;
+      if (industryFilter !== '__all__' && r.employer_industry !== industryFilter) return false;
+      if (wageValue !== '' && !isNaN(Number(wageValue))) {
+        const wage = Number(r.hourly_wage);
+        if (isNaN(wage)) return false;
+        const target = Number(wageValue);
+        if (wageOp === 'Equals' && wage !== target) return false;
+        if (wageOp === 'Over' && !(wage > target)) return false;
+        if (wageOp === 'Under' && !(wage < target)) return false;
+      }
+      return applyAgeFilter(r);
+    });
+
+  // Filter options derived from full (unfiltered) data so selecting one doesn't collapse another
+  const racialIdentityOptions = [
+    ...new Set([...intakes, ...enrolled].map(r => r.racial_identity).filter(Boolean))
+  ].sort();
+  const statusOptions = isApplicants
+    ? ['Applied', 'Accepted', 'Rejected', 'Waitlisted']
+    : ['Active', 'On hold', 'Completed', 'Dropped', 'Inactive'];
+  const residencyLabel = isApplicants ? 'Residency' : 'Employer city';
+  const residencyOptions = isApplicants
+    ? [...new Set(intakes.map(r => cityOf(r.city_zip)).filter(Boolean))].sort()
+    : [...new Set(enrolled.map(r => r.employer_city).filter(Boolean))].sort();
+  const programOptions = isApplicants
+    ? [...new Set(intakes.flatMap(r => r.programs_of_interest || []).filter(Boolean))].sort()
+    : [...new Set(enrolled.map(r => r.program_name).filter(Boolean))].sort();
+  const industryOptions = [...new Set(enrolled.map(r => r.employer_industry).filter(Boolean))].sort();
+  const employerOptions = [...new Set(enrolled.map(r => r.employer_name).filter(Boolean))].sort();
+
   return (
     <>
       <SubTabBar>
-        <SubTab $active={activeSubTab === 'applicants'} onClick={() => setActiveSubTab('applicants')}>
+        <SubTab $active={isApplicants} onClick={() => setActiveSubTab('applicants')}>
           Applicants
-          {applicantCount !== null && (
-            <SubTabBadge $active={activeSubTab === 'applicants'}>{applicantCount}</SubTabBadge>
-          )}
+          <SubTabBadge $active={isApplicants}>{intakes.length}</SubTabBadge>
         </SubTab>
-        <SubTab $active={activeSubTab === 'enrolled'} onClick={() => setActiveSubTab('enrolled')}>
+        <SubTab $active={!isApplicants} onClick={() => setActiveSubTab('enrolled')}>
           Enrolled
-          {enrolledCount !== null && (
-            <SubTabBadge $active={activeSubTab === 'enrolled'}>{enrolledCount}</SubTabBadge>
-          )}
+          <SubTabBadge $active={!isApplicants}>{enrolled.length}</SubTabBadge>
         </SubTab>
       </SubTabBar>
 
-      {termFilter.ready && (
-        <TermFilter
-          terms={termFilter.terms}
-          value={termFilter.selectedTermKey}
-          onChange={termFilter.setSelectedTermKey}
-          currentTermKey={termFilter.currentTermKey}
-        />
-      )}
+      {/* Single scrollable filter bar: term + all additional filters */}
+      <TermFilterBar>
+        {termFilter.ready && (
+          <EnrolledFilterGroup style={{ flexShrink: 0 }}>
+            <TermFilterLabel>Term:</TermFilterLabel>
+            <TermFilterSelect
+              value={termFilter.selectedTermKey}
+              onChange={e => termFilter.setSelectedTermKey(e.target.value)}
+            >
+              <option value="__all__">All terms</option>
+              {termFilter.terms.map(t => {
+                const key = termValueKey(t);
+                const label = t.session ? `${t.season} ${t.year} — ${t.session}` : `${t.season} ${t.year}`;
+                return (
+                  <option key={key} value={key}>
+                    {label}{key === termFilter.currentTermKey ? ' (current)' : ''}
+                  </option>
+                );
+              })}
+            </TermFilterSelect>
+          </EnrolledFilterGroup>
+        )}
 
-      {activeSubTab === 'applicants'
-        ? <ApplicantsTable programId={programId} termFilter={termFilter} />
-        : <EnrolledTable programId={programId} termFilter={termFilter} />}
+        <EnrolledFilterGroup>
+          <EnrolledFilterLabel>Status:</EnrolledFilterLabel>
+          <EnrolledFilterSelect value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {statusOptions.map(s => <option key={s} value={s}>{s}</option>)}
+          </EnrolledFilterSelect>
+        </EnrolledFilterGroup>
+
+        <EnrolledFilterGroup>
+          <EnrolledFilterLabel>Race / ethnicity:</EnrolledFilterLabel>
+          <EnrolledFilterSelect value={racialIdentityFilter} onChange={e => setRacialIdentityFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {racialIdentityOptions.map(r => <option key={r} value={r}>{r}</option>)}
+          </EnrolledFilterSelect>
+        </EnrolledFilterGroup>
+
+        {!isApplicants && (
+          <>
+            <EnrolledFilterGroup>
+              <EnrolledFilterLabel>Employed:</EnrolledFilterLabel>
+              <EnrolledFilterSelect value={employedFilter} onChange={e => setEmployedFilter(e.target.value)}>
+                <option value="__all__">All</option>
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </EnrolledFilterSelect>
+            </EnrolledFilterGroup>
+            <EnrolledFilterGroup>
+              <EnrolledFilterLabel>Employer:</EnrolledFilterLabel>
+              <EnrolledFilterSelect value={employerFilter} onChange={e => setEmployerFilter(e.target.value)}>
+                <option value="__all__">All</option>
+                {employerOptions.map(e => <option key={e} value={e}>{e}</option>)}
+              </EnrolledFilterSelect>
+            </EnrolledFilterGroup>
+          </>
+        )}
+
+        <EnrolledFilterGroup>
+          <EnrolledFilterLabel>{residencyLabel}:</EnrolledFilterLabel>
+          <EnrolledFilterSelect value={residencyFilter} onChange={e => setResidencyFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {residencyOptions.map(c => <option key={c} value={c}>{c}</option>)}
+          </EnrolledFilterSelect>
+        </EnrolledFilterGroup>
+
+        <EnrolledFilterGroup>
+          <EnrolledFilterLabel>Program:</EnrolledFilterLabel>
+          <EnrolledFilterSelect value={programFilter} onChange={e => setProgramFilter(e.target.value)}>
+            <option value="__all__">All</option>
+            {programOptions.map(p => <option key={p} value={p}>{p}</option>)}
+          </EnrolledFilterSelect>
+        </EnrolledFilterGroup>
+
+        {!isApplicants && (
+          <EnrolledFilterGroup>
+            <EnrolledFilterLabel>Industry:</EnrolledFilterLabel>
+            <EnrolledFilterSelect value={industryFilter} onChange={e => setIndustryFilter(e.target.value)}>
+              <option value="__all__">All</option>
+              {industryOptions.map(i => <option key={i} value={i}>{i}</option>)}
+            </EnrolledFilterSelect>
+          </EnrolledFilterGroup>
+        )}
+
+        <EnrolledFilterGroup>
+          <EnrolledFilterLabel>Age:</EnrolledFilterLabel>
+          <EnrolledFilterSelect value={ageOp} onChange={e => setAgeOp(e.target.value)} style={{ maxWidth: 110 }}>
+            <option>Equals</option>
+            <option>Greater than</option>
+            <option>Less than</option>
+          </EnrolledFilterSelect>
+          <EnrolledFilterNumberInput
+            type="number"
+            value={ageValue}
+            onChange={e => setAgeValue(e.target.value)}
+            placeholder="value"
+          />
+        </EnrolledFilterGroup>
+
+        {!isApplicants && (
+          <EnrolledFilterGroup>
+            <EnrolledFilterLabel>Wage:</EnrolledFilterLabel>
+            <EnrolledFilterSelect value={wageOp} onChange={e => setWageOp(e.target.value)} style={{ maxWidth: 80 }}>
+              <option>Equals</option>
+              <option>Over</option>
+              <option>Under</option>
+            </EnrolledFilterSelect>
+            <EnrolledFilterNumberInput
+              type="number"
+              value={wageValue}
+              onChange={e => setWageValue(e.target.value)}
+              placeholder="$/hr"
+            />
+          </EnrolledFilterGroup>
+        )}
+      </TermFilterBar>
+
+      {loading && <LoadingState>Loading...</LoadingState>}
+      {error && <ErrorState>{error}</ErrorState>}
+      {!loading && !error && (
+        isApplicants
+          ? <ApplicantsTable
+              programId={programId}
+              rows={intakes}
+              filteredRows={filteredIntakes}
+              onStatusUpdate={(id, newStatus) =>
+                setIntakes(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r))
+              }
+            />
+          : <EnrolledTable
+              rows={enrolled}
+              filteredRows={filteredEnrolled}
+              setRows={setEnrolled}
+              refetch={fetchData}
+            />
+      )}
     </>
   );
 }

@@ -574,7 +574,7 @@ function MasterDashboard() {
   const [industryFilter, setIndustryFilter] = useState('__all__');
   const [ageOp, setAgeOp] = useState('Equals'); // Equals | Greater than | Less than
   const [ageValue, setAgeValue] = useState('');
-  const [earningPowerMode, setEarningPowerMode] = useState('current'); // 'current' | 'all'
+  const [earningPowerMode, setEarningPowerMode] = useState(String(new Date().getFullYear()));
 
   // Build a lookup of intake.id -> intake row so we can join enrolled → applicant data
   const intakeById = useMemo(() => {

@@ -574,6 +574,7 @@ function MasterDashboard() {
   const [industryFilter, setIndustryFilter] = useState('__all__');
   const [ageOp, setAgeOp] = useState('Equals'); // Equals | Greater than | Less than
   const [ageValue, setAgeValue] = useState('');
+  const [earningPowerMode, setEarningPowerMode] = useState('current'); // 'current' | 'all'
 
   // Build a lookup of intake.id -> intake row so we can join enrolled → applicant data
   const intakeById = useMemo(() => {
@@ -642,10 +643,32 @@ function MasterDashboard() {
   const annualWages = filteredEnrolled.filter(e => e.is_employed).map(e => Number(e.annual_wage)).filter(n => !isNaN(n) && n > 0);
   const avgHourlyWage = wages.length ? wages.reduce((a, b) => a + b, 0) / wages.length : null;
   const avgAnnualWage = annualWages.length ? annualWages.reduce((a, b) => a + b, 0) / annualWages.length : null;
-  const combinedEarningPower = annualWages.reduce((a, b) => a + b, 0);
 
-  // Estimated cumulative earnings: same as combined earning power for now
-  const cumulativeEarnings = combinedEarningPower;
+  // Combined Earning Power: cycles through all available grant years + 'all'
+  const enrolledGrantYears = useMemo(
+    () => [...new Set(enrolled.map(e => String(e.program_year)).filter(Boolean))].sort(),
+    [enrolled]
+  );
+  const cycleEarningPowerMode = () => {
+    setEarningPowerMode(prev => {
+      if (prev === 'all') return enrolledGrantYears[0] || 'all';
+      const idx = enrolledGrantYears.indexOf(prev);
+      if (idx === -1 || idx === enrolledGrantYears.length - 1) return 'all';
+      return enrolledGrantYears[idx + 1];
+    });
+  };
+  const earningPowerRows = earningPowerMode === 'all'
+    ? filteredEnrolled
+    : filteredEnrolled.filter(e => String(e.program_year) === earningPowerMode);
+  const earningPowerWages = earningPowerRows.filter(e => e.is_employed).map(e => Number(e.annual_wage)).filter(n => !isNaN(n) && n > 0);
+  const combinedEarningPower = earningPowerWages.reduce((a, b) => a + b, 0);
+
+  // Estimated Total Cumulative Earnings: ALL enrolled ever, ignoring all filters
+  const cumulativeEarnings = enrolled
+    .filter(e => e.is_employed)
+    .map(e => Number(e.annual_wage))
+    .filter(n => !isNaN(n) && n > 0)
+    .reduce((a, b) => a + b, 0);
 
   // ─── Breakdown tables ───
   const completionData = useMemo(() => {
@@ -823,16 +846,13 @@ function MasterDashboard() {
     background: 'linear-gradient(135deg, rgb(231, 247, 239) 100%, #fff 100%)',
     border: '1px solid #006853',
   }}>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <div>
-        <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
-          Estimated Total Cumulative Earnings
-        </div>
-        <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
-          {fmtMoney(cumulativeEarnings)}
-        </div>
-      </div>
+    <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
+      Estimated Total Cumulative Earnings
     </div>
+    <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
+      {fmtMoney(cumulativeEarnings)}
+    </div>
+    <div style={{ fontSize: 11, color: '#006853', marginTop: 4, opacity: 0.7 }}>All students, all time</div>
   </KpiTile>
   <KpiTile>
     <KpiLabel># of Students</KpiLabel>
@@ -863,9 +883,17 @@ function MasterDashboard() {
 
       <KpiRow>
         <KpiTile>
-          <KpiLabel>Combined Earning Power</KpiLabel>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+            <KpiLabel style={{ margin: 0 }}>Combined Earning Power</KpiLabel>
+            <button
+              onClick={cycleEarningPowerMode}
+              style={{ fontSize: 10, padding: '2px 7px', border: '1px solid #d4d4d4', borderRadius: 4, cursor: 'pointer', background: '#fff', color: '#555', fontFamily: 'inherit', flexShrink: 0, marginLeft: 6 }}
+            >
+              {earningPowerMode === 'all' ? 'All yrs' : earningPowerMode} ↕
+            </button>
+          </div>
           <KpiValue>{fmtMoney(combinedEarningPower)}</KpiValue>
-          <KpiSubtext>Sum of annual wages</KpiSubtext>
+          <KpiSubtext>{earningPowerMode === 'all' ? 'All grant years' : `Grant year ${earningPowerMode}`} · sum of annual wages</KpiSubtext>
         </KpiTile>
         <KpiTile>
           <KpiLabel>Avg Annual Wage</KpiLabel>

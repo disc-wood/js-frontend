@@ -643,6 +643,8 @@ function MasterDashboard() {
   const annualWages = filteredEnrolled.filter(e => e.is_employed).map(e => Number(e.annual_wage)).filter(n => !isNaN(n) && n > 0);
   const avgHourlyWage = wages.length ? wages.reduce((a, b) => a + b, 0) / wages.length : null;
   const avgAnnualWage = annualWages.length ? annualWages.reduce((a, b) => a + b, 0) / annualWages.length : null;
+  const ages = filteredEnrolled.map(e => Number(e.age_at_enrollment)).filter(n => !isNaN(n) && n > 0);
+  const avgAge = ages.length ? (ages.reduce((a, b) => a + b, 0) / ages.length).toFixed(1) : null;
 
   // Combined Earning Power: cycles through all available grant years + 'all'
   const enrolledGrantYears = useMemo(
@@ -905,6 +907,11 @@ function MasterDashboard() {
           <KpiValue>{avgHourlyWage != null ? fmtMoney(avgHourlyWage) : '—'}</KpiValue>
           <KpiSubtext>{wages.length} reported</KpiSubtext>
         </KpiTile>
+        <KpiTile>
+          <KpiLabel>Average Age</KpiLabel>
+          <KpiValue>{avgAge ?? '—'}</KpiValue>
+          <KpiSubtext>{ages.length} reported</KpiSubtext>
+        </KpiTile>
       </KpiRow>
 
       {/* ─── 3-column row: Completion, Employment, Placements by Grant ─── */}
@@ -1012,6 +1019,12 @@ function EmploymentSnapshot() {
       .sort((a, b) => b.count - a.count);
   }, [filtered]);
 
+  // Employer breakdown
+  const employerData = useMemo(
+    () => tallyBy(filtered, r => r.employer_name),
+    [filtered]
+  );
+
   // Industry breakdown
   const industryData = useMemo(
     () => tallyBy(filtered, r => r.employer_industry),
@@ -1083,29 +1096,28 @@ function EmploymentSnapshot() {
         </KpiTile>
       </KpiRow>
 
-      {/* ─── Industry + City breakdown ─── */}
-      <SectionGrid $cols="1fr 1fr" style={{ width: '100%' }}>
+      {/* ─── Employer + Industry + City breakdown ─── */}
+      <SectionGrid $cols="1fr 1fr 1fr" style={{ width: '100%' }}>
+  <Card>
+    <CardTitle>Hires by Employer</CardTitle>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+      <Donut data={employerData} size={140} />
+    </div>
+    <BreakdownList data={employerData} valueLabel="#" colorIdx={4} />
+  </Card>
   <Card>
     <CardTitle>Hires by Industry</CardTitle>
-    <ChartRow>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <BreakdownList data={industryData} valueLabel="#" colorIdx={0} />
-      </div>
-      <div style={{ flexShrink: 0 }}>
-        <Donut data={industryData} size={140} />
-      </div>
-    </ChartRow>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+      <Donut data={industryData} size={140} />
+    </div>
+    <BreakdownList data={industryData} valueLabel="#" colorIdx={0} />
   </Card>
   <Card>
     <CardTitle>Hires by Employer City</CardTitle>
-    <ChartRow>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <BreakdownList data={cityData} valueLabel="#" colorIdx={2} />
-      </div>
-      <div style={{ flexShrink: 0 }}>
-        <Donut data={cityData} size={140} />
-      </div>
-    </ChartRow>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+      <Donut data={cityData} size={140} />
+    </div>
+    <BreakdownList data={cityData} valueLabel="#" colorIdx={2} />
   </Card>
 </SectionGrid>
       {/* ─── Employer listing ─── */}

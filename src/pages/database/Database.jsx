@@ -392,8 +392,6 @@ function termValueKey(t) {
   return `${t.year}|${t.season}|${t.session || ''}`;
 }
 
-
-
 function useTermFilter() {
   const [terms, setTerms] = useState([]);
   const [currentTermKey, setCurrentTermKey] = useState('__all__');

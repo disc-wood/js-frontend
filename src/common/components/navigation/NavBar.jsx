@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useUser } from '@/common/contexts/UserContext';
 import { useUser as useUserRole } from '@/common/hooks/useUser';
@@ -85,13 +85,28 @@ const LogoText = styled.h1`
 
 const NavLink = styled.span`
   font-size: 13px;
-  color: #555555;
+  color: ${({ $active }) => ($active ? '#0a0a0a' : '#555555')};
   cursor: pointer;
   line-height: 1;
+  position: relative;
   transition: color 0.15s ease;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: #0C447C;
+    border-radius: 1px;
+    opacity: ${({ $active }) => ($active ? 1 : 0)};
+    transition: opacity 0.15s ease;
+  }
 
   &:hover {
     color: #0a0a0a;
+    &::after { opacity: ${({ $active }) => ($active ? 1 : 0.3)}; }
   }
 `;
 
@@ -249,6 +264,7 @@ export default function NavBar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useUser();
   const { role, assignedPrograms } = useUserRole();
   const dropdownRef = useRef(null);
@@ -295,10 +311,10 @@ export default function NavBar() {
         </LogoGroup>
         {user && (
           <NavLinksGroup>
-            <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
-            <NavLink onClick={() => navigate('/database')}>Database</NavLink>
-            <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
-            <NavLink onClick={() => navigate('/forms')}>Forms</NavLink>
+            <NavLink $active={location.pathname === '/dashboard'} onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
+            <NavLink $active={location.pathname === '/database'} onClick={() => navigate('/database')}>Database</NavLink>
+            <NavLink $active={location.pathname === '/communications'} onClick={() => navigate('/communications')}>Communications</NavLink>
+            <NavLink $active={location.pathname === '/forms'} onClick={() => navigate('/forms')}>Forms</NavLink>
           </NavLinksGroup>
         )}
       </LeftGroup>

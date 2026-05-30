@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TermDatesModal from '@/pages/database/TermDatesModal';
 import CustomQuestionModal from '@/common/components/modals/CustomQuestionModal';
 import IntakeSessionsModal from './IntakeSessionsModal';
+import ProgramsModal from './ProgramsModal';
 
 const PageContainer = styled.div`
   flex: 1;
@@ -125,6 +126,14 @@ export default function ManageOakton() {
         <ActionButton onClick={() => setActiveModal('intakeSessions')}>Edit session dates</ActionButton>
       </Section>
 
+      <Section>
+        <SectionTitle>Programs of interest</SectionTitle>
+        <SectionDescription>
+          Manage the program options shown on the intake form. Changes also update the per-program acceptance email options in Communications.
+        </SectionDescription>
+        <ActionButton onClick={() => setActiveModal('programs')}>Edit programs</ActionButton>
+      </Section>
+
       {activeModal === 'termDates' && (
         <TermDatesModal onClose={() => setActiveModal(null)} />
       )}
@@ -133,6 +142,9 @@ export default function ManageOakton() {
       )}
       {activeModal === 'intakeSessions' && (
         <IntakeSessionsModal onClose={() => setActiveModal(null)} />
+      )}
+      {activeModal === 'programs' && (
+        <ProgramsModal onClose={() => setActiveModal(null)} />
       )}
     </PageContainer>
   );

@@ -263,6 +263,7 @@ export default function OaktonIntake() {
   const [submitStatus, setSubmitStatus] = useState({ state: 'idle', message: '' });
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [intakeSessions, setIntakeSessions] = useState([]);
+  const [oaktonPrograms, setOaktonPrograms] = useState([]);
   const [customQuestion, setCustomQuestion] = useState(null);
   const navigate = useNavigate();
 
@@ -270,9 +271,11 @@ export default function OaktonIntake() {
     const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
     Promise.all([
       fetch(`${baseUrl}/oaktonInfo/intake-sessions`).then((r) => r.json()),
+      fetch(`${baseUrl}/oaktonInfo/programs`).then((r) => r.json()),
       fetch(`${baseUrl}/customQuestions/oakton`).then((r) => r.json()),
-    ]).then(([sessions, question]) => {
+    ]).then(([sessions, programs, question]) => {
       setIntakeSessions(Array.isArray(sessions) ? sessions.filter((s) => s.is_active) : []);
+      setOaktonPrograms(Array.isArray(programs) ? programs.filter((p) => p.is_active).map((p) => p.label) : []);
       if (question?.is_active && question?.question_text) {
         setCustomQuestion(question);
       }
@@ -478,17 +481,7 @@ export default function OaktonIntake() {
                   <div className="oakton-group-label">Please choose your program of interest. Please email us for general questions. *</div>
                   <CheckboxGroup
                     name="programsOfInterest"
-                    options={[
-                      'Truck Driver Training (Class A)',
-                      'Forklift Operator Training',
-                      'Intro to Manufacturing with OSHA 10 Certificate',
-                      'Basic Nursing Assistant Training (BNAT)',
-                      'Emergency Medical Technician Certificate (EMT)',
-                      'Computer Numerical Control Certificate (CNC)',
-                      'Pharmacy Technician Certificate',
-                      'Medical Assistant Certificate (MA)',
-                      'Medical Assistant Certificate (Apprenticeship)',
-                    ]}
+                    options={oaktonPrograms}
                     formData={formData}
                     handleCheckboxChange={handleCheckboxChange}
                   />

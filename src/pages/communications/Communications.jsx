@@ -5,6 +5,13 @@ import { programs } from '@/config/programs';
 import { useUser } from '@/common/hooks/useUser';
 import { authFetch } from '@/common/utils/authFetch';
 
+// Derives the accepted-email template ID from a program label.
+// Must stay in sync with slugifyProgram in oaktonInfoRoutes.js.
+function slugifyProgram(label) {
+  return 'oakton-accepted-' +
+    label.toLowerCase().replace(/[()]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
 // ---------------------------------------------------------------------------
 // Email data — add or remove entries here to change what appears in each tab
 // ---------------------------------------------------------------------------
@@ -29,9 +36,10 @@ const EMAILS = [
     id: 'oakton-accepted',
     program: 'oakton',
     name: 'Accepted',
-    triggerLabel: "Sends when: applicant marked Accepted",
+    triggerLabel: 'Sends when: applicant marked Accepted',
     subject: "Congratulations — You've Been Selected for the WEI Grant",
     body: `Hi {{first_name}},\n\nWe're excited to let you know that you've been selected to receive the Workforce Empowerment Initiative (WEI) grant!\n\nSomeone from our team will be reaching out soon with next steps. If you have any questions, feel free to contact us at wei@oakton.edu.\n\nWe look forward to supporting you on your journey.\n\n— The Oakton WEI Team`,
+    subPrograms: [],
   },
   {
     id: 'oakton-program-completed',
@@ -215,6 +223,23 @@ const Input = styled.input`
   &:focus { border-color: #0C447C; }
 `;
 
+const Select = styled.select`
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid #d4d4d4;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: inherit;
+  color: #0a0a0a;
+  background: #ffffff;
+  outline: none;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:focus { border-color: #0C447C; }
+`;
+
 const Textarea = styled.textarea`
   width: 100%;
   padding: 9px 12px;
@@ -266,6 +291,7 @@ const SaveButton = styled.button`
   cursor: pointer;
 
   &:hover { background: #2a2a2a; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
 `;
 
 // ---------------------------------------------------------------------------
@@ -287,7 +313,25 @@ function EmailList({ emails, onSelect }) {
   );
 }
 
-function EmailModal({ email, draft, onChange, onSave, onClose, saving }) {
+function EmailModal({ email, templates, onSave, onClose, saving }) {
+  const hasSubPrograms = !!email.subPrograms?.length;
+  const firstId = hasSubPrograms ? email.subPrograms[0].id : email.id;
+
+  const [activeId, setActiveId] = useState(firstId);
+
+  const getDraft = (id) => {
+    const t = templates[id];
+    if (t) return { subject: t.subject, body: t.body };
+    return { subject: email.subject, body: email.body };
+  };
+
+  const [draft, setDraft] = useState(() => getDraft(firstId));
+
+  const handleProgramChange = (newId) => {
+    setActiveId(newId);
+    setDraft(getDraft(newId));
+  };
+
   return (
     <Backdrop onClick={onClose}>
       <ModalCard onClick={(e) => e.stopPropagation()}>
@@ -296,6 +340,21 @@ function EmailModal({ email, draft, onChange, onSave, onClose, saving }) {
           <CloseButton onClick={onClose}>✕</CloseButton>
         </ModalHeader>
 
+        {hasSubPrograms && (
+          <div>
+            <FieldLabel htmlFor="email-program">Program</FieldLabel>
+            <Select
+              id="email-program"
+              value={activeId}
+              onChange={(e) => handleProgramChange(e.target.value)}
+            >
+              {email.subPrograms.map((sp) => (
+                <option key={sp.id} value={sp.id}>{sp.label}</option>
+              ))}
+            </Select>
+          </div>
+        )}
+
         <TriggerBadge>{email.triggerLabel}</TriggerBadge>
 
         <div>
@@ -303,7 +362,7 @@ function EmailModal({ email, draft, onChange, onSave, onClose, saving }) {
           <Input
             id="email-subject"
             value={draft.subject}
-            onChange={(e) => onChange('subject', e.target.value)}
+            onChange={(e) => setDraft((d) => ({ ...d, subject: e.target.value }))}
           />
         </div>
 
@@ -312,13 +371,15 @@ function EmailModal({ email, draft, onChange, onSave, onClose, saving }) {
           <Textarea
             id="email-body"
             value={draft.body}
-            onChange={(e) => onChange('body', e.target.value)}
+            onChange={(e) => setDraft((d) => ({ ...d, body: e.target.value }))}
           />
         </div>
 
         <ModalFooter>
           <CancelButton onClick={onClose}>Cancel</CancelButton>
-          <SaveButton onClick={onSave} disabled={saving}>{saving ? 'Saving…' : 'Save'}</SaveButton>
+          <SaveButton onClick={() => onSave(activeId, draft)} disabled={saving}>
+            {saving ? 'Saving…' : 'Save'}
+          </SaveButton>
         </ModalFooter>
       </ModalCard>
     </Backdrop>
@@ -330,43 +391,38 @@ function EmailModal({ email, draft, onChange, onSave, onClose, saving }) {
 // ---------------------------------------------------------------------------
 export default function Communications() {
   const { role, assignedPrograms, loading } = useUser();
-  const [emails, setEmails] = useState(EMAILS);
+  const [templates, setTemplates] = useState({});
+  const [oaktonPrograms, setOaktonPrograms] = useState([]);
   const [editing, setEditing] = useState(null);
-  const [draft, setDraft] = useState({ subject: '', body: '' });
   const [saving, setSaving] = useState(false);
 
+  const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
+
   useEffect(() => {
-    const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
     authFetch(`${baseUrl}/emailTemplates`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((templates) => {
-        setEmails((prev) =>
-          prev.map((email) => {
-            const t = templates.find((t) => t.id === email.id);
-            return t ? { ...email, subject: t.subject, body: t.body } : email;
-          })
-        );
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => {
+        const map = {};
+        data.forEach((t) => { map[t.id] = { subject: t.subject, body: t.body }; });
+        setTemplates(map);
       })
       .catch(() => {});
-  }, []);
 
-  const handleOpen = (email) => {
-    setEditing(email);
-    setDraft({ subject: email.subject, body: email.body });
-  };
+    fetch(`${baseUrl}/oaktonInfo/programs`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setOaktonPrograms(Array.isArray(data) ? data.filter((p) => p.is_active) : []))
+      .catch(() => {});
+  }, [baseUrl]);
 
-  const handleSave = async () => {
+  const handleSave = async (templateId, draft) => {
     setSaving(true);
     try {
-      const baseUrl = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '');
-      await authFetch(`${baseUrl}/emailTemplates/${editing.id}`, {
-        method: 'PATCH',
+      await authFetch(`${baseUrl}/emailTemplates/${templateId}`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ subject: draft.subject, body: draft.body }),
       });
-      setEmails((prev) =>
-        prev.map((e) => (e.id === editing.id ? { ...e, ...draft } : e))
-      );
+      setTemplates((prev) => ({ ...prev, [templateId]: { subject: draft.subject, body: draft.body } }));
       setEditing(null);
     } catch {
       // keep modal open on error
@@ -381,13 +437,19 @@ export default function Communications() {
     ? programs
     : programs.filter((p) => assignedPrograms.includes(p.id));
 
+  const emails = EMAILS.map((e) =>
+    e.id === 'oakton-accepted'
+      ? { ...e, subPrograms: oaktonPrograms.map((p) => ({ id: slugifyProgram(p.label), label: p.label })) }
+      : e
+  );
+
   const tabs = visiblePrograms.map((p) => ({
     id: p.id,
     label: p.label,
     content: (
       <EmailList
         emails={emails.filter((e) => e.program === p.id)}
-        onSelect={handleOpen}
+        onSelect={setEditing}
       />
     ),
   }));
@@ -402,8 +464,7 @@ export default function Communications() {
       {editing && (
         <EmailModal
           email={editing}
-          draft={draft}
-          onChange={(field, value) => setDraft((d) => ({ ...d, [field]: value }))}
+          templates={templates}
           onSave={handleSave}
           onClose={() => setEditing(null)}
           saving={saving}

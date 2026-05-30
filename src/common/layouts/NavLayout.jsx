@@ -3,7 +3,6 @@ import { Outlet } from 'react-router-dom';
 import styled from 'styled-components';
 
 import NavBar from '@/common/components/navigation/NavBar';
-
 import Footer from '@/common/components/navigation/Footer';
 
 const Layout = styled.div`

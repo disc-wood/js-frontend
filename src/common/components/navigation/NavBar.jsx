@@ -293,12 +293,14 @@ export default function NavBar() {
           <LogoMark>L</LogoMark>
           <LogoText>LearnerTrack</LogoText>
         </LogoGroup>
-        <NavLinksGroup>
-          <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
-          <NavLink onClick={() => navigate('/database')}>Database</NavLink>
-          <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
-          <NavLink onClick={() => navigate('/forms')}>Forms</NavLink>
-        </NavLinksGroup>
+        {user && (
+          <NavLinksGroup>
+            <NavLink onClick={() => navigate('/dashboard')}>Dashboard</NavLink>
+            <NavLink onClick={() => navigate('/database')}>Database</NavLink>
+            <NavLink onClick={() => navigate('/communications')}>Communications</NavLink>
+            <NavLink onClick={() => navigate('/forms')}>Forms</NavLink>
+          </NavLinksGroup>
+        )}
       </LeftGroup>
 
       <RightGroup>
@@ -359,10 +361,14 @@ export default function NavBar() {
       </RightGroup>
 
       <MobileMenu $open={isMobileMenuOpen}>
-        <MobileMenuLink onClick={() => navigateAndClose('/dashboard')}>Dashboard</MobileMenuLink>
-        <MobileMenuLink onClick={() => navigateAndClose('/database')}>Database</MobileMenuLink>
-        <MobileMenuLink onClick={() => navigateAndClose('/communications')}>Communications</MobileMenuLink>
-        <MobileMenuLink onClick={() => navigateAndClose('/forms')}>Forms</MobileMenuLink>
+        {user && (
+          <>
+            <MobileMenuLink onClick={() => navigateAndClose('/dashboard')}>Dashboard</MobileMenuLink>
+            <MobileMenuLink onClick={() => navigateAndClose('/database')}>Database</MobileMenuLink>
+            <MobileMenuLink onClick={() => navigateAndClose('/communications')}>Communications</MobileMenuLink>
+            <MobileMenuLink onClick={() => navigateAndClose('/forms')}>Forms</MobileMenuLink>
+          </>
+        )}
         {user && role === 'admin' && (
           <MobileMenuLink onClick={() => navigateAndClose('/manage-access')}>Manage access</MobileMenuLink>
         )}

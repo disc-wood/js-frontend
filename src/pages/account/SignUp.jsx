@@ -145,6 +145,17 @@ export default function SignUp() {
         <StyledSignUpButton type="submit" disabled={isLoading}>
           {isLoading ? 'Creating account...' : 'Sign Up'}
         </StyledSignUpButton>
+
+        <p style={{ margin: 0, fontSize: 13, color: '#888', textAlign: 'center' }}>
+          Already have an account?{' '}
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            style={{ background: 'none', border: 'none', padding: 0, color: '#0C447C', fontWeight: 500, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Log in
+          </button>
+        </p>
       </StyledForm>
     </StyledPage>
   );

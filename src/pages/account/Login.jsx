@@ -110,7 +110,7 @@ export default function Login() {
         await userCredential.user.getIdToken(true);
       }
 
-      navigate(inviteToken ? '/dashboard' : '/', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error('Login error:', error);
 
@@ -143,7 +143,7 @@ export default function Login() {
         await userCredential.user.getIdToken(true);
       }
 
-      navigate(inviteToken ? '/dashboard' : '/', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error('Google login error:', error);
       setError(error.message || 'Google login failed.');

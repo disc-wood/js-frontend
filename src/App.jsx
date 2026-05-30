@@ -12,6 +12,7 @@ import Login from '@/pages/account/Login';
 import RequestPasswordReset from '@/pages/account/RequestPasswordReset';
 import ResetPassword from '@/pages/account/ResetPassword';
 import SignUp from '@/pages/account/SignUp';
+import Home from '@/pages/home/Home';
 import Communications from '@/pages/communications/Communications';
 import Dashboard from '@/pages/dashboard/Dashboard';
 import Database from '@/pages/database/Database';
@@ -39,7 +40,7 @@ export default function App() {
 
           {/* Internal pages (inside NavLayout) */}
           <Route path='/' element={<NavLayout />}>
-            <Route index element={<Dashboard />} />
+            <Route index element={<Home />} />
 
             {/* Empty PrivateRoute wrapper for future protected pages */}
             <Route element={<PrivateRoute />}>

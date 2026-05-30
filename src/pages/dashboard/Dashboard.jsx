@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const SubTabContent = styled.div`
+  animation: ${fadeUp} 0.25s ease-out both;
+`;
 import TabCard from '@/common/components/atoms/TabCard';
 import { programs } from "@/config/programs";
 import { useUser } from '@/common/hooks/useUser';
@@ -1167,7 +1176,9 @@ function OaktonDashboard() {
         </SubTab>
       </SubTabBar>
 
-      {activeSubTab === 'master' ? <MasterDashboard /> : <EmploymentSnapshot />}
+      <SubTabContent key={activeSubTab}>
+        {activeSubTab === 'master' ? <MasterDashboard /> : <EmploymentSnapshot />}
+      </SubTabContent>
     </>
   );
 }

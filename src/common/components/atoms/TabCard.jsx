@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
+
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
 
 const CARD_BG = '#ffffff';
 const TAB_BAR_BG = '#fafafa';
@@ -23,6 +28,10 @@ const Tabs = styled.div`
   align-items: stretch;
   background: ${TAB_BAR_BG};
   border-bottom: 1.5px solid ${BORDER_COLOR};
+`;
+
+const ContentPanel = styled.div`
+  animation: ${fadeIn} 0.25s ease-out both;
 `;
 
 const Tab = styled.button`
@@ -83,7 +92,9 @@ export default function TabCard({ tabs }) {
         ))}
       </Tabs>
 
-      {tabs[safeIndex]?.content}
+      <ContentPanel key={safeIndex}>
+        {tabs[safeIndex]?.content}
+      </ContentPanel>
     </TabCardWrapper>
   );
 }

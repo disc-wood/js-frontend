@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import TabCard from "@/common/components/atoms/TabCard";
 import { programs } from "@/config/programs";
 import { useUser } from '@/common/hooks/useUser';
 import { authFetch } from '@/common/utils/authFetch';
 
 // --- Styled Components ---
+const fadeUp = keyframes`
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+`;
+
+const SubTabContent = styled.div`
+  animation: ${fadeUp} 0.25s ease-out both;
+`;
 const PageContainer = styled.div`
   flex: 1;
   padding: 2rem 2.5rem;
@@ -1072,21 +1080,24 @@ function ProgramView({ programId }) {
       {loading && <LoadingState>Loading...</LoadingState>}
       {error && <ErrorState>{error}</ErrorState>}
       {!loading && !error && (
-        isApplicants
-          ? <ApplicantsTable
-              programId={programId}
-              rows={intakes}
-              filteredRows={filteredIntakes}
-              onStatusUpdate={(id, newStatus) =>
-                setIntakes(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r))
-              }
-            />
-          : <EnrolledTable
-              rows={enrolled}
-              filteredRows={filteredEnrolled}
-              setRows={setEnrolled}
-              refetch={fetchData}
-            />
+        <SubTabContent key={activeSubTab}>
+          {isApplicants
+            ? <ApplicantsTable
+                programId={programId}
+                rows={intakes}
+                filteredRows={filteredIntakes}
+                onStatusUpdate={(id, newStatus) =>
+                  setIntakes(prev => prev.map(r => r.id === id ? { ...r, status: newStatus } : r))
+                }
+              />
+            : <EnrolledTable
+                rows={enrolled}
+                filteredRows={filteredEnrolled}
+                setRows={setEnrolled}
+                refetch={fetchData}
+              />
+          }
+        </SubTabContent>
       )}
     </>
   );

@@ -5,10 +5,10 @@ import { programs } from '@/config/programs';
 import { useUser } from '@/common/hooks/useUser';
 import { authFetch } from '@/common/utils/authFetch';
 
-// Derives the accepted-email template ID from a program label.
+// Derives a per-program email template ID from an email's base id and a program label.
 // Must stay in sync with slugifyProgram in oaktonInfoRoutes.js.
-function slugifyProgram(label) {
-  return 'oakton-accepted-' +
+function slugifyProgram(baseId, label) {
+  return baseId + '-' +
     label.toLowerCase().replace(/[()]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
@@ -31,6 +31,7 @@ const EMAILS = [
     triggerLabel: 'Sends when: application submitted',
     subject: 'Your Oakton WEI Application Has Been Received',
     body: `Hi {{first_name}},\n\nWe've received your application for the Oakton Workforce Empowerment Initiative. Someone from our team will be in contact with you soon.\n\nQuestions? Email wei@oakton.edu.\n\n— The Oakton WEI Team`,
+    subPrograms: [],
   },
   {
     id: 'oakton-accepted',
@@ -48,6 +49,7 @@ const EMAILS = [
     triggerLabel: 'Sends when: student marked Program Completed',
     subject: 'Congratulations on Completing Your Program!',
     body: `Hi {{first_name}},\n\nCongratulations on completing the {{program_name}} program with the Workforce Empowerment Initiative! This is a huge accomplishment and we are so proud of everything you've achieved.\n\nWe wish you all the best in your next steps. If you ever need support or want to stay connected, don't hesitate to reach out to us at wei@oakton.edu.\n\n— The Oakton WEI Team`,
+    subPrograms: [],
   },
 ];
 
@@ -437,9 +439,15 @@ export default function Communications() {
     ? programs
     : programs.filter((p) => assignedPrograms.includes(p.id));
 
+  const PROGRAM_SPECIFIC_EMAIL_IDS = [
+    'oakton-application-received',
+    'oakton-accepted',
+    'oakton-program-completed',
+  ];
+
   const emails = EMAILS.map((e) =>
-    e.id === 'oakton-accepted'
-      ? { ...e, subPrograms: oaktonPrograms.map((p) => ({ id: slugifyProgram(p.label), label: p.label })) }
+    PROGRAM_SPECIFIC_EMAIL_IDS.includes(e.id)
+      ? { ...e, subPrograms: oaktonPrograms.map((p) => ({ id: slugifyProgram(e.id, p.label), label: p.label })) }
       : e
   );
 

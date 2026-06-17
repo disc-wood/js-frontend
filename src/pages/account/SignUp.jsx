@@ -102,7 +102,7 @@ export default function SignUp() {
 
       navigate('/login', {
         state: {
-          message: 'Account created! Please check your email to verify it.',
+          message: 'Account created! An admin will reach out once you have been granted access.',
         },
       });
     } catch (err) {

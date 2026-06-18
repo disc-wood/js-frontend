@@ -180,14 +180,14 @@ const PROGRAM_CONFIG = {
     name: 'Oakton Workforce Empowerment Initiative (WEI)',
     shortName: 'Oakton WEI',
     color: '#006853',
-    contactEmail: 'PLACEHOLDER@WEI.ORG',
+    contactEmail: 'wei@oakton.edu',
     aboutUrl: 'https://www.oakton.edu/paying-for-college/wei-grant.php',
   },
   ihtu: {
     name: 'I Hope They Understand Program',
     shortName: 'IHTU',
     color: '#0C447C',
-    contactEmail: 'PLACEHOLDER@ITHU.ORG',
+    contactEmail: 'inspirationalbooks21@gmail.com',
     aboutUrl: '#',
   },
 };

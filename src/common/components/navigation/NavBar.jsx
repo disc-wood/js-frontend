@@ -305,7 +305,7 @@ export default function NavBar() {
   return (
     <StyledNav ref={mobileMenuRef}>
       <LeftGroup>
-        <LogoGroup onClick={() => navigate('/')}>
+        <LogoGroup onClick={() => navigate(user ? '/dashboard' : '/')}>
           <LogoMark>L</LogoMark>
           <LogoText>LearnerTrack</LogoText>
         </LogoGroup>

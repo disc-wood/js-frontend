@@ -851,6 +851,7 @@ function MasterDashboard() {
         </FilterGroup>
       </FilterBar>
 
+
       {/* ─── Top row: earnings + KPI tiles all inline ─── */}
 <KpiRow $cols="2fr repeat(5, minmax(0, 1fr))">
   <KpiTile style={{
@@ -1078,6 +1079,7 @@ function EmploymentSnapshot() {
         </FilterSelect>
       </FilterBar>
 
+
       {/* ─── Earnings strip ─── */}
       <EarningsStrip amount={cumulativeEarnings} reportedCount={annualWages.length} />
 
@@ -1269,6 +1271,7 @@ function IhtuDashboard() {
   const cityOptions = useMemo(() => [...new Set(intakes.map(i => i.current_city).filter(Boolean))].sort(), [intakes]);
   const genderOptions = useMemo(() => [...new Set(intakes.map(i => i.gender).filter(Boolean))].sort(), [intakes]);
   const ethnicityOptions = useMemo(() => [...new Set(intakes.map(i => i.ethnicity_race).filter(Boolean))].sort(), [intakes]);
+
   if (loading) return <DashboardSurface><div style={{ padding: 40, textAlign: 'center', color: '#888' }}>Loading IHTU data...</div></DashboardSurface>;
   if (error) return <DashboardSurface><div style={{ padding: 40, color: '#991b1b' }}>Error: {error}</div></DashboardSurface>;
 
@@ -1299,6 +1302,7 @@ function IhtuDashboard() {
           </FilterSelect>
         </FilterGroup>
       </FilterBar>
+
 
       {/* ─── KPI row ─── */}
       <KpiRow $cols="repeat(5, minmax(0, 1fr))">

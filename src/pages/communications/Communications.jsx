@@ -469,6 +469,7 @@ export default function Communications() {
         <PageSubtitle>Manage automated emails sent to applicants and students.</PageSubtitle>
       </PageHeader>
       <TabCard tabs={tabs} />
+
       {editing && (
         <EmailModal
           email={editing}

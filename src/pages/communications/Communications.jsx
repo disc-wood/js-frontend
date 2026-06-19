@@ -100,6 +100,28 @@ const LoadingState = styled.div`
   padding: 2rem;
 `;
 
+const EmptyState = styled.div`
+  border: 1px dashed #eaeaea;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: #fafafa;
+`;
+
+const EmptyStateTitle = styled.h3`
+  font-size: 15px;
+  font-weight: 500;
+  color: #0a0a0a;
+  margin: 0 0 8px 0;
+`;
+
+const EmptyStateText = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+  line-height: 1.6;
+`;
+
 const EmailRow = styled.button`
   width: 100%;
   display: flex;
@@ -468,7 +490,16 @@ export default function Communications() {
         <PageTitle>Communications</PageTitle>
         <PageSubtitle>Manage automated emails sent to applicants and students.</PageSubtitle>
       </PageHeader>
-      <TabCard tabs={tabs} />
+      {visiblePrograms.length === 0 ? (
+        <EmptyState>
+          <EmptyStateTitle>No communications available</EmptyStateTitle>
+          <EmptyStateText>
+            You don't have access to any program communications yet. Contact an admin to request access.
+          </EmptyStateText>
+        </EmptyState>
+      ) : (
+        <TabCard tabs={tabs} />
+      )}
 
       {editing && (
         <EmailModal

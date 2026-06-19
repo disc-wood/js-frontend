@@ -171,6 +171,30 @@ const EmptyStateText = styled.p`
   margin: 0;
 `;
 
+// Page-level "no access" state (matches Forms/Communications/Dashboard) — distinct from
+// the EmptyState above, which is used for in-tab "no data yet" states.
+const NoAccessState = styled.div`
+  border: 1px dashed #eaeaea;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: #fafafa;
+`;
+
+const NoAccessTitle = styled.h3`
+  font-size: 15px;
+  font-weight: 500;
+  color: #0a0a0a;
+  margin: 0 0 8px 0;
+`;
+
+const NoAccessText = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+  line-height: 1.6;
+`;
+
 const ErrorState = styled.div`
   padding: 16px 20px;
   margin: 12px;
@@ -1124,7 +1148,16 @@ export default function Database() {
         <PageTitle>Database</PageTitle>
         <PageSubtitle>View, edit, and manage learner data across programs.</PageSubtitle>
       </PageHeader>
-      <TabCard tabs={tabs} />
+      {visiblePrograms.length === 0 ? (
+        <NoAccessState>
+          <NoAccessTitle>No database access available</NoAccessTitle>
+          <NoAccessText>
+            You don't have access to any program databases yet. Contact an admin to request access.
+          </NoAccessText>
+        </NoAccessState>
+      ) : (
+        <TabCard tabs={tabs} />
+      )}
     </PageContainer>
   );
 }

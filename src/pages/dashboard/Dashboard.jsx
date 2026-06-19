@@ -55,6 +55,28 @@ const LoadingState = styled.div`
   min-height: 100vh;
 `;
 
+const EmptyState = styled.div`
+  border: 1px dashed #eaeaea;
+  border-radius: 12px;
+  padding: 48px 24px;
+  text-align: center;
+  background-color: #fafafa;
+`;
+
+const EmptyStateTitle = styled.h3`
+  font-size: 15px;
+  font-weight: 500;
+  color: #0a0a0a;
+  margin: 0 0 8px 0;
+`;
+
+const EmptyStateText = styled.p`
+  font-size: 13px;
+  color: #888888;
+  margin: 0;
+  line-height: 1.6;
+`;
+
 // --- Sub tabs (matches Database.jsx style) ---
 const SubTabBar = styled.div`
   display: flex;
@@ -1411,7 +1433,16 @@ export default function Dashboard() {
         <PageTitle>Dashboard</PageTitle>
         <PageSubtitle>Program performance and learner outcomes at a glance.</PageSubtitle>
       </PageHeader>
-      <TabCard tabs={tabs} />
+      {visiblePrograms.length === 0 ? (
+        <EmptyState>
+          <EmptyStateTitle>No dashboards available</EmptyStateTitle>
+          <EmptyStateText>
+            You don't have access to any program dashboards yet. Contact an admin to request access.
+          </EmptyStateText>
+        </EmptyState>
+      ) : (
+        <TabCard tabs={tabs} />
+      )}
     </PageContainer>
   );
 }

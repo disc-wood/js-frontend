@@ -17,18 +17,9 @@ const floatY = keyframes`
   50%       { transform: translateY(-8px); }
 `;
 
-const drawPath = keyframes`
-  to { stroke-dashoffset: 0; }
-`;
-
 const growBar = keyframes`
   from { transform: scaleX(0); }
   to   { transform: scaleX(1); }
-`;
-
-const blink = keyframes`
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
 `;
 
 // ─── Page shell ──────────────────────────────────────────────────────────────
@@ -144,15 +135,6 @@ const PanelHeader = styled.div`
   margin-bottom: 14px;
 `;
 
-const LiveDot = styled.div`
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #006853;
-  flex-shrink: 0;
-  animation: ${blink} 2.2s ease-in-out infinite;
-`;
-
 const PanelTitle = styled.div`
   font-size: 11px;
   font-weight: 600;
@@ -209,30 +191,143 @@ const KpiSub = styled.div`
   margin-top: 2px;
 `;
 
-// ─── Chart ───────────────────────────────────────────────────────────────────
+// ─── Donut chart ─────────────────────────────────────────────────────────────
 
-const ChartWrap = styled.div`
-  background: #fafafa;
-  border: 1px solid #eaeaea;
-  border-radius: 10px;
-  padding: 10px 12px 6px;
+const spinUp = keyframes`
+  from { transform: rotate(-220deg) scale(0); opacity: 0; }
+  to   { transform: rotate(0deg) scale(1); opacity: 1; }
+`;
+
+const PALETTE = ['#0C447C', '#006853', '#854F0B'];
+
+const fmtPct = (n, total) => (!total ? '0%' : `${((n / total) * 100).toFixed(1)}%`);
+
+const DonutWrap = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
   margin-bottom: 14px;
 `;
 
-const ChartLabel = styled.div`
-  font-size: 10px;
-  color: #888;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-bottom: 6px;
+const Legend = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 `;
 
-const AnimatedPath = styled.path`
-  stroke-dasharray: 420;
-  stroke-dashoffset: 420;
-  animation: ${drawPath} 1.8s cubic-bezier(0.4, 0, 0.2, 1) 0.55s both;
+const LegendItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #1f2937;
+  padding: 3px 0;
 `;
+
+const LegendDot = styled.span`
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: ${({ $color }) => $color};
+  flex-shrink: 0;
+`;
+
+const LegendLabel = styled.span`
+  flex: 1;
+`;
+
+const LegendValue = styled.span`
+  color: #888;
+  font-variant-numeric: tabular-nums;
+`;
+
+const SpinArc = styled.g`
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ${spinUp} 0.6s cubic-bezier(0.34, 1.12, 0.64, 1) ${({ $d }) => $d}s both;
+`;
+
+const SpinText = styled.text`
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ${fadeInUp} 0.4s ease-out 0.85s both;
+`;
+
+function Donut({ data, size = 110, thickness = 20 }) {
+  const total = data.reduce((s, d) => s + d.count, 0);
+  const radius = size / 2;
+  const inner = radius - thickness;
+
+  const arcs = data.reduce((acc, d, i) => {
+    const prevEnd = acc.length ? acc[acc.length - 1].endAngle : 0;
+    const startAngle = prevEnd;
+    const endAngle = startAngle + (d.count / total) * 2 * Math.PI;
+
+    const x1 = radius + radius * Math.sin(startAngle);
+    const y1 = radius - radius * Math.cos(startAngle);
+    const x2 = radius + radius * Math.sin(endAngle);
+    const y2 = radius - radius * Math.cos(endAngle);
+    const xi2 = radius + inner * Math.sin(endAngle);
+    const yi2 = radius - inner * Math.cos(endAngle);
+    const xi1 = radius + inner * Math.sin(startAngle);
+    const yi1 = radius - inner * Math.cos(startAngle);
+    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+
+    const path = [
+      `M ${x1} ${y1}`,
+      `A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2}`,
+      `L ${xi2} ${yi2}`,
+      `A ${inner} ${inner} 0 ${largeArc} 0 ${xi1} ${yi1}`,
+      'Z',
+    ].join(' ');
+
+    acc.push({
+      endAngle,
+      element: <path key={i} d={path} fill={PALETTE[i % PALETTE.length]} />,
+    });
+    return acc;
+  }, []);
+
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      style={{ overflow: 'visible' }}
+      aria-label="placement breakdown chart"
+    >
+      <SpinArc $d={0.5}>
+        {arcs.map((a) => a.element)}
+      </SpinArc>
+      <SpinText x={radius} y={radius - 2} textAnchor="middle" fontSize="16" fontWeight="600" fill="#0a0a0a">
+        {total}
+      </SpinText>
+      <text x={radius} y={radius + 12} textAnchor="middle" fontSize="9" fill="#888">
+        total
+      </text>
+    </svg>
+  );
+}
+
+function DonutWithLegend({ data, size }) {
+  const total = data.reduce((s, d) => s + d.count, 0);
+  return (
+    <DonutWrap>
+      <Donut data={data} size={size} />
+      <Legend>
+        {data.map((d, i) => (
+          <LegendItem key={d.label}>
+            <LegendDot $color={PALETTE[i % PALETTE.length]} />
+            <LegendLabel title={d.label}>{d.label}</LegendLabel>
+            <LegendValue>{d.count} ({fmtPct(d.count, total)})</LegendValue>
+          </LegendItem>
+        ))}
+      </Legend>
+    </DonutWrap>
+  );
+}
 
 // ─── Bars ────────────────────────────────────────────────────────────────────
 
@@ -376,27 +471,13 @@ function useCountUp(end, delay = 300, duration = 1200) {
   return n;
 }
 
-// ─── Mini chart ──────────────────────────────────────────────────────────────
-
-function MiniChart() {
-  const line = 'M0,54 C25,50 45,42 70,35 S110,24 140,18 S185,9 225,6 S270,3 300,2';
-  const area = `${line} L300,68 L0,68 Z`;
-  return (
-    <svg viewBox="0 0 300 68" width="100%" style={{ display: 'block' }}>
-      <defs>
-        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0C447C" stopOpacity="0.1" />
-          <stop offset="100%" stopColor="#0C447C" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#chartGrad)" />
-      <AnimatedPath d={line} stroke="#0C447C" strokeWidth="1.75" fill="none" strokeLinecap="round" />
-      <circle cx="300" cy="2" r="3" fill="#0C447C" />
-    </svg>
-  );
-}
-
 // ─── Dashboard preview ───────────────────────────────────────────────────────
+
+const PLACEMENT_DATA = [
+  { label: 'Completed', count: 84 },
+  { label: 'In Progress', count: 11 },
+  { label: 'Not Started', count: 5 },
+];
 
 function DashboardPreview() {
   const students   = useCountUp(248, 400);
@@ -408,7 +489,6 @@ function DashboardPreview() {
     <PanelWrapper>
       <Panel>
         <PanelHeader>
-          <LiveDot />
           <PanelTitle>Dashboard Preview</PanelTitle>
           <PanelBadge>sample data</PanelBadge>
         </PanelHeader>
@@ -436,10 +516,7 @@ function DashboardPreview() {
           </KpiTile>
         </KpiGrid>
 
-        <ChartWrap>
-          <ChartLabel>Placement Rate — 2021–2024</ChartLabel>
-          <MiniChart />
-        </ChartWrap>
+        <DonutWithLegend data={PLACEMENT_DATA} size={100} />
 
         <Bars>
           <BarRow>

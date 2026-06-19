@@ -1,6 +1,6 @@
-// handles the authentication callback after a user signs in with a redirect-based login flow (e.g. Google OAuth on mobile). 
+// handles the authentication callback after a user signs in with a redirect-based login flow (e.g. Google OAuth on mobile).
     // - processes the authentication result from Firebase, retrieves the user ID token, and sends it to the backend for session creation.
-    // - if authentication succeeds, the user is redirected to the homepage. 
+    // - if authentication succeeds, the user is redirected to the dashboard.
     // - if authentication fails, the user is redirected back to the login page with an error message.
 
 import React, { useEffect } from 'react';
@@ -32,7 +32,7 @@ export default function AuthCallback() {
         const result = await getRedirectResult(auth);
 
         if (!result) {
-          navigate('/', { replace: true });
+          navigate('/dashboard', { replace: true });
           return;
         }
 
@@ -53,7 +53,7 @@ export default function AuthCallback() {
           throw new Error(error.error || 'Authentication failed');
         }
 
-        navigate('/', { replace: true });
+        navigate('/dashboard', { replace: true });
       } catch (error) {
         console.error('Auth callback error:', error);
         navigate('/login', {

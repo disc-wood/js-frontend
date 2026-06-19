@@ -66,7 +66,7 @@ export default function SignUp() {
 
     try {
       await googleAuth();
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message || 'Google signup failed');
     } finally {

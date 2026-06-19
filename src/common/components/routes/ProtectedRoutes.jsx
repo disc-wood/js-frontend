@@ -20,7 +20,7 @@ export function PublicOnlyRoute() {
     return <div>Loading...</div>;
   }
 
-  return !user ? <Outlet /> : <Navigate to='/' replace />;
+  return !user ? <Outlet /> : <Navigate to='/dashboard' replace />;
 }
 
 export function ProgramRoute({ programId }) {

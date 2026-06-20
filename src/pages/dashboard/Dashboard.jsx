@@ -127,6 +127,10 @@ const KpiRow = styled.div`
   @media (max-width: 1100px) {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
+
+  @media (max-width: 600px) {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
 `;
 
 const KpiTile = styled.div`
@@ -134,6 +138,12 @@ const KpiTile = styled.div`
   border: 1px solid #eaeaea;
   border-radius: 10px;
   padding: 14px 16px;
+  min-width: 0;
+  overflow: hidden;
+
+  @media (max-width: 600px) {
+    padding: 10px 12px;
+  }
 `;
 
 const Card = styled.div`
@@ -164,11 +174,13 @@ const KpiLabel = styled.div`
 `;
 
 const KpiValue = styled.div`
-  font-size: 26px;
+  font-size: clamp(16px, 5vw, 26px);
   font-weight: 600;
   color: #0a0a0a;
   letter-spacing: -0.5px;
   line-height: 1.1;
+  overflow-wrap: break-word;
+  word-break: break-word;
 `;
 
 const KpiSubtext = styled.div`
@@ -578,11 +590,11 @@ function EarningsStrip({ amount, reportedCount }) {
       padding: '14px 20px',
       marginBottom: 16,
     }}>
-      <div>
+      <div style={{ minWidth: 0 }}>
         <div style={{ fontSize: 11, color: '#006853', fontWeight: 600, letterSpacing: '0.4px', textTransform: 'uppercase', marginBottom: 4 }}>
           Estimated Total Cumulative Earnings
         </div>
-        <div style={{ fontSize: 26, fontWeight: 700, color: '#006853', letterSpacing: '-0.5px' }}>
+        <div style={{ fontSize: 'clamp(16px, 5vw, 26px)', fontWeight: 700, color: '#006853', letterSpacing: '-0.5px', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
           {fmtMoney(amount)}
         </div>
       </div>

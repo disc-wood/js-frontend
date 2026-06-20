@@ -40,7 +40,9 @@ export default function App() {
 
           {/* Internal pages (inside NavLayout) */}
           <Route path='/' element={<NavLayout />}>
-            <Route index element={<Home />} />
+            <Route element={<PublicOnlyRoute />}>
+              <Route index element={<Home />} />
+            </Route>
 
             {/* Empty PrivateRoute wrapper for future protected pages */}
             <Route element={<PrivateRoute />}>

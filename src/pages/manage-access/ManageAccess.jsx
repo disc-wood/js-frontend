@@ -634,6 +634,8 @@ export default function ManageAccess() {
 
   const [invitations, setInvitations] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState('');
 
   const [emailTemplates, setEmailTemplates] = useState({});
   const [editingInvites, setEditingInvites] = useState(false);
@@ -645,17 +647,27 @@ export default function ManageAccess() {
     programs.find((p) => p.id === id)?.label || id;
 
   const fetchData = useCallback(async () => {
+    setDataLoading(true);
+    setDataError('');
     try {
       const [invRes, supRes] = await Promise.all([
         authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/list`),
         authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/active`),
       ]);
+
+      if (!invRes.ok || !supRes.ok) {
+        throw new Error('Failed to load invites and supervisors.');
+      }
+
       const invData = await invRes.json();
       const supData = await supRes.json();
       setInvitations(invData.invitations || []);
       setSupervisors(supData.supervisors || []);
     } catch (err) {
       console.error('Failed to fetch:', err);
+      setDataError('Failed to load invites and supervisors.');
+    } finally {
+      setDataLoading(false);
     }
   }, []);
 
@@ -777,6 +789,15 @@ export default function ManageAccess() {
         <PageSubtitle>Invite supervisors and manage program access.</PageSubtitle>
       </PageHeader>
 
+      {dataError && (
+        <StatusMessage $error>
+          {dataError}{' '}
+          <SmallButton type="button" onClick={fetchData} style={{ marginLeft: 8 }}>
+            Retry
+          </SmallButton>
+        </StatusMessage>
+      )}
+
       <Section>
         <SectionHeaderRow>
           <SectionTitle>Send invite</SectionTitle>
@@ -826,7 +847,9 @@ export default function ManageAccess() {
             <span aria-hidden="true">✎</span> Edit Cancellations
           </EditEmailButton>
         </SectionHeaderRow>
-        {pendingInvites.length === 0 ? (
+        {dataLoading ? (
+          <EmptyState>Loading…</EmptyState>
+        ) : pendingInvites.length === 0 ? (
           <EmptyState>No pending invites.</EmptyState>
         ) : (
           <>
@@ -901,7 +924,9 @@ export default function ManageAccess() {
             <span aria-hidden="true">✎</span> Edit Revocations
           </EditEmailButton>
         </SectionHeaderRow>
-        {groupedSupervisors.length === 0 ? (
+        {dataLoading ? (
+          <EmptyState>Loading…</EmptyState>
+        ) : groupedSupervisors.length === 0 ? (
           <EmptyState>No active supervisors.</EmptyState>
         ) : (
           <>

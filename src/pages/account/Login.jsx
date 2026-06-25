@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 
 import { auth } from '@/firebase-config';
+import { acceptInvite } from '@/common/utils/acceptInvite';
 
 import { StyledPage, SignupText, StyledForm } from './styles';
 
@@ -62,18 +63,6 @@ const StyledLoginButton = styled.button`
 
 const provider = new GoogleAuthProvider();
 
-async function acceptInvite(token, uid) {
-  try {
-    await fetch(`${import.meta.env.VITE_BACKEND_URL}/invite/accept`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, uid }),
-    });
-  } catch (err) {
-    console.error('Failed to accept invite:', err);
-  }
-}
-
 export default function Login() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -106,8 +95,14 @@ export default function Login() {
       );
 
       if (inviteToken) {
-        await acceptInvite(inviteToken, userCredential.user.uid);
-        await userCredential.user.getIdToken(true);
+        try {
+          await acceptInvite(inviteToken, userCredential.user.uid);
+          await userCredential.user.getIdToken(true);
+        } catch (inviteError) {
+          console.error('Failed to accept invite:', inviteError);
+          setError(inviteError.message || 'Failed to accept invite. Please try logging in again.');
+          return;
+        }
       }
 
       navigate('/dashboard', { replace: true });
@@ -139,8 +134,14 @@ export default function Login() {
       const userCredential = await signInWithPopup(auth, provider);
 
       if (inviteToken) {
-        await acceptInvite(inviteToken, userCredential.user.uid);
-        await userCredential.user.getIdToken(true);
+        try {
+          await acceptInvite(inviteToken, userCredential.user.uid);
+          await userCredential.user.getIdToken(true);
+        } catch (inviteError) {
+          console.error('Failed to accept invite:', inviteError);
+          setError(inviteError.message || 'Failed to accept invite. Please try logging in again.');
+          return;
+        }
       }
 
       navigate('/dashboard', { replace: true });
@@ -189,7 +190,7 @@ export default function Login() {
 
         <SignupText>
           Don't have an account?{' '}
-          <StyledLink to="/signup">Create</StyledLink>
+          <StyledLink to={inviteToken ? `/signup?invite=${inviteToken}` : '/signup'}>Create</StyledLink>
         </SignupText>
       </StyledForm>
     </StyledPage>

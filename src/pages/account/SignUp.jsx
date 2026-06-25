@@ -2,13 +2,15 @@
     // - Sends registration data to backend for Firebase Auth + DB user creation
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import GoogleButton from '@/common/components/atoms/GoogleButton';
 import { FormTitle } from '@/common/components/form/Form';
 import { Input } from '@/common/components/form/Input';
 import { useUser } from '@/common/contexts/UserContext';
 import { RedSpan } from '@/common/components/form/styles';
+import { auth } from '@/firebase-config';
+import { acceptInvite } from '@/common/utils/acceptInvite';
 
 import { StyledPage, StyledForm } from './styles';
 
@@ -42,6 +44,8 @@ const StyledSignUpButton = styled.button`
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite');
   const { googleAuth } = useUser();
 
   const [formState, setFormState] = useState({
@@ -66,6 +70,12 @@ export default function SignUp() {
 
     try {
       await googleAuth();
+
+      if (inviteToken && auth.currentUser) {
+        await acceptInvite(inviteToken, auth.currentUser.uid);
+        await auth.currentUser.getIdToken(true);
+      }
+
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message || 'Google signup failed');
@@ -100,10 +110,10 @@ export default function SignUp() {
         throw new Error(data.error || 'Failed to create account');
       }
 
-      navigate('/login', {
-        state: {
-          message: 'Account created! An admin will reach out once you have been granted access.',
-        },
+      navigate(inviteToken ? `/login?invite=${inviteToken}` : '/login', {
+        state: inviteToken
+          ? undefined
+          : { message: 'Account created! An admin will reach out once you have been granted access.' },
       });
     } catch (err) {
       console.error('Signup error:', err);

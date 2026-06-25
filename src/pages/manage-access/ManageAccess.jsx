@@ -646,29 +646,44 @@ export default function ManageAccess() {
   const programLabel = (id) =>
     programs.find((p) => p.id === id)?.label || id;
 
+  // The backend is a Vercel serverless function — a cold start on the first
+  // hit after idle can be slow enough to fail outright, so retry silently
+  // before surfacing an error to the user.
+  const fetchDataOnce = async () => {
+    const [invRes, supRes] = await Promise.all([
+      authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/list`),
+      authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/active`),
+    ]);
+
+    if (!invRes.ok || !supRes.ok) {
+      throw new Error('Failed to load invites and supervisors.');
+    }
+
+    const invData = await invRes.json();
+    const supData = await supRes.json();
+    setInvitations(invData.invitations || []);
+    setSupervisors(supData.supervisors || []);
+  };
+
   const fetchData = useCallback(async () => {
     setDataLoading(true);
     setDataError('');
-    try {
-      const [invRes, supRes] = await Promise.all([
-        authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/list`),
-        authFetch(`${import.meta.env.VITE_BACKEND_URL}/invite/active`),
-      ]);
-
-      if (!invRes.ok || !supRes.ok) {
-        throw new Error('Failed to load invites and supervisors.');
+    const attempts = 3;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        await fetchDataOnce();
+        setDataLoading(false);
+        return;
+      } catch (err) {
+        console.error(`Failed to fetch (attempt ${attempt}/${attempts}):`, err);
+        if (attempt === attempts) {
+          setDataError('Failed to load invites and supervisors.');
+        } else {
+          await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        }
       }
-
-      const invData = await invRes.json();
-      const supData = await supRes.json();
-      setInvitations(invData.invitations || []);
-      setSupervisors(supData.supervisors || []);
-    } catch (err) {
-      console.error('Failed to fetch:', err);
-      setDataError('Failed to load invites and supervisors.');
-    } finally {
-      setDataLoading(false);
     }
+    setDataLoading(false);
   }, []);
 
   const fetchEmailTemplates = useCallback(async () => {
